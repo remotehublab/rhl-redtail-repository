@@ -22,17 +22,25 @@ Query OK, 0 rows affected (0.02 sec)
 
 Then:
 ```
-$ . devrc
+$ cd redtail_repository/static
+$ npm install
+````
+
+```
+$ source devrc
 $ flask db upgrade head
 $ flask run
 ```
 
 ## Development commands
 
+
+
 ```
-$ . devrc
+$ source devrc
 $ flask db revision --autogenerate -m "Whatever change"
 $ flask db upgrade head
 ```
+
 
 

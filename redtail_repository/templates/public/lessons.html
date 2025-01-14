@@ -1,0 +1,10 @@
+{% extends "public/_base.html" %}
+
+{% block container %}
+    {% for lesson in lessons %}
+    <div class="">
+        <h3>{{ lesson.name }}</h3>
+
+    </div>
+    {% endfor %}
+{% endblock %}

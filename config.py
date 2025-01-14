@@ -6,6 +6,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'secret'
+    SQLALCHEMY_RECORD_QUERIES = True
 
 class StagingConfig(Config):
     pass

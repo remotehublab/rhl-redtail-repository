@@ -46,16 +46,19 @@ def create_app(config_name: str = 'default') -> Flask:
         toolbar.init_app(app)
     login_manager.init_app(app)
 
+    from .views.admin import admin
+    admin.init_app(app)
+
     import redtail_repository.models # noqa
 
     # Register bundles
     from .bundles import register_bundles
     register_bundles(environment)
 
-    # Register endpoints
-    from .views.public import public_endpoint
+    # Register blueprint
+    from .views.public import public_blueprint
 
-    app.register_blueprint(public_endpoint, url_prefix='/')
+    app.register_blueprint(public_blueprint, url_prefix='/')
 
     def _list_languages() -> Dict[str, str]:
         global SUPPORTED_LANGUAGES                                                  
