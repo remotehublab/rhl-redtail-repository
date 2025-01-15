@@ -28,11 +28,6 @@ else:
 
 from config import configurations
 
-@login_manager.user_loader
-def user_loader(login: str):
-    from .models import User
-    return db.session.query(User).filter_by(login=login).first()
-
 def create_app(config_name: str = 'default') -> Flask:
     app = Flask(__name__)
     app.config.from_object(configurations[config_name])
@@ -45,6 +40,7 @@ def create_app(config_name: str = 'default') -> Flask:
     if toolbar is not None:
         toolbar.init_app(app)
     login_manager.init_app(app)
+    login_manager.login_view = 'login.login'
 
     from .views.admin import admin
     admin.init_app(app)
@@ -57,8 +53,10 @@ def create_app(config_name: str = 'default') -> Flask:
 
     # Register blueprint
     from .views.public import public_blueprint
+    from .views.login import login_blueprint
 
     app.register_blueprint(public_blueprint, url_prefix='/')
+    app.register_blueprint(login_blueprint, url_prefix='/')
 
     def _list_languages() -> Dict[str, str]:
         global SUPPORTED_LANGUAGES                                                  
