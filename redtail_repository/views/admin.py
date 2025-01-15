@@ -18,9 +18,16 @@ class AuthorModelView(AuthedModelMixIn, ModelView):
         super().__init__(Author, db.session, *args, **kwargs)
 
 class UserModelView(AuthedModelMixIn, ModelView):
-    column_list = ['login', 'name', 'author']
+    column_list = ['login', 'name', 'author', 'role', 'verified']
 
-    form_columns = ['login', 'name', 'author', 'password']
+    form_columns = ['login', 'password', 'name', 'author', 'role', 'verified']
+
+    form_choices = {
+        'role': [
+            ('admin', 'Admin'),
+            ('instructor', 'Instructor')
+        ]
+    }
 
     form_extra_fields = {
         'password': PasswordField('Password')
