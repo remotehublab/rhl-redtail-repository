@@ -8,7 +8,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from redtail_repository import db
 
 class Author(db.Model):
-
     __tablename__ = 'author'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -19,7 +18,6 @@ class Author(db.Model):
     users: Mapped['User'] = relationship("User", back_populates="author")
 
 class User(db.Model, UserMixin):
-
     __tablename__ = 'user'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -43,9 +41,49 @@ class User(db.Model, UserMixin):
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-
 class Lesson(db.Model):
+    __tablename__ = 'lessons'
+
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
     short_description: Mapped[str] = mapped_column(db.String(255))
 
+    videos: Mapped[List['LessonVideos']] = \
+        relationship("LessonVideos", back_populates="lesson", cascade="all, delete-orphan")
+    images: Mapped[List['LessonImages']] = \
+        relationship("LessonImages", back_populates="lesson", cascade="all, delete-orphan")
+    documents: Mapped[List['LessonDocs']] = \
+        relationship("LessonDocs", back_populates="lesson", cascade="all, delete-orphan")
+
+class LessonVideos(db.Model):
+    __tablename__ = 'lesson_videos'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lessons.id'), nullable=False)
+    video_url: Mapped[str] = mapped_column(db.String(255), nullable=False)
+    title: Mapped[str] = mapped_column(db.String(100), nullable=True)
+    description: Mapped[str] = mapped_column(db.Text, nullable=True)
+
+    lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="videos")
+
+class LessonImages(db.Model):
+    __tablename__ = 'lesson_images'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lessons.id'), nullable=False)
+    image_url: Mapped[str] = mapped_column(db.String(255), nullable=False)
+    title: Mapped[str] = mapped_column(db.String(100), nullable=True)
+    description: Mapped[str] = mapped_column(db.Text, nullable=True)
+
+    lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="images")
+
+class LessonDocs(db.Model):
+    __tablename__ = 'lesson_docs'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lessons.id'), nullable=False)
+    doc_url: Mapped[str] = mapped_column(db.String(255), nullable=False)
+    title: Mapped[str] = mapped_column(db.String(100), nullable=True)
+    description: Mapped[str] = mapped_column(db.Text, nullable=True)
+
+    lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="documents")
