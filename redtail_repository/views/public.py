@@ -11,10 +11,16 @@ def index():
 def lessons():
     lessons = [
         {
-            'name': "Parking lot lesson 1"
+            'name': "Parking Lot Lesson 1",
+            'video': "some link",
+            'images': "some photos",
+            'docs': "some docs"
         },
         {
-            'name': "Parking lot lesson 2"
+            'name': "Parking Lot Lesson 2",
+            'video': "another link",
+            'images': "another photo",
+            'docs': "another docs"
         },
     ]
 

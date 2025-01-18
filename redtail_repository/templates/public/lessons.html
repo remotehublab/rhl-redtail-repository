@@ -1,10 +1,30 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
+<h2>Info about lessons.....</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Lessons</th>
+      <th scope="col">Videos</th>
+      <th scope="col">Images</th>
+      <th scope="col">Docs</th>
+    </tr>
+  </thead>
+  <tbody>
     {% for lesson in lessons %}
     <div class="">
-        <h3>{{ lesson.name }}</h3>
-
+      <tr>
+        <th scope="row">{{ lesson.name }}</th>
+        <td>{{ lesson.video }}</td>
+        <td>{{ lesson.images }}</td>
+        <td>{{ lesson.docs }}</td>
+      </tr>
     </div>
     {% endfor %}
+  </tbody>
+</table>
+    
+
 {% endblock %}
