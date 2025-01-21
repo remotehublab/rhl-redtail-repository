@@ -1,5 +1,6 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.model.form import InlineFormAdmin
 from flask_login import current_user
 
 from wtforms import PasswordField
@@ -50,8 +51,18 @@ class UserModelView(AuthedModelMixIn, ModelView):
 
         return super().on_model_change(form, model, is_created)
 
+class LessonVideoForm(InlineFormAdmin):
+    pass
+
 class LessonModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'short_description', 'authors', 'devices', 'simulations']
+
+    inline_models = [
+        # You can use an InlineFormAdmin if you want to customize the form (e.g., descriptions or whatever)
+        LessonVideoForm(LessonVideos),
+        # Or alternatively you can put the model directly:
+        LessonImages,
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(Lesson, db.session, *args, **kwargs)
