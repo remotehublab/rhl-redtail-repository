@@ -26,23 +26,23 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page" href="/">{{ gettext("Home") }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('.lessons') }}">Lessons</a>
-        </li>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Simulations</a>
+          <a class="nav-link {% if request.endpoint == 'public.lessons' %}active{% endif %}" href="{{ url_for('.lessons') }}">{{ gettext("Lessons") }}</a>
         </li>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Devices</a>
+          <a class="nav-link {% if request.endpoint == 'public.simulations' %}active{% endif %}" href="#">{{ gettext("Simulations") }}</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}" href="#">{{ gettext("Devices") }}</a>
         </li>
       </ul>
       <form class="d-flex" role="search">
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-        <button class="btn btn-outline-success" type="submit" style="color: aquamarine;">Search</button>
+        <button class="btn btn-outline-success" type="submit" style="color: aquamarine;">{{ gettext("Search") }}</button>
       </form>
     </div>
   </div>
