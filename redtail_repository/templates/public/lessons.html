@@ -1,30 +1,88 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<h2>Info about lessons.....</h2>
+<!-- <div class="container-fluid"> -->
+  <div class="row">
+    <!-- Sidebar Section -->
+    <div class="col-md-3">
+      <!-- Categories Section -->
+      <div class="card mb-4">
+        <div class="card-header">Categories:</div>
+        <div class="card-body">
+          <!-- Clean Up with forloop after finalizing category -->
+          <ul class="list-unstyled">
+            <li><a href="#">Digital Twin</a></li>
+            <li><a href="#">Simulation</a></li>
+            <li><a href="#">Real-world</a></li>
+            <li><a href="#">[...]</a></li>
+          </ul>
+        </div>
+      </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">{{ gettext("Lessons") }}</th>
-      <th scope="col">{{ gettext("Videos") }}</th>
-      <th scope="col">{{ gettext("Images") }}</th>
-      <th scope="col">{{ gettext("Docs") }}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for lesson in lessons %}
-    <div class="">
-      <tr>
-        <th scope="row">{{ lesson.name }}</th>
-        <td>{{ lesson.video }}</td>
-        <td>{{ lesson.images }}</td>
-        <td>{{ lesson.docs }}</td>
-      </tr>
+      <!-- Devices Section -->
+      <div class="card mb-4">
+        <div class="card-header">Devices:</div>
+        <div class="card-body">
+          <!-- Clean Up with forloop after finalizing devices-->
+          <ul class="list-unstyled">
+            <li>
+              <a href="#">DE1-SoC</a>
+              <ul>
+                <li><a href="#">VHDL</a></li>
+                <li><a href="#">SystemVerilog</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">STM32</a>
+              <ul>
+                <li><a href="#">mbedOS</a></li>
+                <li><a href="#">STM32Cube</a></li>
+              </ul>
+            </li>
+            <li><a href="#">[...]</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Level Section -->
+      <div class="card mb-4">
+        <div class="card-header">Level:</div>
+        <div class="card-body">
+          <!-- Clean Up with forloop after finalizing level -->
+          <ul class="list-unstyled">
+            <li><a href="#">Advanced</a></li>
+            <li><a href="#">[...]</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
-    {% endfor %}
-  </tbody>
-</table>
-    
 
+    <!-- Main Content Section -->
+    <div class="col-md-9">
+      <h1 class="text-center">Lessons</h1>
+       <!-- Temp Data for Testing -->
+      {% set lessons = ["Parking Lot", "NES Controller", "Elevator", "Keypad"] %}
+      <div class="row row-cols-1 row-cols-md-3 g-2">
+        {% for lesson in lessons %}
+        <div class="col">
+          <div class="card" style="width: 90%;">
+            <img src="{{ url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="temp">
+            <div class="card-body">
+              <h5 class="card-title">
+                <a href="{{ lesson['video'] }}" class="stretched-link text-decoration-none" target="_blank">
+                  {{ lesson }}
+                </a>
+              </h5>
+              <p class="card-text">Placeholder</p>
+            </div>
+            <div class="card-footer">
+              <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+<!-- </div> -->
 {% endblock %}

@@ -9,19 +9,10 @@ def index():
 
 @public_blueprint.route('/lessons')
 def lessons():
-    lessons = [
-        {
-            'name': "Parking Lot Lesson 1",
-            'video': "some link",
-            'images': "some photos",
-            'docs': "some docs"
-        },
-        {
-            'name': "Parking Lot Lesson 2",
-            'video': "another link",
-            'images': "another photo",
-            'docs': "another docs"
-        },
-    ]
+# TODO: Add calls to database to populate page
+    return render_template('public/lessons.html')
 
-    return render_template('public/lessons.html', lessons=lessons)
+@public_blueprint.route('/simulations')
+def simulations():
+    # TODO: Add calls to database to populate page
+    return render_template('public/simulations.html')

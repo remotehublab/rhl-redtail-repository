@@ -1,10 +1,9 @@
 {% extends "_base.html" %}
 
 {% block body %}
-    {{ super() }}
-    
-    <div class="container">
-    {% block container %}
-    {% endblock %}
-    </div>
+{{ super() }}
+<div class="container-fluid">
+  {% block container %}
+  {% endblock %}
+</div>
 {% endblock %}
