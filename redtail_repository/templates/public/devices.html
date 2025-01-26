@@ -1,0 +1,57 @@
+{% extends "public/_base.html" %}
+
+{% block container %}
+<div class="row">
+  <!-- Sidebar Section -->
+  <div class="col-md-3">
+    <!-- Categories Section -->
+    <div class="card mb-4">
+      <div class="card-header">Categories:</div>
+      <div class="card-body">
+        <!-- Clean Up with forloop after finalizing category -->
+        <ul class="list-unstyled">
+          <li><a href="#">Microcontroller</a></li>
+          <li><a href="#">ARM</a></li>
+          <li><a href="#">RISC-V</a></li>
+          <li><a href="#">FPGA</a></li>
+          <li><a href="#">PLC</a></li>
+          <li><a href="#">[...]</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <div class="col-md-9">
+    <h1 class="text-center">Devices</h1>
+    <!-- Temp Data for Testing -->
+    {% set devices = ["STM32 WB55RG", "FPGA DE1-SoC", "Raspberry Pi Pico", "Circuit X"] %}
+    <div class="row row-cols-1 row-cols-md-3 g-2">
+      {% for device in devices %}
+      <div class="col">
+        <div class="card" style="width: 90%;">
+          <img src="{{ url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="temp">
+          <div class="card-body">
+            <h5 class="card-title">
+              <a href="{{ device['video'] }}" class="stretched-link text-decoration-none" target="_blank">
+                {{ device }}
+              </a>
+            </h5>
+            <p class="card-text">Placeholder</p>
+            <ul class="list-group list-group-flush">
+              <!-- Update place holders -->
+              <li class="list-group-item"> Microcontroller</li>
+              <li class="list-group-item">sub category</li>
+              <li class="list-group-item">in x lessons</li>
+            </ul>
+          </div>
+          <div class="card-footer">
+            <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

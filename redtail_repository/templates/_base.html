@@ -37,7 +37,7 @@
         </li>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}" href="#">{{ gettext("Devices") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}" href="{{ url_for('.devices') }}">{{ gettext("Devices") }}</a>
         </li>
       </ul>
       <form class="d-flex" role="search">

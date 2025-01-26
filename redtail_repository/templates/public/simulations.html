@@ -42,37 +42,31 @@
         </ul>
       </div>
     </div>
-
-    <!-- Level Section -->
-    <div class="card mb-4">
-      <div class="card-header">Level:</div>
-      <div class="card-body">
-        <!-- Clean Up with forloop after finalizing level -->
-        <ul class="list-unstyled">
-          <li><a href="#">Advanced</a></li>
-          <li><a href="#">[...]</a></li>
-        </ul>
-      </div>
-    </div>
   </div>
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">Lessons</h1>
+    <h1 class="text-center">Simulations</h1>
     <!-- Temp Data for Testing -->
-    {% set lessons = ["Parking Lot", "NES Controller", "Elevator", "Keypad"] %}
+    {% set simulations = ["Parking Lot", "NES Controller", "Door", "Keypad"] %}
     <div class="row row-cols-1 row-cols-md-3 g-2">
-      {% for lesson in lessons %}
+      {% for simulation in simulations %}
       <div class="col">
         <div class="card" style="width: 90%;">
           <img src="{{ url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="temp">
           <div class="card-body">
             <h5 class="card-title">
-              <a href="{{ lesson['video'] }}" class="stretched-link text-decoration-none" target="_blank">
-                {{ lesson }}
+              <a href="{{ simulation['video'] }}" class="stretched-link text-decoration-none" target="_blank">
+                {{ simulation }}
               </a>
             </h5>
             <p class="card-text">Placeholder</p>
+            <ul class="list-group list-group-flush">
+              <!-- Update place holder counts for values -->
+              <li class="list-group-item"> x documents</li>
+              <li class="list-group-item">y lessons</li>
+              <li class="list-group-item">z devices</li>
+            </ul>
           </div>
           <div class="card-footer">
             <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
