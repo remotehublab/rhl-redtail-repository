@@ -21,3 +21,9 @@ def simulations():
 def devices():
     # TODO: Add calls to database to populate page
     return render_template('public/devices.html')
+
+# Remove from public once done testing
+@public_blueprint.route('/register')
+def register():
+    # TODO: Add calls to database to populate page
+    return render_template('public/register.html')
