@@ -6,14 +6,13 @@
   <div class="col-md-3">
     <!-- Categories Section -->
     <div class="card mb-4">
-      <div class="card-header">Categories:</div>
+      <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <!-- Clean Up with forloop after finalizing category -->
         <ul class="list-unstyled">
-          <li><a href="#">Digital Twin</a></li>
-          <li><a href="#">Simulation</a></li>
-          <li><a href="#">Real-world</a></li>
-          <li><a href="#">[...]</a></li>
+          {% for category in all_categories %}
+          <li><a href="{{ url_for('.lessons', category=category.slug) }}">{{ category.name }}</a></li>
+          {% endfor %}
         </ul>
       </div>
     </div>
@@ -58,9 +57,8 @@
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">Lessons</h1>
+    <h1 class="text-center">{{ gettext("Lessons") }}</h1>
     <!-- Temp Data for Testing -->
-    {% set lessons = ["Parking Lot", "NES Controller", "Elevator", "Keypad"] %}
     <div class="row row-cols-1 row-cols-md-3 g-2">
       {% for lesson in lessons %}
       <div class="col">
@@ -68,8 +66,8 @@
           <img src="{{ url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="temp">
           <div class="card-body">
             <h5 class="card-title">
-              <a href="{{ lesson['video'] }}" class="stretched-link text-decoration-none" target="_blank">
-                {{ lesson }}
+              <a href="{{ lesson.video }}" class="stretched-link text-decoration-none" target="_blank">
+                {{ lesson.name }}
               </a>
             </h5>
             <p class="card-text">Placeholder</p>
