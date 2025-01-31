@@ -81,6 +81,8 @@ class Lesson(db.Model):
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
     short_description: Mapped[str] = mapped_column(db.String(255))
+    active: Mapped[bool] = mapped_column(db.Boolean, default=True, nullable=False)
+    category_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson_categories.id'), nullable=False)
 
     videos: Mapped[List['LessonVideos']] = \
         relationship("LessonVideos", back_populates="lesson", cascade="all, delete-orphan")
@@ -93,14 +95,16 @@ class Lesson(db.Model):
         secondary=author_lesson_association,
         back_populates="lessons"
     )
-    devices: Mapped[List['Device']] = relationship(
+    devices: Mapped[List['Devices']] = relationship(
         secondary=lesson_device_association,
         back_populates="lessons"
     )
-    simulations: Mapped[List['Simulation']] = relationship(
+    simulations: Mapped[List['Simulations']] = relationship(
         secondary=lesson_simulation_association,
         back_populates="lessons"
     )
+    category: Mapped['LessonCategory'] = relationship(
+        back_populates="lessons")
 
 class LessonVideos(db.Model):
     __tablename__ = 'lesson_videos'
@@ -135,7 +139,19 @@ class LessonDocs(db.Model):
 
     lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="documents")
 
-class Device(db.Model):
+class LessonCategory(db.Model):
+    __tablename__ = 'lesson_categories'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
+    slug: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
+
+    lessons: Mapped[List['Lesson']] = relationship("Lesson", back_populates="category")
+
+    def __str__(self):
+        return self.name
+
+class Devices(db.Model):
     __tablename__ = 'devices'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -146,12 +162,12 @@ class Device(db.Model):
         secondary=lesson_device_association,
         back_populates="devices"
     )
-    simulations: Mapped[List['Simulation']] = relationship(
+    simulations: Mapped[List['Simulations']] = relationship(
         secondary=device_simulation_association,
         back_populates="devices"
     )
 
-class Simulation(db.Model):
+class Simulations(db.Model):
     __tablename__ = 'simulations'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -162,7 +178,7 @@ class Simulation(db.Model):
         secondary=lesson_simulation_association,
         back_populates="simulations"
     )
-    devices: Mapped[List['Device']] = relationship(
+    devices: Mapped[List['Devices']] = relationship(
         secondary=device_simulation_association,
         back_populates="simulations"
     )

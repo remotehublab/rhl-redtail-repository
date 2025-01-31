@@ -6,7 +6,7 @@ from flask_login import current_user
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
-from ..models import Author, User, Lesson, LessonVideos, LessonImages, LessonDocs, Simulation, Device
+from ..models import Author, User, Lesson, LessonVideos, LessonImages, LessonDocs, Simulations, Devices, LessonCategory
 from ..models import device_simulation_association, lesson_device_association
 from ..models import author_lesson_association, lesson_simulation_association, db
 
@@ -50,22 +50,48 @@ class UserModelView(AuthedModelMixIn, ModelView):
             model.set_password(form.password.data)
 
         return super().on_model_change(form, model, is_created)
-
+    
 class LessonVideoForm(InlineFormAdmin):
     pass
 
+class LessonImageForm(InlineFormAdmin):
+    pass
+
+class LessonDocsForm(InlineFormAdmin):
+    pass
+
+class DeviceForm(InlineFormAdmin):
+    pass
+
 class LessonModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'short_description', 'authors', 'devices', 'simulations']
+    column_list = ['name', 'short_description', 'category', 'authors', 'devices', 'simulations']
+    form_columns = ['name', 'short_description', 'category', 'authors', 'devices', 'simulations']
 
     inline_models = [
         # You can use an InlineFormAdmin if you want to customize the form (e.g., descriptions or whatever)
         LessonVideoForm(LessonVideos),
-        # Or alternatively you can put the model directly:
-        LessonImages,
+        LessonImageForm(LessonImages),
+        LessonDocsForm(LessonDocs),
+        DeviceForm(Devices)
     ]
+
+    def _format_category(view, context, model, name):
+        """Display the category name instead of an object reference."""
+        return model.category.name if model.category else "No Category"
+
+    column_formatters = {
+        'category': _format_category  # Use the function instead of lambda
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(Lesson, db.session, *args, **kwargs)
+
+class LessonCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = ['name', 'slug', 'lessons']
+    form_columns = ['name', 'slug']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(LessonCategory, db.session, *args, **kwargs)
 
 class LessonVideosModelView(AuthedModelMixIn, ModelView):
     column_list = ['lesson', 'title', 'video_url', 'description']
@@ -93,24 +119,24 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     form_columns = ['name', 'description', 'lessons', 'devices']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(Simulation, db.session, *args, **kwargs)
+        super().__init__(Simulations, db.session, *args, **kwargs)
 
 class DeviceModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'description', 'lessons', 'simulations']
     form_columns = ['name', 'description', 'lessons', 'simulations']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(Device, db.session, *args, **kwargs)
+        super().__init__(Devices, db.session, *args, **kwargs)
 
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Authors", category="Users"))
 admin.add_view(UserModelView(name="Users", category="Users"))
 
 admin.add_view(LessonModelView(name="Lessons", category="Lessons"))
-
-admin.add_view(LessonVideosModelView(name="Lesson Videos", category="Lesson Content"))
-admin.add_view(LessonImagesModelView(name="Lesson Images", category="Lesson Content"))
-admin.add_view(LessonDocsModelView(name="Lesson Documents", category="Lesson Content"))
+admin.add_view(LessonCategoryModelView(name="Lesson Categories", category="Lessons"))
+admin.add_view(LessonVideosModelView(name="Lesson Videos", category="Lessons"))
+admin.add_view(LessonImagesModelView(name="Lesson Images", category="Lessons"))
+admin.add_view(LessonDocsModelView(name="Lesson Documents", category="Lessons"))
 
 admin.add_view(SimulationModelView(name="Simulations", category="Simulations"))
 

@@ -1,7 +1,9 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, abort, redirect
+from sqlalchemy.orm import joinedload
 
 from redtail_repository import db
-from redtail_repository.models import Lesson
+from redtail_repository.models import Lesson, LessonCategory, Simulations, Devices, User
+from redtail_repository.views.registration import RegistrationForm
 
 public_blueprint = Blueprint('public', __name__)
 
@@ -13,96 +15,74 @@ def index():
 @public_blueprint.route('/lessons')
 def lessons():
 # TODO: Add calls to database to populate page
+    all_categories = LessonCategory.query.all()
+    category_slug = request.args.get('category')
 
-    all_categories = [
-        { 
-            "name": "Digital Twin",
-            "slug": "digital-twin",
-            "id": 1,
-        },
-        {
-            "name": "Simulation",
-            "slug": "simulation",
-            "id": 2,
-        },
-        {
-            "name": "Real-world",
-            "slug": "real-world",
-            "id": 3,
-        }
-    ]
+    lessons_query = Lesson.query.filter_by(active=True)
 
-    all_categories_by_slug = { category['slug']: category for category in all_categories}
+    if category_slug:
+        category = LessonCategory.query.filter_by(slug=category_slug).first()
+        if category:
+            lessons_query = lessons_query.filter_by(category_id=category.id)
 
-    lessons = [
-        {
-            "name": "Parking Lot",
-            "categories": [
-                1,
-                2
-            ]
-        },
-        {
-            "name": "NES Controller",
-            "categories": [
-                1,
-            ]
-        }, 
-        {
-            "name": "Elevator",
-            "categories": [
-                3,
-            ]
-        }, 
-        {
-            "name": "Keypad",
-            "categories": [
-                2,
-            ]
-        }
-    ]
+    lessons = lessons_query.all()
 
-    category = request.args.get('category')
-    if category:
-        # the user has requested a category
-        category_id = (all_categories_by_slug.get(category) or {}).get('id')
-        if category_id:
-            lessons = [ lesson for lesson in lessons if category_id in lesson.get('categories', [])]
-
-    
-    # lessons = [ 
-    #     {
-    #         'name': lesson.name,
-    #         'description': lesson.description,
-    #     }
-    #     for lesson in db.session.query(Lesson).filter_by(active=True).all()
-    # ]
-    # 
-    return render_template('public/lessons.html', lessons=lessons, all_categories=all_categories)
-
+    return render_template(
+        'public/lessons.html',
+        lessons=lessons,
+        all_categories=all_categories
+    )
 
 @public_blueprint.route('/lessons/<lesson_slug>')
 def lesson(lesson_slug):
-    # human-friendly-slug
-    # parking-log-{12sdf132}
-    # lesson_slug.split('-')[-1]
+    lesson = db.session.query(Lesson).filter_by(slug=lesson_slug, active=True).options(
+        joinedload(Lesson.videos),
+        joinedload(Lesson.images),
+        joinedload(Lesson.documents),
+        joinedload(Lesson.simulations)
+    ).first()
 
-    # TODO: 
-    
-    return render_template("public/lesson.html", lesson=lesson)
+    if not lesson:
+        abort(404)
+
+    return render_template(
+        "public/lesson.html",
+        lesson=lesson,
+        videos=lesson.videos,
+        images=lesson.images,
+        documents=lesson.documents,
+        simulations=lesson.simulations
+    )
 
 @public_blueprint.route('/simulations')
 def simulations():
     # TODO: Add calls to database to populate page
-    return render_template('public/simulations.html')
+    simulations = db.session.query(Simulations).all()
+
+    return render_template('public/simulations.html', simulations=simulations)
 
 @public_blueprint.route('/devices')
 def devices():
     # TODO: Add calls to database to populate page
-    return render_template('public/devices.html')
+    devices = db.lsession.query(Devices).all()
+
+    return render_template('public/devices.html', devices=devices)
 
 # Remove from public once done testing
-@public_blueprint.route('/register')
+@public_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
-    # TODO: Add calls to database to populate page
-    return render_template('public/register.html')
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+        new_user = User(
+            login=form.login.data,
+            name=form.name.data
+        )
+        new_user.set_password(form.password.data)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect('public/')
+
+    return render_template('public/register.html', form=form)
