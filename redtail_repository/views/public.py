@@ -18,13 +18,18 @@ def page_not_found(error):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     return response
 
-@public_blueprint.route('/author/<author_id>')
+@public_blueprint.route('/authors/<author_id>')
 def view_author(author_id):
     author = db.session.query(Author).filter_by(id=author_id).first()
     if not author:
         return render_template("public/error.html", message=gettext("Author not found")), 404
 
     return render_template("public/author.html", author=author)
+
+@public_blueprint.route('/authors')
+def authors():
+    all_authors = db.session.query(Author).all()
+    return render_template('public/authors.html', authors=all_authors)
 
 @public_blueprint.route('/lessons')
 def lessons():
