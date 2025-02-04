@@ -5,6 +5,8 @@ from flask_login import UserMixin
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Table
+from sqlalchemy.sql import func
+from datetime import datetime
 
 from redtail_repository import db
 
@@ -13,28 +15,28 @@ author_lesson_association = Table(
     'author_lesson',
     db.Model.metadata,
     db.Column('author_id', db.Integer, db.ForeignKey('author.id'), primary_key=True),
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
 )
 
 lesson_device_association = Table(
     'lesson_device',
     db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lessons.id'), primary_key=True),
-    db.Column('device_id', db.Integer, db.ForeignKey('devices.id'), primary_key=True)
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
+    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True)
 )
 
 lesson_simulation_association = Table(
     'lesson_simulation',
     db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lessons.id'), primary_key=True),
-    db.Column('simulation_id', db.Integer, db.ForeignKey('simulations.id'), primary_key=True)
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
+    db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
 device_simulation_association = Table(
     'device_simulation',
     db.Model.metadata,
-    db.Column('device_id', db.Integer, db.ForeignKey('devices.id'), primary_key=True),
-    db.Column('simulation_id', db.Integer, db.ForeignKey('simulations.id'), primary_key=True)
+    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True),
+    db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
 class Author(db.Model):
@@ -76,63 +78,68 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 class Lesson(db.Model):
-    __tablename__ = 'lessons'
+    __tablename__ = 'lesson'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
     short_description: Mapped[str] = mapped_column(db.String(255))
     active: Mapped[bool] = mapped_column(db.Boolean, default=True, nullable=False)
-    category_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson_categories.id'), nullable=False)
+    category_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson_category.id'), nullable=False)
+    last_updated: Mapped[datetime] = mapped_column(
+        db.DateTime, 
+        server_default=func.now(),
+        onupdate=func.now()
+    )
 
-    videos: Mapped[List['LessonVideos']] = \
-        relationship("LessonVideos", back_populates="lesson", cascade="all, delete-orphan")
-    images: Mapped[List['LessonImages']] = \
-        relationship("LessonImages", back_populates="lesson", cascade="all, delete-orphan")
-    documents: Mapped[List['LessonDocs']] = \
-        relationship("LessonDocs", back_populates="lesson", cascade="all, delete-orphan")
+    videos: Mapped[List['LessonVideo']] = \
+        relationship("LessonVideo", back_populates="lesson", cascade="all, delete-orphan")
+    images: Mapped[List['LessonImage']] = \
+        relationship("LessonImage", back_populates="lesson", cascade="all, delete-orphan")
+    documents: Mapped[List['LessonDoc']] = \
+        relationship("LessonDoc", back_populates="lesson", cascade="all, delete-orphan")
     
     authors: Mapped[List['Author']] = relationship(
         secondary=author_lesson_association,
         back_populates="lessons"
     )
-    devices: Mapped[List['Devices']] = relationship(
+    devices: Mapped[List['Device']] = relationship(
         secondary=lesson_device_association,
         back_populates="lessons"
     )
-    simulations: Mapped[List['Simulations']] = relationship(
+    simulations: Mapped[List['Simulation']] = relationship(
         secondary=lesson_simulation_association,
         back_populates="lessons"
     )
     category: Mapped['LessonCategory'] = relationship(
         back_populates="lessons")
 
-class LessonVideos(db.Model):
-    __tablename__ = 'lesson_videos'
+class LessonVideo(db.Model):
+    __tablename__ = 'lesson_video'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lessons.id'), nullable=False)
+    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
     video_url: Mapped[str] = mapped_column(db.String(255), nullable=False)
     title: Mapped[str] = mapped_column(db.String(100), nullable=True)
     description: Mapped[str] = mapped_column(db.Text, nullable=True)
 
     lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="videos")
 
-class LessonImages(db.Model):
-    __tablename__ = 'lesson_images'
+class LessonImage(db.Model):
+    __tablename__ = 'lesson_image'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lessons.id'), nullable=False)
+    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
     image_url: Mapped[str] = mapped_column(db.String(255), nullable=False)
     title: Mapped[str] = mapped_column(db.String(100), nullable=True)
     description: Mapped[str] = mapped_column(db.Text, nullable=True)
 
     lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="images")
 
-class LessonDocs(db.Model):
-    __tablename__ = 'lesson_docs'
+class LessonDoc(db.Model):
+    __tablename__ = 'lesson_doc'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lessons.id'), nullable=False)
+    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
     doc_url: Mapped[str] = mapped_column(db.String(255), nullable=False)
     title: Mapped[str] = mapped_column(db.String(100), nullable=True)
     description: Mapped[str] = mapped_column(db.Text, nullable=True)
@@ -140,7 +147,7 @@ class LessonDocs(db.Model):
     lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="documents")
 
 class LessonCategory(db.Model):
-    __tablename__ = 'lesson_categories'
+    __tablename__ = 'lesson_category'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
@@ -151,8 +158,8 @@ class LessonCategory(db.Model):
     def __str__(self):
         return self.name
 
-class Devices(db.Model):
-    __tablename__ = 'devices'
+class Device(db.Model):
+    __tablename__ = 'device'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
@@ -162,13 +169,13 @@ class Devices(db.Model):
         secondary=lesson_device_association,
         back_populates="devices"
     )
-    simulations: Mapped[List['Simulations']] = relationship(
+    simulations: Mapped[List['Simulation']] = relationship(
         secondary=device_simulation_association,
         back_populates="devices"
     )
 
-class Simulations(db.Model):
-    __tablename__ = 'simulations'
+class Simulation(db.Model):
+    __tablename__ = 'simulation'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
@@ -178,7 +185,7 @@ class Simulations(db.Model):
         secondary=lesson_simulation_association,
         back_populates="simulations"
     )
-    devices: Mapped[List['Devices']] = relationship(
+    devices: Mapped[List['Device']] = relationship(
         secondary=device_simulation_association,
         back_populates="simulations"
     )

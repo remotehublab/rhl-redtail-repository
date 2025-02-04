@@ -1,0 +1,8 @@
+{% extends "_base.html" %}
+
+{% block container %}
+  <div class="text-center">
+    <h1>{{ message }}</h1>
+    <p><a href="{{ url_for('public.index') }}">Go back to Home</a></p>
+  </div>
+{% endblock %}
