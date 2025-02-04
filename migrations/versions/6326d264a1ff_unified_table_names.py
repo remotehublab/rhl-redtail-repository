@@ -79,24 +79,10 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.drop_table('lesson_videos')
-    with op.batch_alter_table('lessons', schema=None) as batch_op:
-        batch_op.drop_index('name')
 
-    op.drop_table('lessons')
+
     op.drop_table('lesson_docs')
-    with op.batch_alter_table('simulations', schema=None) as batch_op:
-        batch_op.drop_index('name')
 
-    op.drop_table('simulations')
-    with op.batch_alter_table('lesson_categories', schema=None) as batch_op:
-        batch_op.drop_index('name')
-        batch_op.drop_index('slug')
-
-    op.drop_table('lesson_categories')
-    with op.batch_alter_table('devices', schema=None) as batch_op:
-        batch_op.drop_index('name')
-
-    op.drop_table('devices')
     op.drop_table('lesson_images')
     with op.batch_alter_table('author_lesson', schema=None) as batch_op:
         batch_op.drop_constraint('author_lesson_ibfk_2', type_='foreignkey')
@@ -119,6 +105,27 @@ def upgrade():
         batch_op.drop_constraint('lesson_simulation_ibfk_1', type_='foreignkey')
         batch_op.create_foreign_key(None, 'simulation', ['simulation_id'], ['id'])
         batch_op.create_foreign_key(None, 'lesson', ['lesson_id'], ['id'])
+
+    with op.batch_alter_table('simulations', schema=None) as batch_op:
+        batch_op.drop_index('name')
+
+    with op.batch_alter_table('devices', schema=None) as batch_op:
+        batch_op.drop_index('name')
+
+    op.drop_table('devices')
+
+    op.drop_table('simulations')
+
+    with op.batch_alter_table('lessons', schema=None) as batch_op:
+        batch_op.drop_index('name')
+
+    op.drop_table('lessons')
+
+    with op.batch_alter_table('lesson_categories', schema=None) as batch_op:
+        batch_op.drop_index('name')
+        batch_op.drop_index('slug')
+
+    op.drop_table('lesson_categories')
 
     # ### end Alembic commands ###
 
