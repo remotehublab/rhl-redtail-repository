@@ -12,11 +12,12 @@ public_blueprint = Blueprint('public', __name__)
 def index():
     return render_template('public/index.html')
 
-@public_blueprint.app_errorhandler(404)
-def page_not_found(error):
-    response = make_response(render_template("public/error.html", message=gettext("The page doesn't exist.")), 404)
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
-    return response
+# This should be at app level, and if the template makes calls like url_for('.lessons') it will fail. Let's talk about this in the next meeting
+# @public_blueprint.app_errorhandler(404)
+# def page_not_found(error):
+#     response = make_response(render_template("public/error.html", message=gettext("The page doesn't exist.")), 404)
+#     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+#     return response
 
 @public_blueprint.route('/authors/<author_id>')
 def view_author(author_id):
