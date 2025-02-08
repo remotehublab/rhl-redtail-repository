@@ -29,15 +29,15 @@
           <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page" href="/">{{ gettext("Home") }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.lessons' %}active{% endif %}" href="{{ url_for('.lessons') }}">{{ gettext("Lessons") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.lessons' %}active{% endif %}" href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
         </li>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.simulations' %}active{% endif %}" href="{{ url_for('.simulations') }}">{{ gettext("Simulations") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.simulations' %}active{% endif %}" href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
         </li>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}" href="{{ url_for('.devices') }}">{{ gettext("Devices") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}" href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
         </li>
       </ul>
       <form class="d-flex" role="search">
