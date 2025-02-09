@@ -8,14 +8,18 @@
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
-        <!-- Clean Up with forloop after finalizing category -->
         <ul class="list-unstyled">
           {% for category in all_categories %}
-          <li><a href="{{ url_for('.lessons', category=category.slug) }}">{{ category.name }}</a></li>
+          <li>
+            <a href="{{ url_for('.category', category_slug=category.slug) }}">
+              {{ category.name }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </div>
     </div>
+
 
     <!-- Devices Section -->
     <div class="card mb-4">
@@ -57,28 +61,28 @@
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">{{ gettext("Lessons") }}</h1>
-    <!-- Temp Data for Testing -->
-    <div class="row row-cols-1 row-cols-md-3 g-2">
-      {% for lesson in lessons %}
-      <div class="col">
-        <div class="card" style="width: 90%;">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="temp">
-          <div class="card-body">
-            <h5 class="card-title">
-              <a href="{{ url_for('.lesson', lesson_slug=lesson.slug ) }}" class="stretched-link text-decoration-none">
-                {{ lesson.name }}
-              </a>
-            </h5>
-            <p class="card-text">{{ lesson.short_description }}</p>
-          </div>
-          <div class="card-footer">
-            <p class="card-text"><small class="text-body-secondary">Last Updated: {{ lesson.last_updated }}</small></p>
-          </div>
+    <h1 class="text-center">
+      {{ gettext("Lesson: %(lesson_name)s", lesson_name=lesson.name) }}
+    </h1>
+    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <!-- TODO: Make a for loop to grab both videos and images and prioritize videos -->
+        <div class="carousel-item active">
+          <img src="{{ url_for('static', filename='img/NES.png') }}" class="d-block w-70" alt="...">
         </div>
       </div>
-      {% endfor %}
+      <!-- Previous Button (with Icon) -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ gettext("Previous") }}</span>
+      </button>
+      <!-- Next Button (with Icon) -->
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ gettext("Next") }}</span>
+      </button>
     </div>
+
   </div>
 </div>
 {% endblock %}

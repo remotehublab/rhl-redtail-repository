@@ -59,11 +59,13 @@ def lesson(lesson_slug):
         joinedload(Lesson.videos),
         joinedload(Lesson.images),
         joinedload(Lesson.documents),
-        joinedload(Lesson.simulations)
+        joinedload(Lesson.simulations),
+        joinedload(Lesson.category)
     ).first()
 
     if not lesson:
         return render_template("public/error.html", message=gettext("Lesson not found")), 404
+
 
     return render_template(
         "public/lesson.html",
@@ -73,7 +75,8 @@ def lesson(lesson_slug):
         videos=lesson.videos,
         images=lesson.images,
         documents=lesson.documents,
-        simulations=lesson.simulations
+        simulations=lesson.simulations,
+        category=lesson.category,
     )
 
 @public_blueprint.route('/simulations')

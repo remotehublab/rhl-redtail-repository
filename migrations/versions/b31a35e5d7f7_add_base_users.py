@@ -19,7 +19,7 @@ branch_labels = None
 depends_on = None
 
 user_table = Table(
-    'user', 
+    'user',
     MetaData(),
     Column('id', Integer, primary_key=True),
     Column('login', String(100), unique=True),

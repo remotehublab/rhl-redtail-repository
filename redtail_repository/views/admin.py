@@ -50,7 +50,7 @@ class UserModelView(AuthedModelMixIn, ModelView):
             model.set_password(form.password.data)
 
         return super().on_model_change(form, model, is_created)
-    
+
 class LessonVideoForm(InlineFormAdmin):
     pass
 
@@ -65,7 +65,7 @@ class DeviceForm(InlineFormAdmin):
 
 class LessonModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'authors', 'last_updated', 'short_description', 'category', 'devices', 'simulations']
-    form_columns = ['name', 'authors', 'short_description', 'category', 'devices', 'simulations']
+    form_columns = ['name', 'slug', 'authors', 'short_description', 'category', 'devices', 'simulations']
 
     inline_models = [
         # You can use an InlineFormAdmin if you want to customize the form (e.g., descriptions or whatever)

@@ -82,11 +82,12 @@ class Lesson(db.Model):
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
+    slug: Mapped[str] = mapped_column(db.String(255), unique=True)
     short_description: Mapped[str] = mapped_column(db.String(255))
     active: Mapped[bool] = mapped_column(db.Boolean, default=True, nullable=False)
     category_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson_category.id'), nullable=False)
     last_updated: Mapped[datetime] = mapped_column(
-        db.DateTime, 
+        db.DateTime,
         server_default=func.now(),
         onupdate=func.now()
     )
@@ -97,7 +98,7 @@ class Lesson(db.Model):
         relationship("LessonImage", back_populates="lesson", cascade="all, delete-orphan")
     documents: Mapped[List['LessonDoc']] = \
         relationship("LessonDoc", back_populates="lesson", cascade="all, delete-orphan")
-    
+
     authors: Mapped[List['Author']] = relationship(
         secondary=author_lesson_association,
         back_populates="lessons"
