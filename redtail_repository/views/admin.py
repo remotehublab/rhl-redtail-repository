@@ -64,9 +64,6 @@ class LessonImageForm(InlineFormAdmin):
 class LessonDocsForm(InlineFormAdmin):
     pass
 
-class DeviceForm(InlineFormAdmin):
-    pass
-
 class LessonModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'authors', 'last_updated', 'short_description', 'category', 'devices', 'simulations', 'supported_devices']
     form_columns = ['name', 'slug', 'authors', 'short_description', 'category', 'devices', 'simulations', 'supported_devices']
@@ -76,7 +73,6 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         LessonVideoForm(LessonVideo),
         LessonImageForm(LessonImage),
         LessonDocsForm(LessonDoc),
-        DeviceForm(Device),
     ]
 
     def _format_category(view, context, model, name):
