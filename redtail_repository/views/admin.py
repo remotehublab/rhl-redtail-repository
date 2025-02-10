@@ -6,9 +6,13 @@ from flask_login import current_user
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
-from ..models import Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, Simulation, Device, LessonCategory
-from ..models import device_simulation_association, lesson_device_association
-from ..models import author_lesson_association, lesson_simulation_association, db
+from ..models import (
+    Author, User, Lesson, LessonVideo,
+    LessonImage, LessonDoc, Simulation, Device, LessonCategory, SupportedDevice,
+    device_simulation_association, lesson_device_association,
+    supported_device_lesson, supported_device_simulation,
+    author_lesson_association, lesson_simulation_association, db
+)
 
 class AuthedModelMixIn:
     def is_accessible(self):
@@ -64,23 +68,21 @@ class DeviceForm(InlineFormAdmin):
     pass
 
 class LessonModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'authors', 'last_updated', 'short_description', 'category', 'devices', 'simulations']
-    form_columns = ['name', 'slug', 'authors', 'short_description', 'category', 'devices', 'simulations']
+    column_list = ['name', 'authors', 'last_updated', 'short_description', 'category', 'devices', 'simulations', 'supported_devices']
+    form_columns = ['name', 'slug', 'authors', 'short_description', 'category', 'devices', 'simulations', 'supported_devices']
 
     inline_models = [
         # You can use an InlineFormAdmin if you want to customize the form (e.g., descriptions or whatever)
         LessonVideoForm(LessonVideo),
         LessonImageForm(LessonImage),
         LessonDocsForm(LessonDoc),
-        DeviceForm(Device)
+        DeviceForm(Device),
     ]
 
     def _format_category(view, context, model, name):
-        """Display the category name instead of an object reference."""
         return model.category.name if model.category else "No Category"
-
     column_formatters = {
-        'category': _format_category  # Use the function instead of lambda
+        'category': _format_category
     }
 
     def __init__(self, *args, **kwargs):
@@ -128,6 +130,13 @@ class DeviceModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(Device, db.session, *args, **kwargs)
 
+class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
+    column_list = ['name', 'lessons', 'simulations']
+    form_columns = ['name', 'lessons', 'simulations']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(SupportedDevice, db.session, *args, **kwargs)
+
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(UserModelView(name="User", category="User"))
@@ -141,3 +150,4 @@ admin.add_view(LessonDocsModelView(name="Lesson Document", category="Lesson"))
 admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
 
 admin.add_view(DeviceModelView(name="Device", category="Device"))
+admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Device"))

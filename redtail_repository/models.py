@@ -39,6 +39,20 @@ device_simulation_association = Table(
     db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
+supported_device_lesson = Table(
+    'supported_device_lesson',
+    db.Model.metadata,
+    db.Column('supported_device_id', db.Integer, db.ForeignKey('supported_device.id'), primary_key=True),
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
+)
+
+supported_device_simulation = Table(
+    'supported_device_simulation',
+    db.Model.metadata,
+    db.Column('supported_device_id', db.Integer, db.ForeignKey('supported_device.id'), primary_key=True),
+    db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
+)
+
 class Author(db.Model):
     __tablename__ = 'author'
 
@@ -112,7 +126,12 @@ class Lesson(db.Model):
         back_populates="lessons"
     )
     category: Mapped['LessonCategory'] = relationship(
-        back_populates="lessons")
+        back_populates="lessons"
+    )
+    supported_devices: Mapped[List['SupportedDevice']] = relationship(
+        secondary=supported_device_lesson,
+        back_populates="lessons"
+    )
 
 class LessonVideo(db.Model):
     __tablename__ = 'lesson_video'
@@ -189,4 +208,25 @@ class Simulation(db.Model):
     devices: Mapped[List['Device']] = relationship(
         secondary=device_simulation_association,
         back_populates="simulations"
+    )
+    supported_devices: Mapped[List['SupportedDevice']] = relationship(
+        secondary=supported_device_simulation,
+        back_populates="simulations"
+    )
+
+class SupportedDevice(db.Model):
+    __tablename__ = 'supported_device'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(db.String(100), unique=True)
+
+    lessons: Mapped[List['Lesson']] = relationship(
+        "Lesson",
+        secondary=supported_device_lesson,
+        back_populates="supported_devices"
+    )
+    simulations: Mapped[List['Simulation']] = relationship(
+        "Simulation",
+        secondary=supported_device_simulation,
+        back_populates="supported_devices"
     )
