@@ -23,7 +23,7 @@
 
     <!-- Devices Section -->
     <div class="card mb-4">
-      <div class="card-header">Devices:</div>
+      <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
         <!-- Clean Up with forloop after finalizing devices-->
         <ul class="list-unstyled">
@@ -64,23 +64,29 @@
     <h1 class="text-center">
       {{ gettext("Lesson: %(lesson_name)s", lesson_name=lesson.name) }}
     </h1>
-    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        <!-- TODO: Make a for loop to grab both videos and images and prioritize videos -->
-        <div class="carousel-item active">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" class="d-block w-70" alt="...">
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
+        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <!-- TODO: Make a for loop to grab both videos and images and prioritize videos -->
+            <div class="carousel-item active">
+              <center>
+                <img src="{{ url_for('static', filename='img/NES.png') }}" class="d-block w-70" alt="...">
+              </center>
+            </div>
+          </div>
+          <!-- Previous Button (with Icon) -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ gettext("Previous") }}</span>
+          </button>
+          <!-- Next Button (with Icon) -->
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ gettext("Next") }}</span>
+          </button>
         </div>
       </div>
-      <!-- Previous Button (with Icon) -->
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">{{ gettext("Previous") }}</span>
-      </button>
-      <!-- Next Button (with Icon) -->
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">{{ gettext("Next") }}</span>
-      </button>
     </div>
 
   </div>
