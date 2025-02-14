@@ -3,7 +3,10 @@ from sqlalchemy.orm import joinedload
 from flask_babel import gettext
 
 from redtail_repository import db
-from redtail_repository.models import Lesson, LessonCategory, Simulation, Device, User, Author, SupportedDevice
+from redtail_repository.models import (
+    Lesson, LessonCategory, Simulation, Device, User, Author, SupportedDevice,
+    DeviceCategory, 
+)
 from redtail_repository.views.registration import RegistrationForm
 
 public_blueprint = Blueprint('public', __name__)
@@ -34,7 +37,6 @@ def authors():
 
 @public_blueprint.route('/lessons')
 def lessons():
-# TODO: Add calls to database to populate page
     all_categories = LessonCategory.query.all()
     all_supported_devices = SupportedDevice.query.all()
 
@@ -43,13 +45,18 @@ def lessons():
 
     lessons_query = Lesson.query.filter_by(active=True).options(
         joinedload(Lesson.authors),
-        joinedload(Lesson.supported_devices)
+        joinedload(Lesson.supported_devices),
+        joinedload(Lesson.lesson_categories),
+        joinedload(Lesson.videos),
+        joinedload(Lesson.images),
+        joinedload(Lesson.lesson_documents),
+        joinedload(Lesson.simulations)
     )
 
     if category_slug:
         category = LessonCategory.query.filter_by(slug=category_slug).first()
         if category:
-            lessons_query = lessons_query.filter_by(category_id=category.id)
+            lessons_query = lessons_query.filter(Lesson.lesson_categories.contains(category))
 
     if supported_device_id:
         lessons_query = lessons_query.join(Lesson.supported_devices).filter(SupportedDevice.id == supported_device_id)
@@ -65,15 +72,17 @@ def lessons():
         selected_supported_device=supported_device_id
     )
 
+
 @public_blueprint.route('/lessons/<lesson_slug>')
 def lesson(lesson_slug):
     lesson = db.session.query(Lesson).filter_by(slug=lesson_slug, active=True).options(
         joinedload(Lesson.authors),
         joinedload(Lesson.videos),
         joinedload(Lesson.images),
-        joinedload(Lesson.documents),
+        joinedload(Lesson.lesson_documents),
         joinedload(Lesson.simulations),
-        joinedload(Lesson.category)
+        joinedload(Lesson.lesson_categories),
+        joinedload(Lesson.supported_devices)
     ).first()
 
     if not lesson:
@@ -86,17 +95,23 @@ def lesson(lesson_slug):
         last_updated=lesson.last_updated,
         videos=lesson.videos,
         images=lesson.images,
-        documents=lesson.documents,
+        documents=lesson.lesson_documents,
         simulations=lesson.simulations,
-        category=lesson.category,
+        categories=lesson.lesson_categories,
+        supported_devices=lesson.supported_devices
     )
 
 @public_blueprint.route('/simulations')
 def simulations():
-    # TODO: Add calls to database to populate page
     all_supported_devices = SupportedDevice.query.all()
     supported_device_id = request.args.get('supported_device')
-    simulations_query = db.session.query(Simulation).options(joinedload(Simulation.supported_devices))
+
+    simulations_query = db.session.query(Simulation).options(
+        joinedload(Simulation.supported_devices),
+        joinedload(Simulation.simulation_categories),
+        joinedload(Simulation.simulation_device_categories),
+        joinedload(Simulation.simulation_documents)
+    )
 
     if supported_device_id:
         simulations_query = simulations_query.join(Simulation.supported_devices).filter(SupportedDevice.id == supported_device_id)
@@ -110,12 +125,67 @@ def simulations():
         selected_supported_device=supported_device_id
     )
 
+@public_blueprint.route('/simulations/<simulation_slug>')
+def simulation(simulation_slug):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).options(
+        joinedload(Simulation.lessons),
+        joinedload(Simulation.devices),
+        joinedload(Simulation.supported_devices),
+        joinedload(Simulation.simulation_categories),
+        joinedload(Simulation.simulation_documents)
+    ).first()
+
+    if not simulation:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    return render_template(
+        "public/simulation.html",
+        simulation=simulation,
+        lessons=simulation.lessons,
+        devices=simulation.devices,
+        supported_devices=simulation.supported_devices,
+        categories=simulation.simulation_categories,
+        documents=simulation.simulation_documents
+    )
+
 @public_blueprint.route('/devices')
 def devices():
-    # TODO: Add calls to database to populate page
-    devices = db.session.query(Device).all()
+    all_device_categories = db.session.query(DeviceCategory).all()
+    devices_query = db.session.query(Device).options(
+        joinedload(Device.device_categories),
+        joinedload(Device.device_documents),
+        joinedload(Device.lessons),
+        joinedload(Device.simulations)
+    )
 
-    return render_template('public/devices.html', devices=devices)
+    devices = devices_query.all()
+
+    return render_template(
+        'public/devices.html',
+        devices=devices,
+        all_device_categories=all_device_categories
+    )
+
+@public_blueprint.route('/devices/<device_slug>')
+def device(device_slug):
+    device = db.session.query(Device).filter_by(slug=device_slug).options(
+        joinedload(Device.device_documents),
+        joinedload(Device.lessons),
+        joinedload(Device.simulations),
+        joinedload(Device.device_categories)
+    ).first()
+
+    if not device:
+        return render_template("public/error.html", message=gettext("Device not found")), 404
+
+    return render_template(
+        "public/device.html",
+        device=device,
+        documents=device.device_documents,
+        lessons=device.lessons,
+        simulations=device.simulations,
+        categories=device.device_categories
+    )
 
 # Remove from public once done testing
 @public_blueprint.route('/register', methods=['GET', 'POST'])
