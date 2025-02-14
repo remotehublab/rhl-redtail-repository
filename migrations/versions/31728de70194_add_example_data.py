@@ -68,6 +68,7 @@ def upgrade():
             'description': "Raspberry Pi Pico 1 microcontroller"
         },
     ]
+    
     # missing device:
     # - device image
     # - last update

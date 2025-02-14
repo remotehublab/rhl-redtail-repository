@@ -7,11 +7,13 @@ from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
 from ..models import (
-    Author, User, Lesson, LessonVideo,
-    LessonImage, LessonDoc, Simulation, Device, LessonCategory, SupportedDevice,
+    Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
+    Simulation, Device, LessonCategory, SupportedDevice, 
+    DeviceCategory, SimulationCategory, 
     device_simulation_association, lesson_device_association,
     supported_device_lesson, supported_device_simulation,
-    author_lesson_association, lesson_simulation_association, db
+    author_lesson_association, lesson_simulation_association, 
+    device_category_association, simulation_category_association, db
 )
 
 class AuthedModelMixIn:
@@ -65,21 +67,19 @@ class LessonDocsForm(InlineFormAdmin):
     pass
 
 class LessonModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'authors', 'last_updated', 'short_description', 'category', 'devices', 'simulations', 'supported_devices']
-    form_columns = ['category', 'name', 'slug', 'authors', 'short_description', 'devices', 'simulations', 'supported_devices']
+    column_list = ['name', 'authors', 'last_updated', 'short_description', 'lesson_categories', 'devices', 'simulations', 'supported_devices']
+    form_columns = ['lesson_categories', 'name', 'slug', 'authors', 'short_description', 'devices', 'simulations', 'supported_devices']
 
     inline_models = [
-        # You can use an InlineFormAdmin if you want to customize the form (e.g., descriptions or whatever)
         LessonVideoForm(LessonVideo),
         LessonImageForm(LessonImage),
         LessonDocsForm(LessonDoc),
     ]
 
-    def _format_category(view, context, model, name):
-        return model.category.name if model.category else "No Category"
-    column_formatters = {
-        'category': _format_category
-    }
+    def _format_categories(view, context, model, name):
+        return ", ".join(category.name for category in model.lesson_categories) if model.lesson_categories else "No Categories"
+
+    column_formatters = {'lesson_categories': _format_categories}
 
     def __init__(self, *args, **kwargs):
         super().__init__(Lesson, db.session, *args, **kwargs)
@@ -113,18 +113,32 @@ class LessonDocsModelView(AuthedModelMixIn, ModelView):
         super().__init__(LessonDoc, db.session, *args, **kwargs)
 
 class SimulationModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'description', 'lessons', 'devices']
-    form_columns = ['name', 'description', 'lessons', 'devices']
+    column_list = ['name', 'description', 'lessons', 'devices', 'simulation_categories']
+    form_columns = ['name', 'description', 'lessons', 'devices', 'simulation_categories']
 
     def __init__(self, *args, **kwargs):
         super().__init__(Simulation, db.session, *args, **kwargs)
 
+class SimulationCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = ['name', 'slug', 'simulations']
+    form_columns = ['name', 'slug']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(SimulationCategory, db.session, *args, **kwargs)
+
 class DeviceModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'description', 'lessons', 'simulations']
-    form_columns = ['name', 'description', 'lessons', 'simulations']
+    column_list = ['name', 'description', 'lessons', 'simulations', 'device_categories']
+    form_columns = ['name', 'description', 'lessons', 'simulations', 'device_categories']
 
     def __init__(self, *args, **kwargs):
         super().__init__(Device, db.session, *args, **kwargs)
+    
+class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = ['name', 'slug', 'devices']
+    form_columns = ['name', 'slug']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
 class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'lessons', 'simulations']
@@ -138,7 +152,6 @@ admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(UserModelView(name="User", category="User"))
 
 admin.add_view(LessonModelView(name="Lesson", category="Lesson"))
-admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Lesson"))
 admin.add_view(LessonVideosModelView(name="Lesson Video", category="Lesson"))
 admin.add_view(LessonImagesModelView(name="Lesson Image", category="Lesson"))
 admin.add_view(LessonDocsModelView(name="Lesson Document", category="Lesson"))
@@ -147,3 +160,7 @@ admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
 
 admin.add_view(DeviceModelView(name="Device", category="Device"))
 admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Device"))
+
+admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
+admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
+admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))
