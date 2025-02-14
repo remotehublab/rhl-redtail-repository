@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired
 from ..models import (
     Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
     Simulation, Device, LessonCategory, SupportedDevice, 
-    DeviceCategory, SimulationCategory, 
+    DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
     device_simulation_association, lesson_device_association,
     supported_device_lesson, supported_device_simulation,
     author_lesson_association, lesson_simulation_association, 
@@ -66,9 +66,26 @@ class LessonImageForm(InlineFormAdmin):
 class LessonDocsForm(InlineFormAdmin):
     pass
 
+class SimulationDocForm(InlineFormAdmin):
+    pass
+
+class DeviceDocForm(InlineFormAdmin):
+    pass
+
 class LessonModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'authors', 'last_updated', 'short_description', 'lesson_categories', 'devices', 'simulations', 'supported_devices']
-    form_columns = ['lesson_categories', 'name', 'slug', 'authors', 'short_description', 'devices', 'simulations', 'supported_devices']
+    column_list = [
+        'id', 'name', 'slug', 'short_description', 'active',
+        'cover_image_url', 'long_description', 'learning_goals', 'level',
+        'last_updated',
+        'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
+        'videos', 'images', 'lesson_documents'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'short_description', 'active',
+        'cover_image_url', 'long_description', 'learning_goals', 'level',
+        'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
+        'videos', 'images', 'lesson_documents'
+    ]
 
     inline_models = [
         LessonVideoForm(LessonVideo),
@@ -84,61 +101,123 @@ class LessonModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(Lesson, db.session, *args, **kwargs)
 
-class LessonCategoryModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'slug', 'lessons']
-    form_columns = ['name', 'slug']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(LessonCategory, db.session, *args, **kwargs)
-
 class LessonVideosModelView(AuthedModelMixIn, ModelView):
-    column_list = ['lesson', 'title', 'video_url', 'description']
-    form_columns = ['lesson', 'title', 'video_url', 'description']
+    column_list = [
+        'id', 'lesson_id', 'lesson',
+        'title', 'video_url', 'description', 'last_updated'
+    ]
+    form_columns = [
+        'id', 'lesson_id', 'lesson',
+        'title', 'video_url', 'description', 'last_updated'
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(LessonVideo, db.session, *args, **kwargs)
 
 class LessonImagesModelView(AuthedModelMixIn, ModelView):
-    column_list = ['lesson', 'title', 'image_url', 'description']
-    form_columns = ['lesson', 'title', 'image_url', 'description']
+    column_list = [
+        'id', 'lesson_id', 'lesson',
+        'title', 'image_url', 'description', 'last_updated'
+    ]
+    form_columns = [
+        'id', 'lesson_id', 'lesson',
+        'title', 'image_url', 'description', 'last_updated'
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(LessonImage, db.session, *args, **kwargs)
 
 class LessonDocsModelView(AuthedModelMixIn, ModelView):
-    column_list = ['lesson', 'title', 'doc_url', 'description']
-    form_columns = ['lesson', 'title', 'doc_url', 'description']
+    column_list = [
+        'id', 'lesson_id', 'lesson',
+        'title', 'doc_url', 'description', 'is_solution', 'last_updated'
+    ]
+    form_columns = [
+        'id', 'lesson_id', 'lesson',
+        'title', 'doc_url', 'description', 'is_solution', 'last_updated'
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(LessonDoc, db.session, *args, **kwargs)
 
 class SimulationModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'description', 'lessons', 'devices', 'simulation_categories']
-    form_columns = ['name', 'description', 'lessons', 'devices', 'simulation_categories']
+    column_list = [
+        'id', 'name', 'slug', 'description',
+        'cover_image_url', 'last_updated',
+        'lessons', 'devices', 'supported_devices',
+        'simulation_categories', 'simulation_device_categories',
+        'simulation_documents'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'description',
+        'cover_image_url',
+        'lessons', 'devices', 'supported_devices',
+        'simulation_categories', 'simulation_device_categories',
+        'simulation_documents'
+    ]
+
+    inline_models = [
+        SimulationDocForm(SimulationDoc)
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(Simulation, db.session, *args, **kwargs)
 
+class SimulationDocModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'id', 'simulation_id', 'simulation',
+        'title', 'doc_url', 'description', 'last_updated'
+    ]
+    form_columns = [
+        'id', 'simulation_id', 'simulation',
+        'title', 'doc_url', 'description', 'last_updated'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(SimulationDoc, db.session, *args, **kwargs)
+
+
 class SimulationCategoryModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'slug', 'simulations']
-    form_columns = ['name', 'slug']
+    column_list = [
+        'id', 'name', 'slug', 'last_updated', 'simulations'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'last_updated'
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(SimulationCategory, db.session, *args, **kwargs)
 
 class DeviceModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'description', 'lessons', 'simulations', 'device_categories']
-    form_columns = ['name', 'description', 'lessons', 'simulations', 'device_categories']
+    column_list = [
+        'id', 'slug', 'name', 'description',
+        'cover_image_url', 'last_updated',
+        'lessons', 'simulations', 'device_categories', 'device_documents'
+    ]
+    form_columns = [
+        'id', 'slug', 'name', 'description',
+        'cover_image_url', 'lessons', 'simulations', 'device_categories', 'device_documents'
+    ]
+
+    inline_models = [
+        DeviceDocForm(DeviceDoc)
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(Device, db.session, *args, **kwargs)
-    
-class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'slug', 'devices']
-    form_columns = ['name', 'slug']
+
+class DeviceDocModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'id', 'device_id', 'device',
+        'doc_url', 'title', 'description', 'last_updated'
+    ]
+    form_columns = [
+        'id', 'device_id', 'device',
+        'doc_url', 'title', 'description', 'last_updated'
+    ]
 
     def __init__(self, *args, **kwargs):
-        super().__init__(DeviceCategory, db.session, *args, **kwargs)
+        super().__init__(DeviceDoc, db.session, *args, **kwargs)
 
 class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'lessons', 'simulations']
@@ -146,6 +225,44 @@ class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(SupportedDevice, db.session, *args, **kwargs)
+
+# Category Views
+class LessonCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'id', 'name', 'slug', 'last_updated',
+        'lessons'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'last_updated',
+        'lessons'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(LessonCategory, db.session, *args, **kwargs)
+
+class SimulationCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'id', 'name', 'slug', 'last_updated', 'simulations'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'last_updated', 'simulations'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(SimulationCategory, db.session, *args, **kwargs)
+
+class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'id', 'name', 'slug', 'last_updated',
+        'devices', 'simulations'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'last_updated',
+        'devices', 'simulations'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))
@@ -157,10 +274,12 @@ admin.add_view(LessonImagesModelView(name="Lesson Image", category="Lesson"))
 admin.add_view(LessonDocsModelView(name="Lesson Document", category="Lesson"))
 
 admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
+admin.add_view(SimulationDocModelView(name="Simulation Document", category="Simulation"))
+admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
 
 admin.add_view(DeviceModelView(name="Device", category="Device"))
+admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
 admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Device"))
 
 admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
-admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))

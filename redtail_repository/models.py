@@ -127,7 +127,7 @@ class Lesson(db.Model):
     slug: Mapped[str] = mapped_column(db.String(255), unique=True)
     short_description: Mapped[str] = mapped_column(db.String(255))
     active: Mapped[bool] = mapped_column(db.Boolean, default=True, nullable=False)
-    cover_image: Mapped[str] = mapped_column(db.String(255), nullable=True)
+    cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
     long_description: Mapped[str] = mapped_column(db.Text, nullable=True)
     learning_goals: Mapped[str] = mapped_column(db.Text, nullable=True)
     level: Mapped[str] = mapped_column(db.String(50), nullable=True)
@@ -221,7 +221,7 @@ class Device(db.Model):
     slug: Mapped[str] = mapped_column(db.String(255), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
     description: Mapped[str] = mapped_column(db.Text)
-    image_url: Mapped[str] = mapped_column(db.String(2083))
+    cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
     last_updated: Mapped[datetime] = mapped_column(
         db.DateTime,
         server_default=func.now(),
@@ -263,8 +263,14 @@ class Simulation(db.Model):
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
+    slug: Mapped[str] = mapped_column(db.String(100), unique=True)
     description: Mapped[str] = mapped_column(db.Text)
+    cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
+    last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
+    simulation_documents: Mapped[List['SimulationDoc']] = relationship(
+        back_populates="simulation", cascade="all, delete-orphan"
+    )
     lessons: Mapped[List['Lesson']] = relationship(
         secondary=lesson_simulation_association,
         back_populates="simulations"
@@ -286,11 +292,31 @@ class Simulation(db.Model):
         back_populates="simulations"
     )
 
+class SimulationDoc(db.Model):
+    __tablename__ = 'simulation_doc'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    simulation_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('simulation.id'), nullable=False)
+    doc_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
+    title: Mapped[str] = mapped_column(db.String(100), nullable=True)
+    description: Mapped[str] = mapped_column(db.Text, nullable=True)
+    last_updated: Mapped[datetime] = mapped_column(
+        db.DateTime,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+
+    simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_documents")
+
+
 class SupportedDevice(db.Model):
     __tablename__ = 'supported_device'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
+    slug: Mapped[str] = mapped_column(db.String(100), unique=True)
+    cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
+    last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
     lessons: Mapped[List['Lesson']] = relationship(
         secondary=supported_device_lesson,
