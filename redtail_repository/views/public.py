@@ -5,7 +5,7 @@ from flask_babel import gettext
 from redtail_repository import db
 from redtail_repository.models import (
     Lesson, LessonCategory, Simulation, Device, User, Author, SupportedDevice,
-    DeviceCategory, 
+    DeviceCategory,
 )
 from redtail_repository.views.registration import RegistrationForm
 
@@ -60,7 +60,7 @@ def lessons():
 
     if supported_device_id:
         lessons_query = lessons_query.join(Lesson.supported_devices).filter(SupportedDevice.id == supported_device_id)
-    
+
     lessons = lessons_query.all()
 
     return render_template(

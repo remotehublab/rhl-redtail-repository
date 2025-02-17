@@ -3,12 +3,11 @@
 {% block container %}
 <div class="row">
   <!-- Sidebar Section -->
-  <div class="col-md-3">
+  <div class="col-md-2">
     <!-- Categories Section -->
-    <div class="card mb-4">
+    <div class="card mb-3">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
-        <!-- Clean Up with forloop after finalizing category -->
         <ul class="list-unstyled">
           {% for category in all_categories %}
           <li><a href="{{ url_for('.lessons', category=category.slug) }}">{{ category.name }}</a></li>
