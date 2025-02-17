@@ -3,9 +3,9 @@
 {% block container %}
 <div class="row">
   <!-- Sidebar Section -->
-  <div class="col-md-2">
+  <div class="col-md-2 mt-4">
     <!-- Categories Section -->
-    <div class="card mb-3">
+    <div class="card mb-4">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <!-- Do lessons have categories attached? -->
@@ -49,7 +49,7 @@
   </div>
 
   <!-- Main Content Section -->
-  <div class="col-md-9">
+  <div class="col-md-8">
     <h1 class="text-center">
       {{ gettext("Lesson: %(lesson_name)s", lesson_name=lesson.name) }}
     </h1>
@@ -84,6 +84,7 @@
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light" style="height: 200px;">
+          <div class="card-header">{{gettext("Description")}}</div>
           <div class="card-body">
             <!-- Ask Pablo about db call to short_description -->
             <p class="card-text">{{gettext("Description")}}</p>
@@ -91,8 +92,35 @@
         </div>
       </div>
     </div>
-
+    <!-- Downloads -->
+    <div class="row mt-3">
+      <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
+        <div class="card text-start bg-light" style="height: 200px;">
+          <div class="card-header">{{gettext("Downloads")}}</div>
+          <div class="card-body">
+            <!-- Ask Pablo about db call to short_description -->
+            <p class="card-text">{{gettext("Downloads")}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <div class="col-md-2 mt-4">
+    <div class="card mb-4 h-50">
+      <div class="card-header">{{ gettext("Learning Goals") }}</div>
+      <div class="card-body">
+        <!-- Is there a db field that has all of the learning goals? -->
+        <ul class="list-unstyled">
+          <!-- {% for goal in lessons_goals %}
+          <li>{{ gettext("category.name") }}</li>
+          {% endfor %} -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+</div>
 </div>
 {% endblock %}
