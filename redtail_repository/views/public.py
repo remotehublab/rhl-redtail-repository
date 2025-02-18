@@ -98,7 +98,8 @@ def lesson(lesson_slug):
         documents=lesson.lesson_documents,
         simulations=lesson.simulations,
         categories=lesson.lesson_categories,
-        supported_devices=lesson.supported_devices
+        supported_devices=lesson.supported_devices,
+        foo="<b>this is bold</b><script>alert('foo');</script>",
     )
 
 @public_blueprint.route('/simulations')

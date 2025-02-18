@@ -164,6 +164,9 @@ class Lesson(db.Model):
         secondary=supported_device_lesson,
         back_populates="lessons"
     )
+    def __str__(self):
+        return self.name
+
 
 class LessonVideo(db.Model):
     __tablename__ = 'lesson_video'
