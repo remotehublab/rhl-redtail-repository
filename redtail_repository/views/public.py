@@ -5,7 +5,7 @@ from flask_babel import gettext
 from redtail_repository import db
 from redtail_repository.models import (
     Lesson, LessonCategory, Simulation, Device, User, Author, SupportedDevice,
-    DeviceCategory,
+    DeviceCategory, DeviceSubcategory, LessonLevel
 )
 from redtail_repository.views.registration import RegistrationForm
 
@@ -39,9 +39,11 @@ def authors():
 def lessons():
     all_categories = LessonCategory.query.all()
     all_supported_devices = SupportedDevice.query.all()
+    all_levels = LessonLevel.query.all()
 
     category_slug = request.args.get('category')
     supported_device_id = request.args.get('supported_device')
+    level_slug = request.args.get('level')
 
     lessons_query = Lesson.query.filter_by(active=True).options(
         joinedload(Lesson.authors),
@@ -50,7 +52,8 @@ def lessons():
         joinedload(Lesson.videos),
         joinedload(Lesson.images),
         joinedload(Lesson.lesson_documents),
-        joinedload(Lesson.simulations)
+        joinedload(Lesson.simulations),
+        joinedload(Lesson.levels)
     )
 
     if category_slug:
@@ -60,6 +63,11 @@ def lessons():
 
     if supported_device_id:
         lessons_query = lessons_query.join(Lesson.supported_devices).filter(SupportedDevice.id == supported_device_id)
+    
+    if level_slug:
+        level = LessonLevel.query.filter_by(slug=level_slug).first()
+        if level:
+            lessons_query = lessons_query.filter(Lesson.levels.contains(level))
 
     lessons = lessons_query.all()
 
@@ -68,8 +76,10 @@ def lessons():
         lessons=lessons,
         all_categories=all_categories,
         all_supported_devices=all_supported_devices,
+        all_levels=all_levels,
         selected_category=category_slug,
-        selected_supported_device=supported_device_id
+        selected_supported_device=supported_device_id,
+        selected_level=level_slug
     )
 
 
@@ -82,7 +92,8 @@ def lesson(lesson_slug):
         joinedload(Lesson.lesson_documents),
         joinedload(Lesson.simulations),
         joinedload(Lesson.lesson_categories),
-        joinedload(Lesson.supported_devices)
+        joinedload(Lesson.supported_devices),
+        joinedload(Lesson.levels)
     ).first()
 
     if not lesson:
@@ -99,6 +110,7 @@ def lesson(lesson_slug):
         simulations=lesson.simulations,
         categories=lesson.lesson_categories,
         supported_devices=lesson.supported_devices,
+        levels=lesson.levels,
         foo="<b>this is bold</b><script>alert('foo');</script>",
     )
 
@@ -152,6 +164,11 @@ def simulation(simulation_slug):
 @public_blueprint.route('/devices')
 def devices():
     all_device_categories = db.session.query(DeviceCategory).all()
+    all_subcategories = db.session.query(DeviceSubcategory).all()
+
+    category_slug = request.args.get('category')
+    subcategory_slug = request.args.get('subcategory')
+
     devices_query = db.session.query(Device).options(
         joinedload(Device.device_categories),
         joinedload(Device.device_documents),
@@ -159,12 +176,25 @@ def devices():
         joinedload(Device.simulations)
     )
 
+    if category_slug:
+        category = DeviceCategory.query.filter_by(slug=category_slug).first()
+        if category:
+            devices_query = devices_query.filter(Device.device_categories.contains(category))
+
+    if subcategory_slug:
+        subcat = DeviceSubcategory.query.filter_by(slug=subcategory_slug).first()
+        if subcat:
+            devices_query = devices_query.filter(Device.device_subcategories.contains(subcat))
+
     devices = devices_query.all()
 
     return render_template(
         'public/devices.html',
         devices=devices,
-        all_device_categories=all_device_categories
+        all_device_categories=all_device_categories,
+        all_subcategories=all_subcategories,
+        selected_category=category_slug,
+        selected_subcategory=subcategory_slug
     )
 
 @public_blueprint.route('/devices/<device_slug>')
@@ -173,7 +203,8 @@ def device(device_slug):
         joinedload(Device.device_documents),
         joinedload(Device.lessons),
         joinedload(Device.simulations),
-        joinedload(Device.device_categories)
+        joinedload(Device.device_categories),
+        joinedload(Device.device_subcategories)
     ).first()
 
     if not device:
@@ -185,7 +216,8 @@ def device(device_slug):
         documents=device.device_documents,
         lessons=device.lessons,
         simulations=device.simulations,
-        categories=device.device_categories
+        categories=device.device_categories,
+        subcategories=device.device_subcategories
     )
 
 # Remove from public once done testing

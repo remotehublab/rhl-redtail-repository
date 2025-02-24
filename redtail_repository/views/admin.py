@@ -8,12 +8,15 @@ from wtforms.validators import DataRequired
 
 from ..models import (
     Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
-    Simulation, Device, LessonCategory, SupportedDevice, 
+    Simulation, Device, LessonCategory, SupportedDevice, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
+    DeviceSubcategory,
     device_simulation_association, lesson_device_association,
     supported_device_lesson, supported_device_simulation,
     author_lesson_association, lesson_simulation_association, 
-    device_category_association, simulation_category_association, db
+    device_category_association, simulation_category_association, 
+    device_subcategory_association, lesson_level_association, 
+    lesson_device_subcategory_association, db
 )
 
 class AuthedModelMixIn:
@@ -75,15 +78,17 @@ class DeviceDocForm(InlineFormAdmin):
 class LessonModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'short_description', 'active',
-        'cover_image_url', 'long_description', 'learning_goals', 'level',
+        'cover_image_url', 'long_description', 'learning_goals', 'levels',
         'last_updated',
         'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
+        'device_subcategories',
         'videos', 'images', 'lesson_documents'
     ]
     form_columns = [
         'id', 'name', 'slug', 'short_description', 'active',
-        'cover_image_url', 'long_description', 'learning_goals', 'level',
+        'cover_image_url', 'long_description', 'learning_goals', 'levels',
         'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
+        'device_subcategories',
         'videos', 'images', 'lesson_documents'
     ]
 
@@ -140,6 +145,13 @@ class LessonDocsModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(LessonDoc, db.session, *args, **kwargs)
 
+class LessonLevelModelView(AuthedModelMixIn, ModelView):
+    column_list = ['id', 'name', 'slug', 'last_updated', 'lessons']
+    form_columns = ['name', 'slug', 'lessons']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(LessonLevel, db.session, *args, **kwargs)
+
 class SimulationModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'description',
@@ -192,11 +204,13 @@ class DeviceModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'slug', 'name', 'description',
         'cover_image_url', 'last_updated',
-        'lessons', 'simulations', 'device_categories', 'device_documents'
+        'lessons', 'simulations', 'device_categories', 'device_subcategories',
+        'device_documents'
     ]
     form_columns = [
         'id', 'slug', 'name', 'description',
-        'cover_image_url', 'lessons', 'simulations', 'device_categories', 'device_documents'
+        'cover_image_url', 'lessons', 'simulations', 'device_categories', 'device_subcategories',
+        'device_documents'
     ]
 
     inline_models = [
@@ -264,6 +278,13 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
+class DeviceSubcategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = ['id', 'name', 'slug', 'last_updated', 'devices']
+    form_columns = ['name', 'slug', 'devices']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(DeviceSubcategory, db.session, *args, **kwargs)
+
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(UserModelView(name="User", category="User"))
@@ -283,3 +304,4 @@ admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Devic
 
 admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))
+admin.add_view(LessonLevelModelView(name="Lesson Level", category="Category"))
