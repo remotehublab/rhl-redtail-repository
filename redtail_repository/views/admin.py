@@ -84,6 +84,10 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         'device_subcategories',
         'videos', 'images', 'lesson_documents'
     ]
+
+    column_searchable_list = ['name', 'slug', 'short_description', 'long_description', 'learning_goals', 'authors.name']
+    column_filters = ['name', 'slug', 'short_description', 'long_description', 'learning_goals', 'active', 'levels', 'last_updated']
+
     form_columns = [
         'id', 'name', 'slug', 'short_description', 'active',
         'cover_image_url', 'long_description', 'learning_goals', 'levels',

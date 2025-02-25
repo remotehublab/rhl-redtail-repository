@@ -47,6 +47,9 @@
     <h1 class="text-center">
       {{ gettext("Lesson: %(lesson_name)s", lesson_name=lesson.name) }}
     </h1>
+    <div class="text-center">
+      <p class="text-lead">{{ lesson.short_description }}</p>
+    </div>
     <!-- Carousel Section -->
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
@@ -75,17 +78,20 @@
     </div>
 
     <!-- Description Section -->
+    {% if lesson.long_description %}
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light" style="height: 200px;">
           <div class="card-header">{{gettext("Description")}}</div>
           <div class="card-body">
             <!-- Ask Pablo about db call to short_description -->
-            <p class="card-text">{{gettext("Description")}}</p>
+            <p class="card-text">{{ lesson.long_description|safe }}</p>
           </div>
         </div>
       </div>
     </div>
+    {% endif %}
+
     <!-- Downloads -->
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
