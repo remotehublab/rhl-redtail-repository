@@ -34,6 +34,10 @@ def login():
             if next and next.startswith('/'):
                 return redirect(next)
 
+            next_url = request.args.get('url')
+            if next_url and next_url.startswith('/'):
+                return redirect(next_url)
+            
             return redirect(url_for('public.index'))
 
         form.username.errors.append(lazy_gettext('Invalid username or password'))
@@ -46,8 +50,8 @@ def login():
 def logout():
     logout_user()
 
-    next = request.args.get('next')
-    if next and next.startswith('/'):
-        return redirect(next)
+    url = request.args.get('url')
+    if url and url.startswith('/'):
+        return redirect(url)
 
     return redirect(url_for('public.index'))

@@ -45,7 +45,12 @@
         </li>
       </ul>
       <!-- Register Button -->
-      <a class="btn btn-primary" href="/login" role="button">{{gettext("Login/Register")}}</a>
+      {% if current_user.is_authenticated %}
+        <span style="color: white">{{ current_user.login }}</span>
+        <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{gettext("Logout")}}</a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">{{gettext("Login/Register")}}</a>
+      {% endif %}
     </div>
   </div>
 </nav>
