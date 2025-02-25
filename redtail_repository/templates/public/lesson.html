@@ -5,12 +5,12 @@
   <!-- Sidebar Section -->
   <div class="col-md-2 mt-4">
     <!-- Categories Section -->
-    <div class="card mb-4">
+    <div class="card mb-3">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for category in categories %}
-          <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ category.name }}</a></li>
+          <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ gettext(category.name) }}</a></li>
           {% endfor %}
         </ul>
       </div>
@@ -21,14 +21,10 @@
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
-        <!-- Change to gettext once database has been updated-->
         <ul class="list-unstyled">
-          <li>
-            <!-- Use Nested for loops to get the subs -->
-            <!-- {% for category in categories %}
-            <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ category.name }}</a></li>
-            {% endfor %} -->
-          </li>
+          {% for device in supported_devices %}
+          <li>{{ gettext(device.name) }}</li>
+          {% endfor %}
         </ul>
       </div>
     </div>
@@ -37,10 +33,10 @@
     <div class="card mb-4">
       <div class="card-header">Level:</div>
       <div class="card-body">
-        <!-- Change to gettext once database has been updated-->
         <ul class="list-unstyled">
-          <li><a href="#">Advanced</a></li>
-          <li><a href="#">[...]</a></li>
+          {% for level in levels %}
+          <li>{{ gettext(level.name) }}</li>
+          {% endfor %}
         </ul>
       </div>
     </div>
