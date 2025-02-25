@@ -8,7 +8,6 @@
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
-        <!-- Do lessons have categories attached? -->
         <ul class="list-unstyled">
           {% for category in categories %}
           <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ category.name }}</a></li>
@@ -25,11 +24,10 @@
         <!-- Change to gettext once database has been updated-->
         <ul class="list-unstyled">
           <li>
-            <a href="#">DE1-SoC</a>
-            <ul>
-              <li><a href="#">VHDL</a></li>
-              <li><a href="#">SystemVerilog</a></li>
-            </ul>
+            <!-- Use Nested for loops to get the subs -->
+            <!-- {% for category in categories %}
+            <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ category.name }}</a></li>
+            {% endfor %} -->
           </li>
         </ul>
       </div>
@@ -110,7 +108,6 @@
     <div class="card mb-4 h-50">
       <div class="card-header">{{ gettext("Learning Goals") }}</div>
       <div class="card-body">
-        <!-- Is there a db field that has all of the learning goals? -->
         <ul class="list-unstyled">
           <!-- {% for goal in lessons_goals %}
           <li>{{ gettext("category.name") }}</li>

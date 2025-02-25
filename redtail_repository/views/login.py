@@ -35,12 +35,13 @@ def login():
                 return redirect(next)
 
             return redirect(url_for('public.index'))
-        
+
         form.username.errors.append(lazy_gettext('Invalid username or password'))
         form.password.errors.append(lazy_gettext('Invalid username or password'))
 
     return render_template('login/login.html', form=form)
 
+# Check state once logged in and allow for a logout button
 @login_blueprint.route('/logout')
 def logout():
     logout_user()
@@ -48,5 +49,5 @@ def logout():
     next = request.args.get('next')
     if next and next.startswith('/'):
         return redirect(next)
-    
+
     return redirect(url_for('public.index'))

@@ -63,7 +63,7 @@ def lessons():
 
     if supported_device_id:
         lessons_query = lessons_query.join(Lesson.supported_devices).filter(SupportedDevice.id == supported_device_id)
-    
+
     if level_slug:
         level = LessonLevel.query.filter_by(slug=level_slug).first()
         if level:
@@ -221,20 +221,21 @@ def device(device_slug):
     )
 
 # Remove from public once done testing
-@public_blueprint.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
+# Move to login section later on
+# @public_blueprint.route('/register', methods=['GET', 'POST'])
+# def register():
+#     form = RegistrationForm()
 
-    if form.validate_on_submit():
-        new_user = User(
-            login=form.login.data,
-            name=form.name.data
-        )
-        new_user.set_password(form.password.data)
+#     if form.validate_on_submit():
+#         new_user = User(
+#             login=form.login.data,
+#             name=form.name.data
+#         )
+#         new_user.set_password(form.password.data)
 
-        db.session.add(new_user)
-        db.session.commit()
+#         db.session.add(new_user)
+#         db.session.commit()
 
-        return redirect(url_for('public.index'))
+#         return redirect(url_for('public.index'))
 
-    return render_template('public/register.html', form=form)
+#     return render_template('public/register.html', form=form)
