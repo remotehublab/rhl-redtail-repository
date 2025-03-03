@@ -10,13 +10,13 @@ from ..models import (
     Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
     Simulation, Device, LessonCategory, SupportedDevice, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
-    DeviceSubcategory,
+    DeviceFramework,
     device_simulation_association, lesson_device_association,
     supported_device_lesson, supported_device_simulation,
     author_lesson_association, lesson_simulation_association, 
     device_category_association, simulation_category_association, 
-    device_subcategory_association, lesson_level_association, 
-    lesson_device_subcategory_association, db
+    device_framework_association, lesson_level_association, 
+    lesson_device_framework_association, db
 )
 
 class AuthedModelMixIn:
@@ -81,7 +81,7 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
         'last_updated',
         'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
-        'device_subcategories',
+        'device_frameworks',
         'videos', 'images', 'lesson_documents'
     ]
 
@@ -92,7 +92,7 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         'id', 'name', 'slug', 'short_description', 'active',
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
         'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
-        'device_subcategories',
+        'device_frameworks',
         'videos', 'images', 'lesson_documents'
     ]
 
@@ -208,12 +208,12 @@ class DeviceModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'slug', 'name', 'description',
         'cover_image_url', 'last_updated',
-        'lessons', 'simulations', 'device_categories', 'device_subcategories',
+        'lessons', 'simulations', 'device_categories', 'device_frameworks',
         'device_documents'
     ]
     form_columns = [
         'id', 'slug', 'name', 'description',
-        'cover_image_url', 'lessons', 'simulations', 'device_categories', 'device_subcategories',
+        'cover_image_url', 'lessons', 'simulations', 'device_categories', 'device_frameworks',
         'device_documents'
     ]
 
@@ -282,12 +282,12 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
-class DeviceSubcategoryModelView(AuthedModelMixIn, ModelView):
+class DeviceFrameworkModelView(AuthedModelMixIn, ModelView):
     column_list = ['id', 'name', 'slug', 'last_updated', 'devices']
     form_columns = ['name', 'slug', 'devices']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(DeviceSubcategory, db.session, *args, **kwargs)
+        super().__init__(DeviceFramework, db.session, *args, **kwargs)
 
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))

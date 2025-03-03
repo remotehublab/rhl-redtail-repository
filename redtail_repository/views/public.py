@@ -5,7 +5,7 @@ from flask_babel import gettext
 from redtail_repository import db
 from redtail_repository.models import (
     Lesson, LessonCategory, Simulation, Device, User, Author, SupportedDevice,
-    DeviceCategory, DeviceSubcategory, LessonLevel
+    DeviceCategory, DeviceFramework, LessonLevel
 )
 from redtail_repository.views.registration import RegistrationForm
 
@@ -164,7 +164,7 @@ def simulation(simulation_slug):
 @public_blueprint.route('/devices')
 def devices():
     all_device_categories = db.session.query(DeviceCategory).all()
-    all_subcategories = db.session.query(DeviceSubcategory).all()
+    all_subcategories = db.session.query(DeviceFramework).all()
 
     category_slug = request.args.get('category')
     subcategory_slug = request.args.get('subcategory')
@@ -182,9 +182,9 @@ def devices():
             devices_query = devices_query.filter(Device.device_categories.contains(category))
 
     if subcategory_slug:
-        subcat = DeviceSubcategory.query.filter_by(slug=subcategory_slug).first()
+        subcat = DeviceFramework.query.filter_by(slug=subcategory_slug).first()
         if subcat:
-            devices_query = devices_query.filter(Device.device_subcategories.contains(subcat))
+            devices_query = devices_query.filter(Device.device_frameworks.contains(subcat))
 
     devices = devices_query.all()
 
@@ -204,7 +204,7 @@ def device(device_slug):
         joinedload(Device.lessons),
         joinedload(Device.simulations),
         joinedload(Device.device_categories),
-        joinedload(Device.device_subcategories)
+        joinedload(Device.device_frameworks)
     ).first()
 
     if not device:
@@ -217,7 +217,7 @@ def device(device_slug):
         lessons=device.lessons,
         simulations=device.simulations,
         categories=device.device_categories,
-        subcategories=device.device_subcategories
+        subcategories=device.device_frameworks
     )
 
 # Remove from public once done testing

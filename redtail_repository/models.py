@@ -81,18 +81,18 @@ simulation_device_category_association = Table(
     db.Column('device_category_id', db.Integer, db.ForeignKey('device_category.id'), primary_key=True)
 )
 
-device_subcategory_association = Table(
-    'device_subcategory_association',
-    db.Model.metadata,
-    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True),
-    db.Column('subcategory_id', db.Integer, db.ForeignKey('device_subcategory.id'), primary_key=True)
-)
-
-lesson_device_subcategory_association = Table(
-    'lesson_device_subcategory_association',
+lesson_device_framework_association = Table(
+    'lesson_device_framework_association',
     db.Model.metadata,
     db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
-    db.Column('subcategory_id', db.Integer, db.ForeignKey('device_subcategory.id'), primary_key=True)
+    db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
+)
+
+device_framework_association = Table(
+    'device_framework_association',
+    db.Model.metadata,
+    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True),
+    db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
 )
 
 lesson_level_association = Table(
@@ -184,8 +184,8 @@ class Lesson(db.Model):
         secondary=supported_device_lesson,
         back_populates="lessons"
     )
-    device_subcategories: Mapped[List['DeviceSubcategory']] = relationship(
-        secondary=lesson_device_subcategory_association,
+    device_frameworks: Mapped[List['DeviceFramework']] = relationship(
+        secondary=lesson_device_framework_association,
         back_populates="lessons"
     )
     levels: Mapped[List['LessonLevel']] = relationship(
@@ -273,8 +273,8 @@ class Device(db.Model):
         secondary=device_category_association,
         back_populates="devices"
     )
-    device_subcategories: Mapped[List['DeviceSubcategory']] = relationship(
-        secondary=device_subcategory_association,
+    device_frameworks: Mapped[List['DeviceFramework']] = relationship(
+        secondary=device_framework_association,
         back_populates="devices"
     )
 
@@ -300,10 +300,10 @@ class LessonLevel(db.Model):
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(db.String(255), unique=True, nullable=False)
-
+    
     last_updated: Mapped[datetime] = mapped_column(
-        db.DateTime,
-        server_default=func.now(),
+        db.DateTime, 
+        server_default=func.now(), 
         onupdate=func.now()
     )
 
@@ -421,8 +421,8 @@ class DeviceCategory(db.Model):
     def __str__(self):
         return self.name
     
-class DeviceSubcategory(db.Model):
-    __tablename__ = 'device_subcategory'
+class DeviceFramework(db.Model):
+    __tablename__ = 'device_framework'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
@@ -434,12 +434,12 @@ class DeviceSubcategory(db.Model):
     )
 
     devices: Mapped[List['Device']] = relationship(
-        secondary=device_subcategory_association,
-        back_populates="device_subcategories"
+        secondary=device_framework_association,
+        back_populates="device_frameworks"
     )
     lessons: Mapped[List['Lesson']] = relationship(
-        secondary=lesson_device_subcategory_association,
-        back_populates="device_subcategories"
+        secondary=lesson_device_framework_association,
+        back_populates="device_frameworks"
     )
 
     def __str__(self):
