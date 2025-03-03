@@ -164,7 +164,7 @@ def simulation(simulation_slug):
 @public_blueprint.route('/devices')
 def devices():
     all_device_categories = db.session.query(DeviceCategory).all()
-    all_subcategories = db.session.query(DeviceFramework).all()
+    all_frameworks = db.session.query(DeviceFramework).all()
 
     category_slug = request.args.get('category')
     subcategory_slug = request.args.get('subcategory')
@@ -192,7 +192,7 @@ def devices():
         'public/devices.html',
         devices=devices,
         all_device_categories=all_device_categories,
-        all_subcategories=all_subcategories,
+        all_frameworks=all_frameworks,
         selected_category=category_slug,
         selected_subcategory=subcategory_slug
     )
@@ -217,7 +217,7 @@ def device(device_slug):
         lessons=device.lessons,
         simulations=device.simulations,
         categories=device.device_categories,
-        subcategories=device.device_frameworks
+        frameworks=device.device_frameworks
     )
 
 # Remove from public once done testing
