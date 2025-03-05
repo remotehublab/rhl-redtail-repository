@@ -4,7 +4,7 @@ from flask_babel import gettext
 
 from redtail_repository import db
 from redtail_repository.models import (
-    Lesson, LessonCategory, Simulation, Device, User, Author, SupportedDevice,
+    Lesson, LessonCategory, Simulation, Device, SimulationCategory, User, Author, SupportedDevice,
     DeviceCategory, DeviceFramework, LessonLevel
 )
 from redtail_repository.views.registration import RegistrationForm
@@ -117,17 +117,26 @@ def lesson(lesson_slug):
 @public_blueprint.route('/simulations')
 def simulations():
     all_supported_devices = SupportedDevice.query.all()
-    supported_device_id = request.args.get('supported_device')
+    all_categories = SimulationCategory.query.all()
+
+    supported_device_id = request.args.get('supported_device', type=int)
+    category_slug = request.args.get('category')
 
     simulations_query = db.session.query(Simulation).options(
         joinedload(Simulation.supported_devices),
         joinedload(Simulation.simulation_categories),
-        joinedload(Simulation.simulation_device_categories),
         joinedload(Simulation.simulation_documents)
     )
 
+    # Filter by selected device
     if supported_device_id:
         simulations_query = simulations_query.join(Simulation.supported_devices).filter(SupportedDevice.id == supported_device_id)
+
+    # Filter by selected category
+    if category_slug:
+        category = SimulationCategory.query.filter_by(slug=category_slug).first()
+        if category:
+            simulations_query = simulations_query.join(Simulation.simulation_categories).filter(SimulationCategory.id == category.id)
 
     simulations = simulations_query.all()
 
@@ -135,8 +144,11 @@ def simulations():
         'public/simulations.html',
         simulations=simulations,
         all_supported_devices=all_supported_devices,
-        selected_supported_device=supported_device_id
+        all_categories=all_categories,
+        selected_supported_device=supported_device_id,
+        selected_category=category_slug
     )
+
 
 @public_blueprint.route('/simulations/<simulation_slug>')
 def simulation(simulation_slug):
@@ -238,4 +250,4 @@ def register():
 
         return redirect(url_for('public.index'))
 
-    return render_template('public/register.html', form=form)
+    return render_template('login/register.html', form=form)

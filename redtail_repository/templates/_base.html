@@ -53,7 +53,7 @@
       {% if current_user.is_authenticated %}
       <div class="d-flex align-items-center">
         <span class="me-2 text-white">Welcome,</span>
-        <input type="text" class="form-control me-2" value="{{ current_user.login | e }}" readonly
+        <input type="text" class="form-control me-2" value="{{ current_user.name | e }}" readonly
           style="width: auto; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; text-align: center; padding: 3px 8px;">
         <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{
           gettext("Logout") }}</a>
