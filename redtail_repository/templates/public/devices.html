@@ -3,22 +3,31 @@
 {% block container %}
 <div class="row">
   <!-- Sidebar Section -->
-  <div class="col-md-3">
+  <div class="col-md-2 mt-4">
     <!-- Categories Section -->
-    <div class="card mb-4">
-      <div class="card-header">Categories:</div>
+    <div class="card mb-3">
+      <div class="card-header">{{ gettext("Categories") }}</div>
       <div class="card-body">
-        <!-- Clean Up with forloop after finalizing category -->
         <ul class="list-unstyled">
-          <li><a href="#">Microcontroller</a></li>
-          <li><a href="#">ARM</a></li>
-          <li><a href="#">RISC-V</a></li>
-          <li><a href="#">FPGA</a></li>
-          <li><a href="#">PLC</a></li>
-          <li><a href="#">[...]</a></li>
+          {% for category in all_categories %}
+          <li>
+            <a href="{{ url_for('.lessons', category=category.slug) }}"
+              class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
+              {{ category.name }}
+            </a>
+          </li>
+          {% endfor %}
         </ul>
       </div>
     </div>
+
+    {% if selected_category or selected_supported_device or selected_level %}
+    <div class="mb-3">
+      <a href="{{ url_for('.lessons') }}" class="btn btn-outline-secondary btn-sm">
+        {{ gettext("Clear Filters") }}
+      </a>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Main Content Section -->
@@ -53,5 +62,6 @@
       {% endfor %}
     </div>
   </div>
+
 </div>
 {% endblock %}
