@@ -49,7 +49,7 @@
             href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
         </li>
       </ul>
-      <!-- Register Button -->
+      <!-- Login/Register Button -->
       {% if current_user.is_authenticated %}
       <div class="d-flex align-items-center">
         <span class="me-2 text-white">Welcome,</span>
@@ -59,8 +59,13 @@
           gettext("Logout") }}</a>
       </div>
       {% else %}
-      <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">{{
-        gettext("Login/Register") }}</a>
+      <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">
+        {{ gettext("Login") }}
+      </a>
+      <a class="btn btn-secondary ms-2" href="{{ url_for('public.register', url=request.full_path) }}" role="button">
+        {{ gettext("Register") }}
+      </a>
+
       {% endif %}
 
     </div>

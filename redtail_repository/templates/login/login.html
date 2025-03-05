@@ -1,36 +1,37 @@
 {% extends "public/_base.html" %}
 
 {% block body %}
-    <div class="container">
-        <h1>{{ gettext("Log in") }}</h1>
+<div class="container">
+  <h1>{{ gettext("Log in") }}</h1>
 
-        <form method="POST" action="{{ request.full_path }}">
-            {{ form.hidden_tag() }}
-            <div class="row mb-3">
-                {{ form.username.label(class_="col-sm-2 col-form-label") }}
-                <div class="col-sm-10">
-                    {{ form.username(class_="form-control", autofocus='autofocus') }}
-                    {% if form.username.errors %}
-                        {% for error in form.username.errors %}
-                            <p class="text-danger">{{ error }}</p>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-            <div class="row mb-3">
-                {{ form.password.label(class_="col-sm-2 col-form-label") }}
-                <div class="col-sm-10">
-                    {{ form.password(class_="form-control") }}
-                </div>
-            </div>
-            <div class="row mb-3">
-                {{ form.remember_me.label(class_="col-sm-2 col-form-label") }}
-                <div class="col-sm-10">
-                    {{ form.remember_me() }}
-                </div>
-            </div>
+  <form method="POST" action="{{ request.full_path }}">
+      {{ form.hidden_tag() }}
+      <div class="row mb-3">
+          {{ form.username.label(class_="col-sm-2 col-form-label") }}
+          <div class="col-sm-10">
+              {{ form.username(class_="form-control", autofocus='autofocus') }}
+              {% if form.username.errors %}
+                  {% for error in form.username.errors %}
+                      <p class="text-danger">{{ error }}</p>
+                  {% endfor %}
+              {% endif %}
+          </div>
+      </div>
+      <div class="row mb-3">
+          {{ form.password.label(class_="col-sm-2 col-form-label") }}
+          <div class="col-sm-10">
+              {{ form.password(class_="form-control") }}
+          </div>
+      </div>
+      <div class="row mb-3">
+          {{ form.remember_me.label(class_="col-sm-2 col-form-label") }}
+          <div class="col-sm-10">
+              {{ form.remember_me() }}
+          </div>
+      </div>
 
-            <button type="submit" class="btn btn-primary">{{ gettext("Log in") }}</button>
-        </form>
-    </div>
+      <button type="submit" class="btn btn-primary">{{ gettext("Log in") }}</button>
+  </form>
+</div>
+
 {% endblock %}

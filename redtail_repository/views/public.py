@@ -222,20 +222,20 @@ def device(device_slug):
 
 # Remove from public once done testing
 # Move to login section later on
-# @public_blueprint.route('/register', methods=['GET', 'POST'])
-# def register():
-#     form = RegistrationForm()
+@public_blueprint.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
 
-#     if form.validate_on_submit():
-#         new_user = User(
-#             login=form.login.data,
-#             name=form.name.data
-#         )
-#         new_user.set_password(form.password.data)
+    if form.validate_on_submit():
+        new_user = User(
+            login=form.login.data,
+            name=form.name.data
+        )
+        new_user.set_password(form.password.data)
 
-#         db.session.add(new_user)
-#         db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-#         return redirect(url_for('public.index'))
+        return redirect(url_for('public.index'))
 
-#     return render_template('public/register.html', form=form)
+    return render_template('public/register.html', form=form)
