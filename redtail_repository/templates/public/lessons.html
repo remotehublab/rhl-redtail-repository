@@ -6,11 +6,16 @@
   <div class="col-md-2 mt-4">
     <!-- Categories Section -->
     <div class="card mb-3">
-      <div class="card-header">{{ gettext("Categories:") }}</div>
+      <div class="card-header">{{ gettext("Categories") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for category in all_categories %}
-          <li><a href="{{ url_for('.lessons', category=category.slug) }}">{{ category.name }}</a></li>
+          <li>
+            <a href="{{ url_for('.lessons', category=category.slug) }}"
+              class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
+              {{ category.name }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </div>
@@ -18,46 +23,89 @@
 
     <!-- Devices Section -->
     <div class="card mb-4">
-      <div class="card-header">Devices:</div>
+      <div class="card-header">{{ gettext("Devices")}}</div>
       <div class="card-body">
-        <!-- Ask pablo for help on implementing devices -->
         <ul class="list-unstyled">
+          {% for supported_device in all_supported_devices %}
           <li>
-            <a href="#">DE1-SoC</a>
-            <ul>
-              <li><a href="#">VHDL</a></li>
-              <li><a href="#">SystemVerilog</a></li>
-            </ul>
+            <a href="{{ url_for('.lessons', supported_device=supported_device.id) }}"
+              class="{{ 'active text-primary' if selected_supported_device == supported_device.id|string else '' }}">
+              {{ supported_device.name }}
+            </a>
           </li>
-          <li>
-            <a href="#">STM32</a>
-            <ul>
-              <li><a href="#">mbedOS</a></li>
-              <li><a href="#">STM32Cube</a></li>
-            </ul>
-          </li>
-          <li><a href="#">[...]</a></li>
+          {% endfor %}
         </ul>
       </div>
     </div>
 
     <!-- Level Section -->
     <div class="card mb-4">
-      <div class="card-header">Level:</div>
+      <div class="card-header">{{ gettext("Levels") }}</div>
       <div class="card-body">
-        <!-- Clean Up with forloop after finalizing level -->
         <ul class="list-unstyled">
-          <li><a href="#">Advanced</a></li>
-          <li><a href="#">[...]</a></li>
+          {% for level in all_levels %}
+          <li>
+            <a href="{{ url_for('.lessons', level=level.slug) }}"
+              class="{{ 'active text-primary' if selected_level == level.slug else '' }}">
+              {{ level.name }}
+            </a>
+          </li>
+          {% endfor %}
         </ul>
       </div>
     </div>
+
+    {% if selected_category or selected_supported_device or selected_level %}
+    <div class="mb-3">
+      <a href="{{ url_for('.lessons') }}" class="btn btn-outline-secondary btn-sm">
+        {{ gettext("Clear Filters") }}
+      </a>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Main Content Section -->
   <div class="col-md-9">
     <h1 class="text-center">{{ gettext("Lessons") }}</h1>
-    <!-- Temp Data for Testing -->
+
+    {# Current Filter Selections Section #}
+    {% if selected_category or selected_supported_device or selected_level %}
+    <div class="row mb-3">
+      <div class="col text-center">
+        <div class="d-inline-block">
+          {% if selected_category %}
+          <span class="badge bg-secondary me-2">
+            {{ gettext("Category") }}:
+            {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
+            {{ selected_cat.name }}
+            <a href="{{ url_for('.lessons') }}" class="text-white ms-1">&times;</a>
+          </span>
+          {% endif %}
+
+          {% if selected_supported_device %}
+          <span class="badge bg-secondary me-2">
+            {{ gettext("Device") }}:
+            {% set selected_dev = all_supported_devices|selectattr('id', 'equalto', selected_supported_device|int)|first
+            %}
+            {{ selected_dev.name }}
+            <a href="{{ url_for('.lessons') }}" class="text-white ms-1">&times;</a>
+          </span>
+          {% endif %}
+
+          {% if selected_level %}
+          <span class="badge bg-secondary me-2">
+            {{ gettext("Level") }}:
+            {% set selected_lvl = all_levels|selectattr('slug', 'equalto', selected_level)|first %}
+            {{ selected_lvl.name }}
+            <a href="{{ url_for('.lessons') }}" class="text-white ms-1">&times;</a>
+          </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if lessons %}
     <div class="row row-cols-1 row-cols-md-3 g-2">
       {% for lesson in lessons %}
       <div class="col">
@@ -78,6 +126,11 @@
       </div>
       {% endfor %}
     </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+      {{ gettext("No lessons found matching your current filters.") }}
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

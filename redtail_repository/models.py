@@ -300,10 +300,10 @@ class LessonLevel(db.Model):
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(db.String(255), unique=True, nullable=False)
-    
+
     last_updated: Mapped[datetime] = mapped_column(
-        db.DateTime, 
-        server_default=func.now(), 
+        db.DateTime,
+        server_default=func.now(),
         onupdate=func.now()
     )
 
