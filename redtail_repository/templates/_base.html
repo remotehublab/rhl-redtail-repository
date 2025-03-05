@@ -1,23 +1,24 @@
 <!doctype html>
 <html lang="{{ language }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
-    {% assets 'bootstrap_css' %}
-        <link href="{{ ASSET_URL }}" rel="stylesheet">
-    {% endassets %}
-    {% assets 'fontawesome_css' %}
-        <link href="{{ ASSET_URL }}" rel="stylesheet">
-    {% endassets %}
 
-    {% block head %}{% endblock %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  {% assets 'bootstrap_css' %}
+  <link href="{{ ASSET_URL }}" rel="stylesheet">
+  {% endassets %}
+  {% assets 'fontawesome_css' %}
+  <link href="{{ ASSET_URL }}" rel="stylesheet">
+  {% endassets %}
+
+  {% block head %}{% endblock %}
 </head>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/" style="color:#FF2400">
-      <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo"
-      width="30" height="24" class="d-inline-block align-text-top"> RedTail
+      <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo" width="30"
+        height="24" class="d-inline-block align-text-top"> RedTail
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,51 +28,63 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <!-- Home Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page" href="/">{{ gettext("Home") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page"
+            href="/">{{ gettext("Home") }}</a>
         </li>
         <!-- Lessons Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.lessons' %}active{% endif %}" href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.lessons' %}active{% endif %}"
+            href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
         </li>
         </li>
         <!-- Simulations Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.simulations' %}active{% endif %}" href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.simulations' %}active{% endif %}"
+            href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
         </li>
         </li>
         <!-- Devices Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}" href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
+          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}"
+            href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
         </li>
       </ul>
       <!-- Register Button -->
       {% if current_user.is_authenticated %}
-        <span style="color: white">{{ current_user.login }}</span>
-        <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{gettext("Logout")}}</a>
+      <div class="d-flex align-items-center">
+        <span class="me-2 text-white">Welcome,</span>
+        <input type="text" class="form-control me-2" value="{{ current_user.login | e }}" readonly
+          style="width: auto; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; text-align: center; padding: 3px 8px;">
+        <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{
+          gettext("Logout") }}</a>
+      </div>
       {% else %}
-        <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">{{gettext("Login/Register")}}</a>
+      <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">{{
+        gettext("Login/Register") }}</a>
       {% endif %}
+
     </div>
   </div>
 </nav>
 
 
 <body>
-    {% block body %}
-    {% endblock %}
+  {% block body %}
+  {% endblock %}
 
-    {% assets 'bootstrap_js' %}
-        <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+  {% assets 'bootstrap_js' %}
+  <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 
-    {% assets 'fontawesome_js' %}
-        <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+  {% assets 'fontawesome_js' %}
+  <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 
-    {% assets 'vendor_js' %}
-        <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+  {% assets 'vendor_js' %}
+  <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 
-    {% block tail %}{% endblock %}
+  {% block tail %}{% endblock %}
 </body>
+
 </html>
