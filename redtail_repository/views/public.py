@@ -40,10 +40,12 @@ def lessons():
     all_categories = LessonCategory.query.all()
     all_supported_devices = SupportedDevice.query.all()
     all_levels = LessonLevel.query.all()
+    all_frameworks = DeviceFramework.query.all()
 
     category_slug = request.args.get('category')
     supported_device_id = request.args.get('supported_device')
     level_slug = request.args.get('level')
+    framework_slug = request.args.get('framework')
 
     lessons_query = Lesson.query.filter_by(active=True).options(
         joinedload(Lesson.authors),
@@ -68,6 +70,11 @@ def lessons():
         level = LessonLevel.query.filter_by(slug=level_slug).first()
         if level:
             lessons_query = lessons_query.filter(Lesson.levels.contains(level))
+    
+    if framework_slug:
+        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
+        if framework:
+            lessons_query = lessons_query.join(Lesson.device_frameworks).filter(DeviceFramework.id == framework.id)
 
     lessons = lessons_query.all()
 
@@ -77,9 +84,11 @@ def lessons():
         all_categories=all_categories,
         all_supported_devices=all_supported_devices,
         all_levels=all_levels,
+        all_frameworks=all_frameworks,
         selected_category=category_slug,
         selected_supported_device=supported_device_id,
-        selected_level=level_slug
+        selected_level=level_slug,
+        selected_framework=framework_slug
     )
 
 
@@ -93,6 +102,7 @@ def lesson(lesson_slug):
         joinedload(Lesson.simulations),
         joinedload(Lesson.lesson_categories),
         joinedload(Lesson.supported_devices),
+        joinedload(Lesson.learning_goals),
         joinedload(Lesson.levels)
     ).first()
 
@@ -110,6 +120,7 @@ def lesson(lesson_slug):
         simulations=lesson.simulations,
         categories=lesson.lesson_categories,
         supported_devices=lesson.supported_devices,
+        learning_goals=lesson.learning_goals,
         levels=lesson.levels,
         foo="<b>this is bold</b><script>alert('foo');</script>",
     )
@@ -179,7 +190,7 @@ def devices():
     all_frameworks = db.session.query(DeviceFramework).all()
 
     category_slug = request.args.get('category')
-    subcategory_slug = request.args.get('subcategory')
+    framework_slug = request.args.get('framework')
 
     devices_query = db.session.query(Device).options(
         joinedload(Device.device_categories),
@@ -193,10 +204,10 @@ def devices():
         if category:
             devices_query = devices_query.filter(Device.device_categories.contains(category))
 
-    if subcategory_slug:
-        subcat = DeviceFramework.query.filter_by(slug=subcategory_slug).first()
-        if subcat:
-            devices_query = devices_query.filter(Device.device_frameworks.contains(subcat))
+    if framework_slug:
+        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
+        if framework:
+            devices_query = devices_query.join(Device.device_frameworks).filter(DeviceFramework.id == framework.id)
 
     devices = devices_query.all()
 
@@ -206,7 +217,7 @@ def devices():
         all_device_categories=all_device_categories,
         all_frameworks=all_frameworks,
         selected_category=category_slug,
-        selected_subcategory=subcategory_slug
+        selected_framework=framework_slug
     )
 
 @public_blueprint.route('/devices/<device_slug>')
