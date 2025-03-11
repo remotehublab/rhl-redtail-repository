@@ -129,25 +129,31 @@ def lesson(lesson_slug):
 def simulations():
     all_supported_devices = SupportedDevice.query.all()
     all_categories = SimulationCategory.query.all()
+    all_frameworks = DeviceFramework.query.all()
 
     supported_device_id = request.args.get('supported_device', type=int)
     category_slug = request.args.get('category')
+    framework_slug = request.args.get('framework')
 
     simulations_query = db.session.query(Simulation).options(
         joinedload(Simulation.supported_devices),
         joinedload(Simulation.simulation_categories),
-        joinedload(Simulation.simulation_documents)
+        joinedload(Simulation.simulation_documents),
+        joinedload(Simulation.device_frameworks)
     )
 
-    # Filter by selected device
     if supported_device_id:
         simulations_query = simulations_query.join(Simulation.supported_devices).filter(SupportedDevice.id == supported_device_id)
 
-    # Filter by selected category
     if category_slug:
         category = SimulationCategory.query.filter_by(slug=category_slug).first()
         if category:
             simulations_query = simulations_query.join(Simulation.simulation_categories).filter(SimulationCategory.id == category.id)
+    
+    if framework_slug:
+        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
+        if framework:
+            simulations_query = simulations_query.join(Simulation.device_frameworks).filter(DeviceFramework.id == framework.id)
 
     simulations = simulations_query.all()
 
@@ -156,8 +162,10 @@ def simulations():
         simulations=simulations,
         all_supported_devices=all_supported_devices,
         all_categories=all_categories,
+        all_frameworks=all_frameworks,
         selected_supported_device=supported_device_id,
-        selected_category=category_slug
+        selected_category=category_slug,
+        selected_framework=framework_slug
     )
 
 

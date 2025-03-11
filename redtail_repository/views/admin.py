@@ -16,7 +16,8 @@ from ..models import (
     author_lesson_association, lesson_simulation_association, 
     device_category_association, simulation_category_association, 
     device_framework_association, lesson_level_association, 
-    lesson_device_framework_association, db
+    lesson_device_framework_association, simulation_framework_association,
+    db
 )
 
 class AuthedModelMixIn:
@@ -162,14 +163,16 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
         'cover_image_url', 'last_updated',
         'lessons', 'devices', 'supported_devices',
         'simulation_categories', 'simulation_device_categories',
-        'simulation_documents'
+        'device_frameworks',
+        'simulation_documents', 
     ]
     form_columns = [
         'id', 'name', 'slug', 'description',
         'cover_image_url',
         'lessons', 'devices', 'supported_devices',
         'simulation_categories', 'simulation_device_categories',
-        'simulation_documents'
+        'device_frameworks',
+        'simulation_documents', 
     ]
 
     inline_models = [
@@ -283,8 +286,8 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
         super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
 class DeviceFrameworkModelView(AuthedModelMixIn, ModelView):
-    column_list = ['id', 'name', 'slug', 'last_updated', 'devices']
-    form_columns = ['name', 'slug', 'devices']
+    column_list = ['id', 'name', 'slug', 'last_updated', 'devices', 'simulations']
+    form_columns = ['name', 'slug', 'devices', 'simulations']
 
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceFramework, db.session, *args, **kwargs)
@@ -302,9 +305,11 @@ admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
 admin.add_view(SimulationDocModelView(name="Simulation Document", category="Simulation"))
 admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
 
+
 admin.add_view(DeviceModelView(name="Device", category="Device"))
 admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
 admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Device"))
+admin.add_view(DeviceFrameworkModelView(name="Device Framework", category="Device"))
 
 admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))

@@ -95,6 +95,13 @@ device_framework_association = Table(
     db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
 )
 
+simulation_framework_association = Table(
+    'simulation_framework_association',
+    db.Model.metadata,
+    db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True),
+    db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
+)
+
 lesson_level_association = Table(
     'lesson_level_association',
     db.Model.metadata,
@@ -349,6 +356,10 @@ class Simulation(db.Model):
         secondary=simulation_device_category_association,
         back_populates="simulations"
     )
+    device_frameworks: Mapped[List['DeviceFramework']] = relationship(
+        secondary=simulation_framework_association,
+        back_populates="simulations"
+    )
 
 class SimulationDoc(db.Model):
     __tablename__ = 'simulation_doc'
@@ -439,6 +450,10 @@ class DeviceFramework(db.Model):
     )
     lessons: Mapped[List['Lesson']] = relationship(
         secondary=lesson_device_framework_association,
+        back_populates="device_frameworks"
+    )
+    simulations: Mapped[List['Simulation']] = relationship(
+        secondary=simulation_framework_association,
         back_populates="device_frameworks"
     )
 
