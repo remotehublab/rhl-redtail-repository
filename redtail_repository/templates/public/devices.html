@@ -9,7 +9,7 @@
       <div class="card-header">{{ gettext("Categories") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for category in all_categories %}
+          {% for category in all_categories|sort %}
           <li>
             <a href="{{ url_for('.lessons', category=category.slug) }}"
               class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
@@ -34,7 +34,6 @@
   <div class="col-md-9">
     <h1 class="text-center">Devices</h1>
     <!-- Temp Data for Testing -->
-    {% set devices = ["STM32 WB55RG", "FPGA DE1-SoC", "Raspberry Pi Pico", "Circuit X"] %}
     <div class="row row-cols-1 row-cols-md-3 g-2">
       {% for device in devices %}
       <div class="col">
@@ -49,9 +48,15 @@
             <p class="card-text">Placeholder</p>
             <ul class="list-group list-group-flush">
               <!-- Update place holders -->
-              <li class="list-group-item"> Microcontroller</li>
+              <li class="list-group-item">
+                {% for device_category in device.device_categories %}
+                  {{ device_category.name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+              </li>
               <li class="list-group-item">sub category</li>
-              <li class="list-group-item">in x lessons</li>
+              <li class="list-group-item">
+                {{ gettext("Present in %(lesson_number)s lessons", lesson_number=device.lessons|length) }}
+              </li>
             </ul>
           </div>
           <div class="card-footer">

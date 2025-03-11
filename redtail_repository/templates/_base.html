@@ -62,7 +62,7 @@
       <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">
         {{ gettext("Login") }}
       </a>
-      <a class="btn btn-secondary ms-2" href="{{ url_for('public.register', url=request.full_path) }}" role="button">
+      <a class="btn btn-secondary ms-2" href="{{ url_for('login.register', url=request.full_path) }}" role="button">
         {{ gettext("Register") }}
       </a>
 

@@ -3,10 +3,16 @@
 {% block container %}
 <div class="position-absolute top-50 start-50 translate-middle">
   <div class="container-md">
-    <form>
+    <form method="POST" action="{{ request.full_path }}">
+      {{ form.hidden_tag() }}
       <div class="mb-3">
-        <label for="exampleInputEmail1" class="form-label">Email address</label>
-        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+        {{ form.login.label(class_="form-label") }}
+        {{ form.login(class_="form-control", autofocus="autofocus") }}
+        {% if form.login.errors %}
+            {% for error in form.login.errors %}
+                <p class="text-danger">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
       </div>
       <div class="mb-3">
         <label for="exampleInputPassword1" class="form-label">Password</label>

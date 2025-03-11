@@ -99,7 +99,14 @@
           <div class="card-header">{{gettext("Downloads")}}</div>
           <div class="card-body">
             <!-- Ask Pablo about db call to short_description -->
-            <p class="card-text">{{gettext("Downloads")}}</p>
+            <p class="card-text">
+              {{gettext("Downloads")}}
+
+              {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified %}
+                (also solutions)
+              {% endif %}
+
+            </p>
           </div>
         </div>
       </div>
@@ -111,9 +118,7 @@
       <div class="card-header">{{ gettext("Learning Goals") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          <!-- {% for goal in lessons_goals %}
-          <li>{{ gettext("category.name") }}</li>
-          {% endfor %} -->
+          {{ lesson.learning_goals|safe }}
         </ul>
       </div>
     </div>

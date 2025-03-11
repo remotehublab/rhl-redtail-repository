@@ -7,7 +7,6 @@ from redtail_repository.models import (
     Lesson, LessonCategory, Simulation, Device, SimulationCategory, User, Author, SupportedDevice,
     DeviceCategory, DeviceFramework, LessonLevel
 )
-from redtail_repository.views.registration import RegistrationForm
 
 public_blueprint = Blueprint('public', __name__)
 
@@ -102,7 +101,6 @@ def lesson(lesson_slug):
         joinedload(Lesson.simulations),
         joinedload(Lesson.lesson_categories),
         joinedload(Lesson.supported_devices),
-        joinedload(Lesson.learning_goals),
         joinedload(Lesson.levels)
     ).first()
 
@@ -217,7 +215,10 @@ def devices():
         if framework:
             devices_query = devices_query.join(Device.device_frameworks).filter(DeviceFramework.id == framework.id)
 
-    devices = devices_query.all()
+    devices = list(devices_query.all())
+
+    for device in devices:
+        print([ cat.name for cat in device.device_categories ])
 
     return render_template(
         'public/devices.html',
@@ -250,23 +251,3 @@ def device(device_slug):
         categories=device.device_categories,
         frameworks=device.device_frameworks
     )
-
-# Remove from public once done testing
-# Move to login section later on
-@public_blueprint.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
-
-    if form.validate_on_submit():
-        new_user = User(
-            login=form.login.data,
-            name=form.name.data
-        )
-        new_user.set_password(form.password.data)
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        return redirect(url_for('public.index'))
-
-    return render_template('login/register.html', form=form)

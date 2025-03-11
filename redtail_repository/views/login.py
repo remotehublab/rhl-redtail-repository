@@ -1,14 +1,18 @@
 from typing import Optional
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_user, logout_user
+from flask_babel import lazy_gettext
 from flask_wtf import FlaskForm
 
-from wtforms import PasswordField, BooleanField, StringField
+from wtforms import PasswordField, BooleanField, StringField, SubmitField
+from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
 
 from flask_babel import lazy_gettext
 
 from redtail_repository import login_manager, db
 from redtail_repository.models import User
+
+
 
 @login_manager.user_loader
 def user_loader(user_id: str):
@@ -55,3 +59,34 @@ def logout():
         return redirect(url)
 
     return redirect(url_for('public.index'))
+
+class RegistrationForm(FlaskForm):
+    login = StringField(lazy_gettext('Username'), validators=[DataRequired(), Length(min=4, max=25)])
+    name = StringField(lazy_gettext('Full Name'), validators=[DataRequired(), Length(min=3, max=50)])
+    password = PasswordField(lazy_gettext('Password'), validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField(lazy_gettext('Confirm Password'), validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField(lazy_gettext('Register'))
+
+    def validate(self, login):
+        existing_user = User.query.filter_by(login=login.data).first()
+        if existing_user:
+            raise ValidationError(lazy_gettext('Username is already taken.'))
+
+@login_blueprint.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+        new_user = User(
+            login=form.login.data,
+            name=form.name.data,
+            verified=False,
+        )
+        new_user.set_password(form.password.data)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect(url_for('public.index'))
+
+    return render_template('login/register.html', form=form)

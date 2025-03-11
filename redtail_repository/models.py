@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -140,6 +140,11 @@ class User(db.Model, UserMixin):
 
     # Many-to-one relationship
     author: Mapped[Author] = relationship("Author", back_populates="users")
+
+    def __init__(self, login: Optional[str] = None, name: Optional[str] = None, verified: Optional[bool] = None):
+        self.login = login
+        self.name = name
+        self.verified = verified
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
@@ -284,6 +289,9 @@ class Device(db.Model):
         secondary=device_framework_association,
         back_populates="devices"
     )
+
+    def __str__(self):
+        return self.name
 
 class DeviceDoc(db.Model):
     __tablename__ = 'device_doc'
