@@ -9,7 +9,7 @@
       <div class="card-header">{{ gettext("Device Frameworks") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for device_category in all_device_categories %}
+          {% for device_category in all_device_categories|sort(attribute='name') %}
           <li>
             <a href="{{ url_for('.devices', device_category=device_category.id) }}"
               class="{{ 'active text-primary' if selected_device_category == device_category.id|string else '' }}">
@@ -51,7 +51,8 @@
           {% if selected_device_category %}
           <span class="badge bg-secondary me-2">
             {{ gettext("Device Category") }}:
-            {% set selected_dev_cat = all_device_categories|selectattr('id', 'equalto', selected_device_category|int)|first %}
+            {% set selected_dev_cat = all_device_categories|selectattr('id', 'equalto',
+            selected_device_category|int)|first %}
             {{ selected_dev_cat.name }}
             <a href="{{ url_for('.devices') }}" class="text-white ms-1">&times;</a>
           </span>
@@ -77,7 +78,7 @@
             <ul class="list-group list-group-flush">
               <li class="list-group-item">
                 {% for device_category in device.device_categories %}
-                  {{ device_category.name }}{% if not loop.last %}, {% endif %}
+                {{ device_category.name }}{% if not loop.last %}, {% endif %}
                 {% endfor %}
               </li>
               <li class="list-group-item">

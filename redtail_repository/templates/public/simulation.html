@@ -9,7 +9,7 @@
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for category in all_categories %}
+          {% for category in all_categories|sort(attribute='name') %}
           <li><a href="{{ url_for('.simulation', category=category.slug) }}">{{ category.name }}</a></li>
           {% endfor %}
         </ul>
@@ -17,6 +17,7 @@
     </div>
 
     <!-- Devices Section -->
+     <!-- Update at next meeting -->
     <div class="card mb-4">
       <div class="card-header">Devices:</div>
       <div class="card-body">

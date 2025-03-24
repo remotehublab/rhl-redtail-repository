@@ -9,7 +9,7 @@
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for category in categories %}
+          {% for category in categories|sort(attribute='name') %}
           <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ gettext(category.name) }}</a></li>
           {% endfor %}
         </ul>
@@ -22,7 +22,7 @@
       <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for device in supported_devices %}
+          {% for device in supported_devices|sort(attribute='name') %}
           <li>{{ gettext(device.name) }}</li>
           {% endfor %}
         </ul>
@@ -34,7 +34,7 @@
       <div class="card-header">Level:</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for level in levels %}
+          {% for level in levels|sort(attribute='name') %}
           <li>{{ gettext(level.name) }}</li>
           {% endfor %}
         </ul>

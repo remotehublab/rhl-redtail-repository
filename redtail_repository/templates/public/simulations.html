@@ -9,7 +9,7 @@
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for category in all_categories %}
+          {% for category in all_categories|sort(attribute='name') %}
           <li>
             <a href="{{ url_for('.simulations', category=category.slug) }}"
               class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
@@ -26,7 +26,7 @@
       <div class="card-header">{{ gettext("Devices")}}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for supported_device in all_supported_devices %}
+          {% for supported_device in all_supported_devices|sort(attribute='name') %}
           <li>
             <a href="{{ url_for('.simulations', supported_device=supported_device.id) }}"
               class="{{ 'active text-primary' if selected_supported_device == supported_device.id|string else '' }}">
