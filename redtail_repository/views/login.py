@@ -1,5 +1,5 @@
 from typing import Optional
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, flash, render_template, request, redirect, url_for
 from flask_login import login_user, logout_user
 from flask_babel import lazy_gettext
 from flask_wtf import FlaskForm
@@ -41,7 +41,7 @@ def login():
             next_url = request.args.get('url')
             if next_url and next_url.startswith('/'):
                 return redirect(next_url)
-            
+
             return redirect(url_for('public.index'))
 
         form.username.errors.append(lazy_gettext('Invalid username or password'))
@@ -67,10 +67,14 @@ class RegistrationForm(FlaskForm):
     confirm_password = PasswordField(lazy_gettext('Confirm Password'), validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField(lazy_gettext('Register'))
 
-    def validate(self, login):
+    def validate(self, extra_validators=None):
+        initial_validation = super(RegistrationForm, login, self).validate(extra_validators)
+        if not initial_validation:
+            return False
         existing_user = User.query.filter_by(login=login.data).first()
         if existing_user:
             raise ValidationError(lazy_gettext('Username is already taken.'))
+        return True
 
 @login_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
@@ -86,6 +90,9 @@ def register():
 
         db.session.add(new_user)
         db.session.commit()
+
+        login_user(new_user)
+        flash("You registered and are now logged in. Welcome!", "success")
 
         return redirect(url_for('public.index'))
 
