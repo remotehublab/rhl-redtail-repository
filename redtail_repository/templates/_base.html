@@ -33,19 +33,19 @@
         </li>
         <!-- Lessons Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.lessons' %}active{% endif %}"
+          <a class="nav-link {% if 'public.lesson' in request.endpoint %}active{% endif %}"
             href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
         </li>
         </li>
         <!-- Simulations Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.simulations' %}active{% endif %}"
-            href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
+          <a class="nav-link {% if 'public.simulation' in request.endpoint %}active{% endif %}"
+          href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
         </li>
         </li>
         <!-- Devices Tab -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.devices' %}active{% endif %}"
+          <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}"
             href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
         </li>
       </ul>

@@ -10,6 +10,7 @@ from redtail_repository.models import (
 
 public_blueprint = Blueprint('public', __name__)
 
+
 @public_blueprint.route('/')
 def index():
     return render_template('public/index.html')
@@ -21,6 +22,7 @@ def index():
 #     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
 #     return response
 
+
 @public_blueprint.route('/authors/<author_id>')
 def view_author(author_id):
     author = db.session.query(Author).filter_by(id=author_id).first()
@@ -29,10 +31,12 @@ def view_author(author_id):
 
     return render_template("public/author.html", author=author)
 
+
 @public_blueprint.route('/authors')
 def authors():
     all_authors = db.session.query(Author).all()
     return render_template('public/authors.html', authors=all_authors)
+
 
 @public_blueprint.route('/lessons')
 def lessons():
@@ -60,20 +64,24 @@ def lessons():
     if category_slug:
         category = LessonCategory.query.filter_by(slug=category_slug).first()
         if category:
-            lessons_query = lessons_query.filter(Lesson.lesson_categories.contains(category))
+            lessons_query = lessons_query.filter(
+                Lesson.lesson_categories.contains(category))
 
     if supported_device_id:
-        lessons_query = lessons_query.join(Lesson.supported_devices).filter(SupportedDevice.id == supported_device_id)
+        lessons_query = lessons_query.join(Lesson.supported_devices).filter(
+            SupportedDevice.id == supported_device_id)
 
     if level_slug:
         level = LessonLevel.query.filter_by(slug=level_slug).first()
         if level:
             lessons_query = lessons_query.filter(Lesson.levels.contains(level))
-    
+
     if framework_slug:
-        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
+        framework = DeviceFramework.query.filter_by(
+            slug=framework_slug).first()
         if framework:
-            lessons_query = lessons_query.join(Lesson.device_frameworks).filter(DeviceFramework.id == framework.id)
+            lessons_query = lessons_query.join(Lesson.device_frameworks).filter(
+                DeviceFramework.id == framework.id)
 
     lessons = lessons_query.all()
 
@@ -123,6 +131,7 @@ def lesson(lesson_slug):
         foo="<b>this is bold</b><script>alert('foo');</script>",
     )
 
+
 @public_blueprint.route('/simulations')
 def simulations():
     all_supported_devices = SupportedDevice.query.all()
@@ -141,17 +150,22 @@ def simulations():
     )
 
     if supported_device_id:
-        simulations_query = simulations_query.join(Simulation.supported_devices).filter(SupportedDevice.id == supported_device_id)
+        simulations_query = simulations_query.join(Simulation.supported_devices).filter(
+            SupportedDevice.id == supported_device_id)
 
     if category_slug:
-        category = SimulationCategory.query.filter_by(slug=category_slug).first()
+        category = SimulationCategory.query.filter_by(
+            slug=category_slug).first()
         if category:
-            simulations_query = simulations_query.join(Simulation.simulation_categories).filter(SimulationCategory.id == category.id)
-    
+            simulations_query = simulations_query.join(
+                Simulation.simulation_categories).filter(SimulationCategory.id == category.id)
+
     if framework_slug:
-        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
+        framework = DeviceFramework.query.filter_by(
+            slug=framework_slug).first()
         if framework:
-            simulations_query = simulations_query.join(Simulation.device_frameworks).filter(DeviceFramework.id == framework.id)
+            simulations_query = simulations_query.join(
+                Simulation.device_frameworks).filter(DeviceFramework.id == framework.id)
 
     simulations = simulations_query.all()
 
@@ -190,6 +204,7 @@ def simulation(simulation_slug):
         documents=simulation.simulation_documents
     )
 
+
 @public_blueprint.route('/devices')
 def devices():
     all_device_categories = db.session.query(DeviceCategory).all()
@@ -208,17 +223,20 @@ def devices():
     if category_slug:
         category = DeviceCategory.query.filter_by(slug=category_slug).first()
         if category:
-            devices_query = devices_query.filter(Device.device_categories.contains(category))
+            devices_query = devices_query.filter(
+                Device.device_categories.contains(category))
 
     if framework_slug:
-        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
+        framework = DeviceFramework.query.filter_by(
+            slug=framework_slug).first()
         if framework:
-            devices_query = devices_query.join(Device.device_frameworks).filter(DeviceFramework.id == framework.id)
+            devices_query = devices_query.join(Device.device_frameworks).filter(
+                DeviceFramework.id == framework.id)
 
     devices = list(devices_query.all())
 
     for device in devices:
-        print([ cat.name for cat in device.device_categories ])
+        print([cat.name for cat in device.device_categories])
 
     return render_template(
         'public/devices.html',
@@ -228,6 +246,7 @@ def devices():
         selected_category=category_slug,
         selected_framework=framework_slug
     )
+
 
 @public_blueprint.route('/devices/<device_slug>')
 def device(device_slug):
