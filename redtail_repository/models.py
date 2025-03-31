@@ -88,13 +88,6 @@ lesson_device_framework_association = Table(
     db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
 )
 
-device_framework_association = Table(
-    'device_framework_association',
-    db.Model.metadata,
-    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True),
-    db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
-)
-
 simulation_framework_association = Table(
     'simulation_framework_association',
     db.Model.metadata,
@@ -134,7 +127,7 @@ class User(db.Model, UserMixin):
     password_hash: Mapped[str] = mapped_column(db.String(255))
 
     # Must be 'admin', 'instructor'
-    role: Mapped[str] = mapped_column(db.String(100))
+    role = db.Column(db.String(100), default='user')
 
     verified: Mapped[bool] = mapped_column(db.Boolean, default=False)
 
@@ -272,6 +265,12 @@ class Device(db.Model):
         onupdate=func.now()
     )
 
+    device_frameworks: Mapped[List['DeviceFramework']] = relationship(
+        "DeviceFramework",
+        back_populates="device",
+        cascade="all, delete-orphan"
+    )
+
     device_documents: Mapped[List['DeviceDoc']] = relationship("DeviceDoc", back_populates="device", cascade="all, delete-orphan")
     lessons: Mapped[List['Lesson']] = relationship(
         secondary=lesson_device_association,
@@ -283,10 +282,6 @@ class Device(db.Model):
     )
     device_categories: Mapped[List['DeviceCategory']] = relationship(
         secondary=device_category_association,
-        back_populates="devices"
-    )
-    device_frameworks: Mapped[List['DeviceFramework']] = relationship(
-        secondary=device_framework_association,
         back_populates="devices"
     )
 
@@ -452,10 +447,9 @@ class DeviceFramework(db.Model):
         onupdate=func.now()
     )
 
-    devices: Mapped[List['Device']] = relationship(
-        secondary=device_framework_association,
-        back_populates="device_frameworks"
-    )
+    device_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('device.id'), nullable=False)
+    device: Mapped['Device'] = relationship("Device", back_populates="device_frameworks")
+
     lessons: Mapped[List['Lesson']] = relationship(
         secondary=lesson_device_framework_association,
         back_populates="device_frameworks"

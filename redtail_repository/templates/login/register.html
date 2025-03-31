@@ -3,27 +3,40 @@
 {% block container %}
 <div class="position-absolute top-50 start-50 translate-middle">
   <div class="container-md">
-    <form method="POST" action="{{ request.full_path }}">
+    <form method="POST" action="{{ url_for('login.register') }}">
       {{ form.hidden_tag() }}
+  
       <div class="mb-3">
-        {{ form.login.label(class_="form-label") }}
-        {{ form.login(class_="form-control", autofocus="autofocus") }}
-        {% if form.login.errors %}
-            {% for error in form.login.errors %}
-                <p class="text-danger">{{ error }}</p>
-            {% endfor %}
-        {% endif %}
+          {{ form.login.label(class_="form-label") }}
+          {{ form.login(class_="form-control") }}
+          {% for error in form.login.errors %}
+              <p class="text-danger">{{ error }}</p>
+          {% endfor %}
       </div>
       <div class="mb-3">
-        <label for="exampleInputPassword1" class="form-label">Password</label>
-        <input type="password" class="form-control" id="exampleInputPassword1">
+          {{ form.name.label(class_="form-label") }}
+          {{ form.name(class_="form-control") }}
+          {% for error in form.name.errors %}
+              <p class="text-danger">{{ error }}</p>
+          {% endfor %}
       </div>
       <div class="mb-3">
-        <label for="exampleFormControlTextarea1" class="form-label">Example textarea</label>
-        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+          {{ form.password.label(class_="form-label") }}
+          {{ form.password(class_="form-control") }}
+          {% for error in form.password.errors %}
+              <p class="text-danger">{{ error }}</p>
+          {% endfor %}
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+      <div class="mb-3">
+          {{ form.confirm_password.label(class_="form-label") }}
+          {{ form.confirm_password(class_="form-control") }}
+          {% for error in form.confirm_password.errors %}
+              <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+      </div>
+  
+      <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+  </form>  
   </div>
 </div>
 {% endblock %}

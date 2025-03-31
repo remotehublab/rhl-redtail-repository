@@ -15,7 +15,7 @@ from ..models import (
     supported_device_lesson, supported_device_simulation,
     author_lesson_association, lesson_simulation_association, 
     device_category_association, simulation_category_association, 
-    device_framework_association, lesson_level_association, 
+    lesson_level_association, 
     lesson_device_framework_association, simulation_framework_association,
     db
 )
@@ -286,8 +286,8 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
         super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
 class DeviceFrameworkModelView(AuthedModelMixIn, ModelView):
-    column_list = ['id', 'name', 'slug', 'last_updated', 'devices', 'simulations']
-    form_columns = ['name', 'slug', 'devices', 'simulations']
+    column_list = ['id', 'name', 'slug', 'last_updated', 'device', 'simulations']
+    form_columns = ['name', 'slug', 'device', 'simulations']
 
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceFramework, db.session, *args, **kwargs)

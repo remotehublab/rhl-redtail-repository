@@ -12,8 +12,6 @@ from flask_babel import lazy_gettext
 from redtail_repository import login_manager, db
 from redtail_repository.models import User
 
-
-
 @login_manager.user_loader
 def user_loader(user_id: str):
     user = db.session.query(User).filter_by(id=int(user_id)).first()
@@ -68,10 +66,12 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField(lazy_gettext('Register'))
 
     def validate(self, extra_validators=None):
-        initial_validation = super(RegistrationForm, login, self).validate(extra_validators)
+        initial_validation = super(RegistrationForm, self).validate(extra_validators)
+
         if not initial_validation:
             return False
-        existing_user = User.query.filter_by(login=login.data).first()
+        existing_user = User.query.filter_by(login=self.login.data).first()
+
         if existing_user:
             raise ValidationError(lazy_gettext('Username is already taken.'))
         return True
