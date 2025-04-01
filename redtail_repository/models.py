@@ -264,6 +264,9 @@ class Device(db.Model):
         server_default=func.now(),
         onupdate=func.now()
     )
+    simulation_documents: Mapped[List['SimulationDeviceDocument']] = relationship(
+        back_populates="device"
+    )
 
     device_frameworks: Mapped[List['DeviceFramework']] = relationship(
         "DeviceFramework",
@@ -363,6 +366,13 @@ class Simulation(db.Model):
         secondary=simulation_framework_association,
         back_populates="simulations"
     )
+    device_documents: Mapped[List['SimulationDeviceDocument']] = relationship(
+        back_populates="simulation"
+    )
+
+
+    def __str__(self):
+        return self.name
 
 class SimulationDoc(db.Model):
     __tablename__ = 'simulation_doc'
@@ -381,6 +391,7 @@ class SimulationDoc(db.Model):
     simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_documents")
 
 
+# TODO: is this used anywhere? Otherwise delete
 class SupportedDevice(db.Model):
     __tablename__ = 'supported_device'
 
@@ -397,6 +408,24 @@ class SupportedDevice(db.Model):
     simulations: Mapped[List['Simulation']] = relationship(
         secondary=supported_device_simulation,
         back_populates="supported_devices"
+    )
+
+
+class SimulationDeviceDocument(db.Model):
+    __tablename__ = 'simulation_device_document'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    simulation_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('simulation.id'), nullable=False)
+    device_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('device.id'), nullable=False)
+    name: Mapped[str] = mapped_column(db.String(100), nullable=False)
+    doc_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
+
+    simulation: Mapped[Simulation] = relationship(
+        back_populates="device_documents"
+    )
+
+    device: Mapped[Device] = relationship(
+        back_populates="simulation_documents"
     )
 
 class LessonCategory(db.Model):
@@ -439,7 +468,7 @@ class DeviceFramework(db.Model):
     __tablename__ = 'device_framework'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(db.String(100), nullable=False)
     slug: Mapped[str] = mapped_column(db.String(255), unique=True, nullable=False)
     last_updated: Mapped[datetime] = mapped_column(
         db.DateTime, 
@@ -460,7 +489,7 @@ class DeviceFramework(db.Model):
     )
 
     def __str__(self):
-        return self.name
+        return f"{self.name} of {self.device.name}"
 
 class SimulationCategory(db.Model):
     __tablename__ = 'simulation_category'

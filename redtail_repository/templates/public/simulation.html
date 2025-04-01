@@ -85,6 +85,32 @@
         </div>
       </div>
     </div>
+    <!-- Downloads -->
+    <div class="row mt-3">
+      <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
+        <div class="card text-start bg-light" style="height: 200px;">
+          <div class="card-header">{{gettext("Supported devices")}}</div>
+          <div class="card-body">
+            <ul>
+            {% for device in simulation.devices %}
+              <li><a href="{{ url_for('.device', device_slug=device.slug) }}">{{ device.name }}</a>
+                {% if device.simulation_documents %}
+                <ul>
+                  {% for simulation_document in device.simulation_documents %}
+                  <li><a href="{{ simulation_document.doc_url }}">{{ simulation_document.name }}</a></li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              
+              </li>
+            
+            {% endfor %}
+            </ul>
+            
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="col-md-2 mt-4">

@@ -10,7 +10,7 @@ from ..models import (
     Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
     Simulation, Device, LessonCategory, SupportedDevice, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
-    DeviceFramework,
+    DeviceFramework, SimulationDeviceDocument,
     device_simulation_association, lesson_device_association,
     supported_device_lesson, supported_device_simulation,
     author_lesson_association, lesson_simulation_association, 
@@ -221,7 +221,8 @@ class DeviceModelView(AuthedModelMixIn, ModelView):
     ]
 
     inline_models = [
-        DeviceDocForm(DeviceDoc)
+        DeviceDocForm(DeviceDoc),
+        DeviceFramework,
     ]
 
     def __init__(self, *args, **kwargs):
@@ -239,6 +240,19 @@ class DeviceDocModelView(AuthedModelMixIn, ModelView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceDoc, db.session, *args, **kwargs)
+
+class SimulationDeviceDocumentModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'simulation',
+        'device', 'name', 'doc_url'
+    ]
+    form_columns = [
+        'simulation',
+        'device', 'name', 'doc_url'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(SimulationDeviceDocument, db.session, *args, **kwargs)
 
 class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
     column_list = ['name', 'lessons', 'simulations']
@@ -285,13 +299,6 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
-class DeviceFrameworkModelView(AuthedModelMixIn, ModelView):
-    column_list = ['id', 'name', 'slug', 'last_updated', 'device', 'simulations']
-    form_columns = ['name', 'slug', 'device', 'simulations']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(DeviceFramework, db.session, *args, **kwargs)
-
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(UserModelView(name="User", category="User"))
@@ -304,12 +311,12 @@ admin.add_view(LessonDocsModelView(name="Lesson Document", category="Lesson"))
 admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
 admin.add_view(SimulationDocModelView(name="Simulation Document", category="Simulation"))
 admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
+admin.add_view(SimulationDeviceDocumentModelView(name="Simulation Device Document", category="Simulation"))
 
 
 admin.add_view(DeviceModelView(name="Device", category="Device"))
 admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
 admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Device"))
-admin.add_view(DeviceFrameworkModelView(name="Device Framework", category="Device"))
 
 admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))

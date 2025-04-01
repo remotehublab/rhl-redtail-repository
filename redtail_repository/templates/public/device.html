@@ -8,62 +8,31 @@
       <img src="{{ url_for('static', filename='img/NES.png') }}" alt="TMP" class="img-fluid device-img">
     </div>
     <div class="col-md-9">
-      <h1 class="display-4">DE1-SoC: device frameworks</h1>
+      <h1 class="display-4">{{ gettext("%(device_name)s: frameworks", device_name=device.name)}}</h1>
     </div>
   </div>
 
   <!-- Framework Cards -->
   <div class="row g-4">
-    <!-- VHDL Card -->
-    <div class="col-md-4">
-      <div class="card device-card">
-        <div class="card-header bg-light">
-          VHDL
-        </div>
-        <div class="card-body">
-          <a href="#" class="framework-link text-primary d-block mb-3">FPGA DE1-SoC VHDL</a>
-          <p class="card-text mb-1">Used in 5 lessons</p>
-          <p class="card-text">Supports 3 simulations</p>
-        </div>
-        <div class="card-footer bg-transparent">
-          <p class="last-update mb-0">Last update: 2025/01/15</p>
-        </div>
-      </div>
-    </div>
 
-    <!-- SystemVerilog Card -->
+    {% for device_framework in device.device_frameworks %}
     <div class="col-md-4">
       <div class="card device-card">
         <div class="card-header bg-light">
-          SystemVerilog
+          {{ device_framework.name }}
         </div>
         <div class="card-body">
-          <a href="#" class="framework-link text-primary d-block mb-3">FPGA DE1-SoC SV</a>
-          <p class="card-text mb-1">Used in 8 lessons</p>
-          <p class="card-text">Supports 3 simulations</p>
+          <a href="#" class="framework-link text-primary d-block mb-3">{{ device_framework.name }}</a>
+          <p class="card-text mb-1">{{ gettext("Used in %(lessons)s lessons", lessons=device_framework.lessons|length) }}</p>
+          <p class="card-text">{{ gettext("Used in %(simulations)s simulations", simulations=device_framework.simulations|length) }}</p>
         </div>
         <div class="card-footer bg-transparent">
-          <p class="last-update mb-0">Last update: 2024/12/27</p>
+          <p class="last-update mb-0">{{ gettext("Last update: ")}}<span>{{ device_framework.last_updated.isoformat() }}</span></span></p>
         </div>
       </div>
     </div>
+    {% endfor %}
 
-    <!-- Verilog Card -->
-    <div class="col-md-4">
-      <div class="card device-card">
-        <div class="card-header bg-light">
-          Verilog
-        </div>
-        <div class="card-body">
-          <a href="#" class="framework-link text-primary d-block mb-3">FPGA DE1-SoC Verilog</a>
-          <p class="card-text mb-1">Used in 3 lessons</p>
-          <p class="card-text">Supports 5 simulations</p>
-        </div>
-        <div class="card-footer bg-transparent">
-          <p class="last-update mb-0">Last update: 2024/12/27</p>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 {% endblock %}
