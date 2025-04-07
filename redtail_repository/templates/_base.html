@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ language }}">
+<html lang="{{ language }}" class="h-100">
 
 <head>
   <meta charset="utf-8">
@@ -14,68 +14,83 @@
 
   {% block head %}{% endblock %}
 </head>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/" style="color:#FF2400">
-      <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo" width="30"
-        height="24" class="d-inline-block align-text-top"> RedTail
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <!-- Home Tab -->
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page"
-            href="/">{{ gettext("Home") }}</a>
-        </li>
-        <!-- Lessons Tab -->
-        <li class="nav-item">
-          <a class="nav-link {% if 'public.lesson' in request.endpoint %}active{% endif %}"
-            href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
-        </li>
-        </li>
-        <!-- Simulations Tab -->
-        <li class="nav-item">
-          <a class="nav-link {% if 'public.simulation' in request.endpoint %}active{% endif %}"
-          href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
-        </li>
-        </li>
-        <!-- Devices Tab -->
-        <li class="nav-item">
-          <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}"
-            href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
-        </li>
-      </ul>
-      <!-- Login/Register Button -->
-      {% if current_user.is_authenticated %}
-      <div class="d-flex align-items-center">
-        <span class="me-2 text-white">Welcome,</span>
-        <input type="text" class="form-control me-2" value="{{ current_user.name | e }}" readonly
-          style="width: auto; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; text-align: center; padding: 3px 8px;">
-        <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{
-          gettext("Logout") }}</a>
+
+<body class="d-flex flex-column h-100">
+
+  <main class="flex-shrink-0">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/" style="color:#FF2400">
+          <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo" width="30"
+            height="24" class="d-inline-block align-text-top"> RedTail
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!-- Home Tab -->
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page"
+                href="/">{{ gettext("Home") }}</a>
+            </li>
+            <!-- Lessons Tab -->
+            <li class="nav-item">
+              <a class="nav-link {% if 'public.lesson' in request.endpoint %}active{% endif %}"
+                href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
+            </li>
+            </li>
+            <!-- Simulations Tab -->
+            <li class="nav-item">
+              <a class="nav-link {% if 'public.simulation' in request.endpoint %}active{% endif %}"
+              href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
+            </li>
+            </li>
+            <!-- Devices Tab -->
+            <li class="nav-item">
+              <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}"
+                href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
+            </li>
+          </ul>
+          <!-- Login/Register Button -->
+          {% if current_user.is_authenticated %}
+          <div class="d-flex align-items-center">
+            <span class="me-2 text-white">Welcome,</span>
+            <input type="text" class="form-control me-2" value="{{ current_user.name | e }}" readonly
+              style="width: auto; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; text-align: center; padding: 3px 8px;">
+            <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{
+              gettext("Logout") }}</a>
+          </div>
+          {% else %}
+          <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">
+            {{ gettext("Login") }}
+          </a>
+          <a class="btn btn-secondary ms-2" href="{{ url_for('login.register', url=request.full_path) }}" role="button">
+            {{ gettext("Register") }}
+          </a>
+
+          {% endif %}
+
+        </div>
       </div>
-      {% else %}
-      <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">
-        {{ gettext("Login") }}
-      </a>
-      <a class="btn btn-secondary ms-2" href="{{ url_for('login.register', url=request.full_path) }}" role="button">
-        {{ gettext("Register") }}
-      </a>
-
-      {% endif %}
-
-    </div>
-  </div>
-</nav>
+    </nav>
 
 
-<body>
   {% block body %}
   {% endblock %}
+    </main>
+
+    
+
+<footer class="footer mt-auto py-3 bg-light">
+  <div class="container">
+        {# Don't translate this message #}
+        <span style="font-size: 75%" class="text-sm text-muted">This website was supported by the National Science Foundation's Division of Undergraduate Education under Grant #2336745. All the source code is open-source and can be found <a href="https://github.com/remotehublab/rhl-redtail-repository" target="_blank">in GitHub</a>. The content available in the website might be provided by third-party entities and/or developed outside the context of the REDTAIL project and grant.</span>
+  </div>
+</footer>
+
 
   {% assets 'bootstrap_js' %}
   <script src="{{ ASSET_URL }}"></script>

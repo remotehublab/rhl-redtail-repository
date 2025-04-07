@@ -9,49 +9,54 @@
 
 <div class="card text-center">
   <div class="card-header">
-    About
+      {{ gettext("REDTAIL project repository") }}
   </div>
   <div class="card-body">
-    <h5 class="card-title">Title block</h5>
-    <p class="card-text">placeholder</p>
-    <a href="#" class="btn btn-primary">Go somewhere</a>
+    <h5 class="card-title">{{ gettext("REDTAIL repository of simulations and digital twins for remote laboratories") }}</h5>
+    <p class="card-text">{{ gettext("Find simulations that are connected to real remote laboratories, as well as lessons for them and what devices are supported") }}</p>
+    <a href="{{ url_for(".simulations") }}" class="btn btn-primary">{{ gettext("Go to the simulations") }}</a>
   </div>
 </div>
 
 <div class="row row-cols-1 row-cols-md-2 g-4">
   <div class="col">
     <div class="card">
-      <img src="https://via.placeholder.com/150" class="card-img-top" alt="Picture">
+      <center>
+          <img src="https://labsland.com/blog/en/wp-content/uploads/sites/2/2022/04/rhlab.jpeg" class="card-img-top" alt="RHLab logo" style="max-width: 50%">
+      </center>
       <div class="card-body">
-        <h5 class="card-title">Lorem Ipsum</h5>
-        <p class="card-text">placeholder</p>
+          <h5 class="card-title">{{ gettext("The REDTAIL project") }}</h5>
+          <p class="card-text">{{ gettext("The REDTAIL project is developed by the <a href='https://rhlab.ece.uw.edu' target=_blank>Remote Hub Lab research group</a> at the <a href='https://uw.edu' target=_blank>University of Washington</a> and <a href='https://labsland.com' target=_blank>LabsLand</a>.") }}</p>
+          <p class="card-text">{{ gettext("The project was supported by the National Science Foundation's Division of Undergraduate Education under Grant #2336745. All the source code is open-source and can be found in GitHub.") }}</p>
       </div>
     </div>
   </div>
   <div class="col">
     <div class="card">
-      <img src="..." class="card-img-top" alt="...">
+      <center>
+         <img src="https://labsland.com/blog/en/wp-content/uploads/sites/2/2022/04/uw-2.jpg" class="card-img-top" alt="Remote labs" style="max-width: 50%">
+      </center>
       <div class="card-body">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">placeholder</p>
+        <h5 class="card-title">{{ gettext("Remote labs") }}</h5>
+        <p class="card-text">{{ gettext("A remote lab is a hardware and software tool that allows students to access real labs through the Internet.") }}</p>
       </div>
     </div>
   </div>
   <div class="col">
     <div class="card">
-      <img src="..." class="card-img-top" alt="...">
+      <iframe width="100%" height="500px" src="https://www.youtube.com/embed/9_RL6gZpP1I" frameborder="0" allow="autoplay; encrypted-media" allowfullscree></iframe>
       <div class="card-body">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">placeholder</p>
+        <h5 class="card-title">{{ gettext("REDTAIL simulations and digital twins") }}</h5>
+        <p class="card-text">{{ gettext("In REDTAIL, we connect simulations and digital twins to real hardware. That way, we expand the laboratory experience so students can access real hardware connected to these simulations.") }}</p>
+        <p class="card-text">{{ gettext("By default, you cannot see the solutions to the lessons, but if you <a href='%(link)s'>register</a>, we will validate your email address and if you are a professor or instructor we will share them with you.", link=url_for('login.register')) }}</p>
       </div>
     </div>
   </div>
   <div class="col">
     <div class="card">
-      <img src="..." class="card-img-top" alt="...">
       <div class="card-body">
-        <h5 class="card-title">Card title</h5>
-        <p class="card-text">placeholder</p>
+        <h5 class="card-title">{{ gettext("Join us!") }}</h5>
+        <p class="card-text">{{ gettext("Are you working on remote laboratories? Either creating lessons, developing remote labs, or want to build simulations? Join us in our mission of expanding the laboratory experience by contacting us <a href='%(link)s' target=_blank>here</a>", link="https://rhlab.ece.uw.edu/join-us/") }}</p>
       </div>
     </div>
   </div>
