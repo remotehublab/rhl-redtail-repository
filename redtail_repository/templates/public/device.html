@@ -1,38 +1,55 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<!-- Main Content Section -->
-<div class="container mb-5 mt-3">
-  <div class="row mb-4 align-items-center">
-    <div class="col-md-3 text-center">
-      <img src="{{ url_for('static', filename='img/NES.png') }}" alt="TMP" class="img-fluid device-img">
-    </div>
-    <div class="col-md-9">
-      <h1 class="display-4">{{ gettext("%(device_name)s: frameworks", device_name=device.name)}}</h1>
+
+<div class="row"></div>
+  <div class="col-md-2 mt-4">
+    <!-- Categories Section -->
+    <div class="card mb-3">
+      <div class="card-header">{{ gettext("Categories:") }}</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          {% for category in categories|sort(attribute='name') %}
+          <li><a href="{{ url_for('.devices', category=category.slug) }}">{{category.name}}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
 
-  <!-- Framework Cards -->
-  <div class="row g-4">
-
-    {% for device_framework in device.device_frameworks %}
-    <div class="col-md-4">
-      <div class="card device-card">
-        <div class="card-header bg-light">
-          {{ device_framework.name }}
-        </div>
-        <div class="card-body">
-          <a href="#" class="framework-link text-primary d-block mb-3">{{ device_framework.name }}</a>
-          <p class="card-text mb-1">{{ gettext("Used in %(lessons)s lessons", lessons=device_framework.lessons|length) }}</p>
-          <p class="card-text">{{ gettext("Used in %(simulations)s simulations", simulations=device_framework.simulations|length) }}</p>
-        </div>
-        <div class="card-footer bg-transparent">
-          <p class="last-update mb-0">{{ gettext("Last update: ")}}<span>{{ device_framework.last_updated.isoformat() }}</span></span></p>
-        </div>
+  <!-- Main Content Section -->
+  <div class="container mb-5 mt-3">
+    <div class="row mb-4 align-items-center">
+      <div class="col-md-3 text-center">
+        <img src="{{ url_for('static', filename='img/NES.png') }}" alt="TMP" class="img-fluid device-img">
+      </div>
+      <div class="col-md-9">
+        <h1 class="display-4">{{ gettext("%(device_name)s: frameworks", device_name=device.name)}}</h1>
       </div>
     </div>
-    {% endfor %}
 
+    <!-- Framework Cards -->
+    <div class="row g-4">
+
+      {% for device_framework in device.device_frameworks %}
+      <div class="col-md-4">
+        <div class="card device-card">
+          <div class="card-header bg-light">
+            {{ device_framework.name }}
+          </div>
+          <div class="card-body">
+            <a href="#" class="framework-link text-primary d-block mb-3">{{ device_framework.name }}</a>
+            <p class="card-text mb-1">{{ gettext("Used in %(lessons)s lessons", lessons=device_framework.lessons|length) }}</p>
+            <p class="card-text">{{ gettext("Used in %(simulations)s simulations", simulations=device_framework.simulations|length) }}</p>
+          </div>
+          <div class="card-footer bg-transparent">
+            <p class="last-update mb-0">{{ gettext("Last update: ")}}<span>{{ device_framework.last_updated.isoformat() }}</span></span></p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
   </div>
 </div>
 {% endblock %}
