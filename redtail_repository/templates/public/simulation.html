@@ -9,35 +9,30 @@
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for category in all_categories|sort(attribute='name') %}
-          <li><a href="{{ url_for('.simulation', category=category.slug) }}">{{ category.name }}</a></li>
+          {% for category in categories|sort(attribute='name') %}
+          <li><a href="{{ url_for('.simulations', category=category.slug) }}">{{ category.name }}</a></li>
           {% endfor %}
         </ul>
       </div>
     </div>
 
     <!-- Devices Section -->
-     <!-- Update at next meeting -->
     <div class="card mb-4">
-      <div class="card-header">Devices:</div>
+      <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
-        <!-- Clean Up with forloop after finalizing devices-->
         <ul class="list-unstyled">
-          <li>
-            <a href="#">DE1-SoC</a>
-            <ul>
-              <li><a href="#">VHDL</a></li>
-              <li><a href="#">SystemVerilog</a></li>
-            </ul>
-          </li>
-          <li>
-            <a href="#">STM32</a>
-            <ul>
-              <li><a href="#">mbedOS</a></li>
-              <li><a href="#">STM32Cube</a></li>
-            </ul>
-          </li>
-          <li><a href="#">[...]</a></li>
+          {% for device in simulation.devices %}
+            <li>
+              <a href="{{ url_for('.device', device_slug=device.slug) }}">{{device.name}}</a>
+              {% if device.device_frameworks %}
+                <ul class="ms-3">
+                  {% for framework in device.device_frameworks %}
+                    <li>{{ framework.name }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
         </ul>
       </div>
     </div>
@@ -107,6 +102,30 @@
             {% endfor %}
             </ul>
             
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lessons -->
+    <div class="row mt-3">
+      <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
+        <div class="card text-start bg-light">
+          <div class="card-header">{{gettext("Lessons")}}</div>
+          <div class="card-body">
+            {% if simulation.lessons %}
+              <ul>
+                {% for lesson in simulation.lessons %}
+                  <li>
+                    <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
+                      {{ lesson.title }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>{{gettext("No lessons available for this simulation.")}}</p>
+            {% endif %}
           </div>
         </div>
       </div>
