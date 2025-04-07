@@ -4,16 +4,32 @@
 <div class="row">
   <!-- Sidebar Section -->
   <div class="col-md-2 mt-4">
-    <!-- Device Frameworks Section -->
     <div class="card mb-4">
-      <div class="card-header">{{ gettext("Device Frameworks") }}</div>
+      <div class="card-header">{{ gettext("Device Categories") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for device_category in all_device_categories|sort(attribute='name') %}
           <li>
             <a href="{{ url_for('.devices', device_category=device_category.id) }}"
-              class="{{ 'active text-primary' if selected_device_category == device_category.id|string else '' }}">
+               class="{{ 'active text-primary' if selected_device_category == device_category.id|string else '' }}">
               {{ device_category.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Device Frameworks Section -->
+    <div class="card mb-4">
+      <div class="card-header">{{ gettext("Device Frameworks") }}</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          {% for framework in all_frameworks | sort(attribute='name') %}
+          <li>
+            <a href="{{ url_for('.devices', framework=framework.slug) }}"
+              class="{{ 'active text-primary' if selected_framework == framework.slug else '' }}">
+              {{ framework.name }}
             </a>
           </li>
           {% endfor %}
