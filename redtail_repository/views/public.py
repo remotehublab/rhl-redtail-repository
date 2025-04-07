@@ -210,7 +210,7 @@ def devices():
     all_device_categories = db.session.query(DeviceCategory).all()
     all_frameworks = db.session.query(DeviceFramework).all()
 
-    category_slug = request.args.get('category')
+    device_category_id = request.args.get('device_category', type=int)
     framework_slug = request.args.get('framework')
 
     devices_query = db.session.query(Device).options(
@@ -220,11 +220,12 @@ def devices():
         joinedload(Device.simulations)
     )
 
-    if category_slug:
-        category = DeviceCategory.query.filter_by(slug=category_slug).first()
+    if device_category_id:
+        category = DeviceCategory.query.get(device_category_id)
         if category:
-            devices_query = devices_query.filter(
-                Device.device_categories.contains(category))
+            devices_query = devices_query.join(Device.device_categories).filter(
+                DeviceCategory.id == category.id
+            )
 
     if framework_slug:
         framework = DeviceFramework.query.filter_by(
@@ -243,7 +244,7 @@ def devices():
         devices=devices,
         all_device_categories=all_device_categories,
         all_frameworks=all_frameworks,
-        selected_category=category_slug,
+        selected_device_category=device_category_id,
         selected_framework=framework_slug
     )
 

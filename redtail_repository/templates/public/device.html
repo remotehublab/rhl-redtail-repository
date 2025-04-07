@@ -6,11 +6,14 @@
   <div class="col-md-2 mt-4">
     <!-- Categories Section -->
     <div class="card mb-3">
-      <div class="card-header">{{ gettext("Categories:") }}</div>
+      <div class="card-header">{{ gettext("Device Categories") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for category in categories|sort(attribute='name') %}
-          <li><a href="{{ url_for('.devices', category=category.slug) }}">{{category.name}}</a></li>
+          <li><a href="{{ url_for('.devices', device_category=category.id) }}"
+            class="{{ 'active text-primary' if selected_device_category == category.id|string else '' }}">
+           {{ category.name }}
+         </a></li>
           {% endfor %}
         </ul>
       </div>
