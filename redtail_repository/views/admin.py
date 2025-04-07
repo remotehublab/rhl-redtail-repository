@@ -255,8 +255,8 @@ class SimulationDeviceDocumentModelView(AuthedModelMixIn, ModelView):
         super().__init__(SimulationDeviceDocument, db.session, *args, **kwargs)
 
 class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'lessons', 'simulations']
-    form_columns = ['name', 'lessons', 'simulations']
+    column_list = ['name', 'slug', 'lessons', 'simulations']
+    form_columns = ['name', 'slug', 'lessons', 'simulations']
 
     def __init__(self, *args, **kwargs):
         super().__init__(SupportedDevice, db.session, *args, **kwargs)
