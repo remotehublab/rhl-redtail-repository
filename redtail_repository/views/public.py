@@ -185,7 +185,7 @@ def simulations():
 def simulation(simulation_slug):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).options(
         joinedload(Simulation.lessons),
-        joinedload(Simulation.devices),
+        joinedload(Simulation.devices).joinedload(Device.device_frameworks),
         joinedload(Simulation.supported_devices),
         joinedload(Simulation.simulation_categories),
         joinedload(Simulation.simulation_documents)
