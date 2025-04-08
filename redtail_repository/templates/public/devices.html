@@ -5,7 +5,7 @@
   <!-- Sidebar Section -->
   <div class="col-md-2 mt-4">
     <div class="card mb-4">
-      <div class="card-header">{{ gettext("All Device Categories") }}</div>
+      <div class="card-header">{{ gettext("Device Categories") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for device_category in all_device_categories|sort(attribute='name') %}
@@ -21,7 +21,7 @@
     </div>
 
     <!-- Device Frameworks Section -->
-    <div class="card mb-4">
+    <!-- <div class="card mb-4">
       <div class="card-header">{{ gettext("Device Frameworks") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
@@ -35,7 +35,7 @@
           {% endfor %}
         </ul>
       </div>
-    </div>
+    </div> -->
 
     {% if selected_category or selected_device_category %}
     <div class="mb-3">
@@ -103,7 +103,7 @@
             </ul>
           </div>
           <div class="card-footer">
-            <p class="card-text"><small class="text-body-secondary">Last Updated: {{ device.last_updated }}</small></p>
+            <p class="card-text"><small class="text-body-secondary">{{ gettext("Last Updated") }}: {{ device.last_updated }}</small></p>
           </div>
         </div>
       </div>

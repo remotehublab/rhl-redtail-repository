@@ -11,7 +11,10 @@
         <ul class="list-unstyled">
           {% for category in all_categories|sort(attribute='name')%}
           <li>
-            <a href="{{ url_for('.lessons', category=category.slug) }}"
+            <a href="{{ url_for('.lessons', 
+                              category=category.slug, 
+                              supported_device=selected_supported_device,
+                              level=selected_level) }}"
               class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
               {{ category.name }}
             </a>
@@ -28,7 +31,10 @@
         <ul class="list-unstyled">
           {% for supported_device in all_supported_devices|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.lessons', supported_device=supported_device.id) }}"
+            <a href="{{ url_for('.lessons', 
+                              category=selected_category,
+                              supported_device=supported_device.id, 
+                              level=selected_level) }}"
               class="{{ 'active text-primary' if selected_supported_device == supported_device.id|string else '' }}">
               {{ supported_device.name }}
             </a>
@@ -45,7 +51,10 @@
         <ul class="list-unstyled">
           {% for level in all_levels|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.lessons', level=level.slug) }}"
+            <a href="{{ url_for('.lessons', 
+                              category=selected_category,
+                              supported_device=selected_supported_device, 
+                              level=level.slug) }}"
               class="{{ 'active text-primary' if selected_level == level.slug else '' }}">
               {{ level.name }}
             </a>
@@ -78,17 +87,16 @@
             {{ gettext("Category") }}:
             {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
             {{ selected_cat.name }}
-            <a href="{{ url_for('.lessons') }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.lessons', supported_device=selected_supported_device, level=selected_level) }}" class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
 
           {% if selected_supported_device %}
           <span class="badge bg-secondary me-2">
             {{ gettext("Device") }}:
-            {% set selected_dev = all_supported_devices|selectattr('id', 'equalto', selected_supported_device|int)|first
-            %}
+            {% set selected_dev = all_supported_devices|selectattr('id', 'equalto', selected_supported_device|int)|first %}
             {{ selected_dev.name }}
-            <a href="{{ url_for('.lessons') }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.lessons', category=selected_category, level=selected_level) }}" class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
 
@@ -97,7 +105,7 @@
             {{ gettext("Level") }}:
             {% set selected_lvl = all_levels|selectattr('slug', 'equalto', selected_level)|first %}
             {{ selected_lvl.name }}
-            <a href="{{ url_for('.lessons') }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.lessons', category=selected_category, supported_device=selected_supported_device) }}" class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
         </div>

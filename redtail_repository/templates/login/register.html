@@ -5,7 +5,7 @@
   <div class="container-md">
     <form method="POST" action="{{ url_for('login.register') }}">
       {{ form.hidden_tag() }}
-  
+
       <div class="mb-3">
           {{ form.login.label(class_="form-label") }}
           {{ form.login(class_="form-control") }}
@@ -34,9 +34,9 @@
               <p class="text-danger">{{ error }}</p>
           {% endfor %}
       </div>
-  
+
       <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-  </form>  
+  </form>
   </div>
 </div>
 {% endblock %}
