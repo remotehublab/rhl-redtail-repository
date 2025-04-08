@@ -410,6 +410,9 @@ class SupportedDevice(db.Model):
         back_populates="supported_devices"
     )
 
+    def __str__(self):
+        return self.name
+
 
 class SimulationDeviceDocument(db.Model):
     __tablename__ = 'simulation_device_document'
