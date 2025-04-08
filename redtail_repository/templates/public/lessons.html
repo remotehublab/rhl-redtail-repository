@@ -29,15 +29,23 @@
       <div class="card-header">{{ gettext("Devices")}}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for supported_device in all_supported_devices|sort(attribute='name') %}
+          {% for device in devices %}
           <li>
-            <a href="{{ url_for('.lessons', 
+            {# <a href="{{ url_for('.lessons', 
                               category=selected_category,
                               supported_device=supported_device.id, 
                               level=selected_level) }}"
               class="{{ 'active text-primary' if selected_supported_device == supported_device.id|string else '' }}">
-              {{ supported_device.name }}
-            </a>
+            #}
+              {{ device.device.name }}
+            {# </a> #}
+            <ul>
+              {% for device_framework in device.frameworks %}
+              <li>
+                {{ device_framework.name }}
+              </li>
+              {% endfor %}
+            </ul>
           </li>
           {% endfor %}
         </ul>

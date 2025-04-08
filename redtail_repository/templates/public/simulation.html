@@ -118,7 +118,7 @@
                 {% for lesson in simulation.lessons %}
                   <li>
                     <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
-                      {{ lesson.title }}
+                      {{ lesson.name }}
                     </a>
                   </li>
                 {% endfor %}

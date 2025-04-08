@@ -41,9 +41,26 @@ def authors():
 @public_blueprint.route('/lessons')
 def lessons():
     all_categories = LessonCategory.query.all()
-    all_supported_devices = SupportedDevice.query.all()
     all_levels = LessonLevel.query.all()
     all_frameworks = DeviceFramework.query.all()
+
+    devices_to_frameworks = {
+        # device.id: [ device frameworks ]
+    }
+
+    for device_framework in all_frameworks:
+        devices_to_frameworks.setdefault(device_framework.device_id, []).append(device_framework)
+    
+    devices_by_id = { device.id: device for device in Device.query.all() }
+
+    devices = [
+        {
+            "device": devices_by_id[device_id],
+            "frameworks": devices_to_frameworks[device_id]
+        }
+        for device_id in devices_to_frameworks
+    ]
+
 
     category_slug = request.args.get('category')
     supported_device_id = request.args.get('supported_device')
@@ -88,8 +105,8 @@ def lessons():
     return render_template(
         'public/lessons.html',
         lessons=lessons,
+        devices=devices,
         all_categories=all_categories,
-        all_supported_devices=all_supported_devices,
         all_levels=all_levels,
         all_frameworks=all_frameworks,
         selected_category=category_slug,
