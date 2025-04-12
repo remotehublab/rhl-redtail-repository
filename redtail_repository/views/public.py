@@ -44,14 +44,16 @@ def lessons():
     all_levels = LessonLevel.query.all()
     all_frameworks = DeviceFramework.query.all()
 
+    # Create devices_by_id dictionary
+    devices_by_id = {device.id: device for device in Device.query.all()}
+
+    # What's this for? @todo
     devices_to_frameworks = {
         # device.id: [ device frameworks ]
     }
 
     for device_framework in all_frameworks:
         devices_to_frameworks.setdefault(device_framework.device_id, []).append(device_framework)
-    
-    devices_by_id = { device.id: device for device in Device.query.all() }
 
     devices = [
         {
@@ -61,15 +63,12 @@ def lessons():
         for device_id in devices_to_frameworks
     ]
 
-
     category_slug = request.args.get('category')
-    supported_device_id = request.args.get('supported_device')
     level_slug = request.args.get('level')
     framework_slug = request.args.get('framework')
 
     lessons_query = Lesson.query.filter_by(active=True).options(
         joinedload(Lesson.authors),
-        joinedload(Lesson.supported_devices),
         joinedload(Lesson.lesson_categories),
         joinedload(Lesson.videos),
         joinedload(Lesson.images),
@@ -83,10 +82,6 @@ def lessons():
         if category:
             lessons_query = lessons_query.filter(
                 Lesson.lesson_categories.contains(category))
-
-    if supported_device_id:
-        lessons_query = lessons_query.join(Lesson.supported_devices).filter(
-            SupportedDevice.id == supported_device_id)
 
     if level_slug:
         level = LessonLevel.query.filter_by(slug=level_slug).first()
@@ -106,11 +101,11 @@ def lessons():
         'public/lessons.html',
         lessons=lessons,
         devices=devices,
+        devices_by_id=devices_by_id,
         all_categories=all_categories,
         all_levels=all_levels,
         all_frameworks=all_frameworks,
         selected_category=category_slug,
-        selected_supported_device=supported_device_id,
         selected_level=level_slug,
         selected_framework=framework_slug
     )
@@ -126,11 +121,34 @@ def lesson(lesson_slug):
         joinedload(Lesson.simulations),
         joinedload(Lesson.lesson_categories),
         joinedload(Lesson.supported_devices),
-        joinedload(Lesson.levels)
+        joinedload(Lesson.levels),
+        joinedload(Lesson.device_frameworks)
     ).first()
 
     if not lesson:
         return render_template("public/error.html", message=gettext("Lesson not found")), 404
+
+    # Create devices_by_id dictionary
+    devices_by_id = {device.id: device for device in Device.query.all()}
+
+    # Get all frameworks for this lesson
+    all_frameworks = DeviceFramework.query.filter(
+        DeviceFramework.id.in_([framework.id for framework in lesson.device_frameworks])
+    ).all()
+
+    # Group frameworks by device
+    devices_to_frameworks = {}
+    for framework in all_frameworks:
+        devices_to_frameworks.setdefault(framework.device_id, []).append(framework)
+
+    # Prepare devices with their frameworks
+    devices = [
+        {
+            "device": devices_by_id[device_id],
+            "frameworks": devices_to_frameworks[device_id]
+        }
+        for device_id in devices_to_frameworks
+    ]
 
     return render_template(
         "public/lesson.html",
@@ -142,10 +160,9 @@ def lesson(lesson_slug):
         documents=lesson.lesson_documents,
         simulations=lesson.simulations,
         categories=lesson.lesson_categories,
-        supported_devices=lesson.supported_devices,
+        devices=devices,  # Use devices instead of supported_devices
         learning_goals=lesson.learning_goals,
         levels=lesson.levels,
-        foo="<b>this is bold</b><script>alert('foo');</script>",
     )
 
 

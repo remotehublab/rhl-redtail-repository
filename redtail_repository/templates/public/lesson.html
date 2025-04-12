@@ -10,20 +10,26 @@
       <div class="card-body">
         <ul class="list-unstyled">
           {% for category in categories|sort(attribute='name') %}
-          <li><a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">{{ gettext(category.name) }}</a></li>
+          <li>{{ gettext(category.name) }}</li>
           {% endfor %}
         </ul>
       </div>
     </div>
-
 
     <!-- Devices Section -->
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for device in supported_devices|sort(attribute='name') %}
-          <li>{{ gettext(device.name) }}</li>
+          {% for device in devices %}
+          <li>
+            {{ gettext(device.device.name) }}
+            <ul>
+              {% for device_framework in device.frameworks %}
+              <li>{{ device_framework.name }}</li>
+              {% endfor %}
+            </ul>
+          </li>
           {% endfor %}
         </ul>
       </div>
@@ -31,7 +37,7 @@
 
     <!-- Level Section -->
     <div class="card mb-4">
-      <div class="card-header">Level:</div>
+      <div class="card-header">{{ gettext("Level:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for level in levels|sort(attribute='name') %}
@@ -84,7 +90,6 @@
         <div class="card text-start bg-light" style="height: 200px;">
           <div class="card-header">{{gettext("Description")}}</div>
           <div class="card-body">
-            <!-- Ask Pablo about db call to short_description -->
             <p class="card-text">{{ lesson.long_description|safe }}</p>
           </div>
         </div>
@@ -98,14 +103,12 @@
         <div class="card text-start bg-light" style="height: 200px;">
           <div class="card-header">{{gettext("Downloads")}}</div>
           <div class="card-body">
-            <!-- Ask Pablo about db call to short_description -->
             <p class="card-text">
               {{gettext("Downloads")}}
 
               {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified %}
-                (also solutions)
+              (also solutions)
               {% endif %}
-
             </p>
           </div>
         </div>
@@ -123,8 +126,5 @@
       </div>
     </div>
   </div>
-
-
-</div>
 </div>
 {% endblock %}

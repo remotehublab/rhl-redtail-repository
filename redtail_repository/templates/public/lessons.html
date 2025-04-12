@@ -11,10 +11,10 @@
         <ul class="list-unstyled">
           {% for category in all_categories|sort(attribute='name')%}
           <li>
-            <a href="{{ url_for('.lessons', 
-                              category=category.slug, 
-                              supported_device=selected_supported_device,
-                              level=selected_level) }}"
+            <a href="{{ url_for('.lessons',
+                              category=category.slug,
+                              level=selected_level,
+                              framework=selected_framework) }}"
               class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
               {{ category.name }}
             </a>
@@ -31,18 +31,17 @@
         <ul class="list-unstyled">
           {% for device in devices %}
           <li>
-            {# <a href="{{ url_for('.lessons', 
-                              category=selected_category,
-                              supported_device=supported_device.id, 
-                              level=selected_level) }}"
-              class="{{ 'active text-primary' if selected_supported_device == supported_device.id|string else '' }}">
-            #}
-              {{ device.device.name }}
-            {# </a> #}
+            {{ device.device.name }}
             <ul>
               {% for device_framework in device.frameworks %}
               <li>
-                {{ device_framework.name }}
+                <a href="{{ url_for('.lessons',
+                                category=selected_category,
+                                framework=device_framework.slug,
+                                level=selected_level) }}"
+                  class="{{ 'active text-primary' if selected_framework == device_framework.slug else '' }}">
+                  {{ device_framework.name }}
+                </a>
               </li>
               {% endfor %}
             </ul>
@@ -59,9 +58,9 @@
         <ul class="list-unstyled">
           {% for level in all_levels|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.lessons', 
+            <a href="{{ url_for('.lessons',
                               category=selected_category,
-                              supported_device=selected_supported_device, 
+                              framework=selected_framework,
                               level=level.slug) }}"
               class="{{ 'active text-primary' if selected_level == level.slug else '' }}">
               {{ level.name }}
@@ -72,7 +71,7 @@
       </div>
     </div>
 
-    {% if selected_category or selected_supported_device or selected_level %}
+    {% if selected_category or selected_level or selected_framework %}
     <div class="mb-3">
       <a href="{{ url_for('.lessons') }}" class="btn btn-outline-secondary btn-sm">
         {{ gettext("Clear Filters") }}
@@ -86,7 +85,7 @@
     <h1 class="text-center">{{ gettext("Lessons") }}</h1>
 
     {# Current Filter Selections Section #}
-    {% if selected_category or selected_supported_device or selected_level %}
+    {% if selected_category or selected_level or selected_framework %}
     <div class="row mb-3">
       <div class="col text-center">
         <div class="d-inline-block">
@@ -95,16 +94,18 @@
             {{ gettext("Category") }}:
             {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
             {{ selected_cat.name }}
-            <a href="{{ url_for('.lessons', supported_device=selected_supported_device, level=selected_level) }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.lessons', level=selected_level, framework=selected_framework) }}"
+              class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
 
-          {% if selected_supported_device %}
+          {% if selected_framework %}
           <span class="badge bg-secondary me-2">
-            {{ gettext("Device") }}:
-            {% set selected_dev = all_supported_devices|selectattr('id', 'equalto', selected_supported_device|int)|first %}
-            {{ selected_dev.name }}
-            <a href="{{ url_for('.lessons', category=selected_category, level=selected_level) }}" class="text-white ms-1">&times;</a>
+            {{ gettext("Framework") }}:
+            {% set selected_fw = all_frameworks|selectattr('slug', 'equalto', selected_framework)|first %}
+            {{ selected_fw.name }}
+            <a href="{{ url_for('.lessons', category=selected_category, level=selected_level) }}"
+              class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
 
@@ -113,7 +114,8 @@
             {{ gettext("Level") }}:
             {% set selected_lvl = all_levels|selectattr('slug', 'equalto', selected_level)|first %}
             {{ selected_lvl.name }}
-            <a href="{{ url_for('.lessons', category=selected_category, supported_device=selected_supported_device) }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.lessons', category=selected_category, framework=selected_framework) }}"
+              class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
         </div>
