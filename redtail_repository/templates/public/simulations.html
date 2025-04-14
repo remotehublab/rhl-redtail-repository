@@ -11,7 +11,7 @@
         <ul class="list-unstyled">
           {% for category in all_categories|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.simulations', category=category.slug) }}"
+            <a href="{{ url_for('.simulations', category=category.slug, device=selected_device) }}"
               class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
               {{ category.name }}
             </a>
@@ -26,11 +26,11 @@
       <div class="card-header">{{ gettext("Devices")}}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for supported_device in all_supported_devices|sort(attribute='name') %}
+          {% for device_item in devices|sort(attribute='device.name') %}
           <li>
-            <a href="{{ url_for('.simulations', supported_device=supported_device.id) }}"
-              class="{{ 'active text-primary' if selected_supported_device == supported_device.id|string else '' }}">
-              {{ supported_device.name }}
+            <a href="{{ url_for('.simulations', device=device_item.device.id, category=selected_category) }}"
+              class="{{ 'active text-primary' if selected_device and selected_device == device_item.device.id else '' }}">
+              {{ device_item.device.name }}
             </a>
           </li>
           {% endfor %}
@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    {% if selected_category or selected_supported_device or selected_level %}
+    {% if selected_category or selected_device %}
     <div class="mb-3">
       <a href="{{ url_for('.simulations') }}" class="btn btn-outline-secondary btn-sm">
         {{ gettext("Clear Filters") }}
@@ -48,66 +48,66 @@
 
   </div>
 
-
-
   <!-- Main Content Section -->
-<div class="col-md-9">
+  <div class="col-md-9">
     <h1 class="text-center">{{ gettext("Simulations") }}</h1>
 
     {# Current Filter Selections Section #}
-    {% if selected_category or selected_supported_device %}
+    {% if selected_category or selected_device %}
     <div class="row mb-3">
-        <div class="col text-center">
-            <div class="d-inline-block">
-                {% if selected_category %}
-                <span class="badge bg-secondary me-2">
-                    {{ gettext("Category") }}:
-                    {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
-                    {{ selected_cat.name }}
-                    <a href="{{ url_for('.simulations', supported_device=selected_supported_device) }}" class="text-white ms-1">&times;</a>
-                </span>
-                {% endif %}
+      <div class="col text-center">
+        <div class="d-inline-block">
+          {% if selected_category %}
+          <span class="badge bg-secondary me-2">
+            {{ gettext("Category") }}:
+            {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
+            {{ selected_cat.name }}
+            <a href="{{ url_for('.simulations', device=selected_device) }}" class="text-white ms-1">&times;</a>
+          </span>
+          {% endif %}
 
-                {% if selected_supported_device %}
-                <span class="badge bg-secondary me-2">
-                    {{ gettext("Device") }}:
-                    {% set selected_dev = all_supported_devices|selectattr('id', 'equalto', selected_supported_device|int)|first %}
-                    {{ selected_dev.name }}
-                    <a href="{{ url_for('.simulations', category=selected_category) }}" class="text-white ms-1">&times;</a>
-                </span>
-                {% endif %}
-            </div>
+          {% if selected_device %}
+          <span class="badge bg-secondary me-2">
+            {{ gettext("Device") }}:
+            {% set selected_dev = devices_by_id[selected_device] %}
+            {{ selected_dev.name }}
+            <a href="{{ url_for('.simulations', category=selected_category) }}" class="text-white ms-1">&times;</a>
+          </span>
+          {% endif %}
         </div>
+      </div>
     </div>
     {% endif %}
 
     {% if simulations %}
     <div class="row row-cols-1 row-cols-md-3 g-2">
-        {% for simulation in simulations %}
-        <div class="col">
-            <div class="card" style="width: 90%;">
-                <img src="{{ simulation.cover_image_url or url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="{{ simulation.name }}">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <a href="{{ url_for('.simulation', simulation_slug=simulation.slug ) }}" class="stretched-link text-decoration-none">
-                            {{ simulation.name }}
-                        </a>
-                    </h5>
-                    <p class="card-text">{{ simulation.description[:100] }}...</p>
-                </div>
-                <div class="card-footer">
-                    <p class="card-text"><small class="text-body-secondary">Last Updated: {{ simulation.last_updated }}</small></p>
-                </div>
-            </div>
+      {% for simulation in simulations %}
+      <div class="col">
+        <div class="card" style="width: 90%;">
+          <img src="{{ simulation.cover_image_url or url_for('static', filename='img/NES.png') }}" class="card-img-top"
+            alt="{{ simulation.name }}">
+          <div class="card-body">
+            <h5 class="card-title">
+              <a href="{{ url_for('.simulation', simulation_slug=simulation.slug ) }}"
+                class="stretched-link text-decoration-none">
+                {{ simulation.name }}
+              </a>
+            </h5>
+            <p class="card-text">{{ simulation.description[:100] }}...</p>
+          </div>
+          <div class="card-footer">
+            <p class="card-text"><small class="text-body-secondary">Last Updated: {{ simulation.last_updated }}</small>
+            </p>
+          </div>
         </div>
-        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
     {% else %}
     <div class="alert alert-info text-center">
-        {{ gettext("No simulations found matching your current filters.") }}
+      {{ gettext("No simulations found matching your current filters.") }}
     </div>
     {% endif %}
-</div>
-
+  </div>
 </div>
 {% endblock %}

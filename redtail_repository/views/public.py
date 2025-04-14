@@ -160,7 +160,7 @@ def lesson(lesson_slug):
         documents=lesson.lesson_documents,
         simulations=lesson.simulations,
         categories=lesson.lesson_categories,
-        devices=devices,  # Use devices instead of supported_devices
+        devices=devices,
         learning_goals=lesson.learning_goals,
         levels=lesson.levels,
     )
@@ -168,11 +168,27 @@ def lesson(lesson_slug):
 
 @public_blueprint.route('/simulations')
 def simulations():
-    all_supported_devices = SupportedDevice.query.all()
+    all_devices = Device.query.all()
     all_categories = SimulationCategory.query.all()
     all_frameworks = DeviceFramework.query.all()
 
-    supported_device_id = request.args.get('supported_device', type=int)
+    # Create devices_by_id dictionary
+    devices_by_id = {device.id: device for device in all_devices}
+
+    # Group frameworks by device for the sidebar organization
+    devices_to_frameworks = {}
+    for device_framework in all_frameworks:
+        devices_to_frameworks.setdefault(device_framework.device_id, []).append(device_framework)
+
+    devices = [
+        {
+            "device": devices_by_id[device_id],
+            "frameworks": devices_to_frameworks[device_id]
+        }
+        for device_id in devices_to_frameworks
+    ]
+
+    device_id = request.args.get('device', type=int)
     category_slug = request.args.get('category')
     framework_slug = request.args.get('framework')
 
@@ -183,9 +199,9 @@ def simulations():
         joinedload(Simulation.device_frameworks)
     )
 
-    if supported_device_id:
-        simulations_query = simulations_query.join(Simulation.supported_devices).filter(
-            SupportedDevice.id == supported_device_id)
+    if device_id:
+        simulations_query = simulations_query.join(Simulation.device_frameworks).join(DeviceFramework.device).filter(
+            Device.id == device_id)
 
     if category_slug:
         category = SimulationCategory.query.filter_by(
@@ -206,21 +222,21 @@ def simulations():
     return render_template(
         'public/simulations.html',
         simulations=simulations,
-        all_supported_devices=all_supported_devices,
+        devices=devices,
+        devices_by_id=devices_by_id,
+        all_devices=all_devices,
         all_categories=all_categories,
         all_frameworks=all_frameworks,
-        selected_supported_device=supported_device_id,
+        selected_device=device_id,
         selected_category=category_slug,
         selected_framework=framework_slug
     )
-
 
 @public_blueprint.route('/simulations/<simulation_slug>')
 def simulation(simulation_slug):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).options(
         joinedload(Simulation.lessons),
-        joinedload(Simulation.devices).joinedload(Device.device_frameworks),
-        joinedload(Simulation.supported_devices),
+        joinedload(Simulation.device_frameworks).joinedload(DeviceFramework.device),
         joinedload(Simulation.simulation_categories),
         joinedload(Simulation.simulation_documents)
     ).first()
@@ -228,12 +244,29 @@ def simulation(simulation_slug):
     if not simulation:
         return render_template("public/error.html", message=gettext("Simulation not found")), 404
 
+    # Organize frameworks by device for consistency with parent route
+    devices_by_id = {}
+    devices_to_frameworks = {}
+
+    for framework in simulation.device_frameworks:
+        device = framework.device
+        devices_by_id[device.id] = device
+        devices_to_frameworks.setdefault(device.id, []).append(framework)
+
+    devices = [
+        {
+            "device": devices_by_id[device_id],
+            "frameworks": devices_to_frameworks[device_id]
+        }
+        for device_id in devices_to_frameworks
+    ]
+
     return render_template(
         "public/simulation.html",
         simulation=simulation,
         lessons=simulation.lessons,
-        devices=simulation.devices,
-        supported_devices=simulation.supported_devices,
+        devices=devices,
+        devices_by_id=devices_by_id,
         categories=simulation.simulation_categories,
         documents=simulation.simulation_documents
     )

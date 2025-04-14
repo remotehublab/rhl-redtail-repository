@@ -21,12 +21,12 @@
       <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% for device in simulation.devices %}
+          {% for device_item in devices|sort(attribute='device.name') %}
           <li>
-            <a href="{{ url_for('.device', device_slug=device.slug) }}">{{device.name}}</a>
-            {% if device.device_frameworks %}
+            <a href="{{ url_for('.simulations', device=device_item.device.id) }}">{{device_item.device.name}}</a>
+            {% if device_item.frameworks %}
             <ul class="ms-3">
-              {% for framework in device.device_frameworks %}
+              {% for framework in device_item.frameworks %}
               <li>{{ framework.name }}</li>
               {% endfor %}
             </ul>
@@ -36,72 +36,87 @@
         </ul>
       </div>
     </div>
-
-    <!-- Level Section -->
-    <div class="card mb-4">
-      <div class="card-header">Level:</div>
-      <div class="card-body">
-        <!-- Clean Up with forloop after finalizing level -->
-        <ul class="list-unstyled">
-          <li><a href="#">Advanced</a></li>
-          <li><a href="#">[...]</a></li>
-        </ul>
-      </div>
-    </div>
   </div>
 
   <!-- Main Content Section -->
   <div class="col-md-8">
     <h1 class="text-center">
-      {{ gettext("simulations: %(simulations_name)s", simulations_name=simulation.name) }}
+      {{ gettext("Simulation: %(simulations_name)s", simulations_name=simulation.name) }}
     </h1>
+
+    <!-- Video Section -->
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
+        <div class="card text-start bg-light mb-3">
+          <div class="card-header">{{gettext("Video Preview")}}</div>
+          <div class="card-body p-0">
+            <div class="ratio ratio-16x9">
+              <!-- Placeholder video - replace src with actual video when available or maybe change to youtube links? -->
+              <video controls class="w-100">
+                <source src="{{ url_for('static', filename='videos/placeholder.mp4') }}" type="video/mp4">
+                {{ gettext("Your browser does not support the video tag.") }}
+              </video>
+            </div>
+            <div class="p-3">
+              <p class="text-muted">{{ gettext("Video demonstration of the simulation") }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Description Section -->
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
-        <div class="card text-start bg-light" style="height: 200px;">
+        <div class="card text-start bg-light">
           <div class="card-header">{{gettext("Description")}}</div>
           <div class="card-body">
-            <!-- Ask Pablo about db call to short_description -->
-            <p class="card-text">{{gettext("Description")}}</p>
+            <p class="card-text">{{ simulation.description }}</p>
           </div>
         </div>
       </div>
     </div>
+
     <!-- Downloads -->
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
-        <div class="card text-start bg-light" style="height: 200px;">
+        <div class="card text-start bg-light">
           <div class="card-header">{{gettext("Downloads")}}</div>
           <div class="card-body">
-            <!-- Ask Pablo about db call to short_description -->
-            <p class="card-text">{{gettext("Downloads")}}</p>
+            {% if documents %}
+            <ul>
+              {% for document in documents %}
+              <li><a href="{{ document.doc_url }}">{{ document.name }}</a></li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p>{{gettext("No downloads available for this simulation.")}}</p>
+            {% endif %}
           </div>
         </div>
       </div>
     </div>
-    <!-- Downloads -->
+
+    <!-- Supported Devices -->
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
-        <div class="card text-start bg-light" style="height: 200px;">
-          <div class="card-header">{{gettext("Supported devices")}}</div>
+        <div class="card text-start bg-light">
+          <div class="card-header">{{gettext("Compatible Devices")}}</div>
           <div class="card-body">
             <ul>
-              {% for device in simulation.devices %}
-              <li><a href="{{ url_for('.device', device_slug=device.slug) }}">{{ device.name }}</a>
-                {% if device.simulation_documents %}
+              {% for device_item in devices|sort(attribute='device.name') %}
+              <li>
+                <a href="{{ url_for('.simulations', device=device_item.device.id) }}">{{ device_item.device.name }}</a>
+                {% if device_item.frameworks %}
                 <ul>
-                  {% for simulation_document in device.simulation_documents %}
-                  <li><a href="{{ simulation_document.doc_url }}">{{ simulation_document.name }}</a></li>
+                  {% for framework in device_item.frameworks %}
+                  <li>{{ framework.name }}</li>
                   {% endfor %}
                 </ul>
                 {% endif %}
-
               </li>
-
               {% endfor %}
             </ul>
-
           </div>
         </div>
       </div>
@@ -113,9 +128,9 @@
         <div class="card text-start bg-light">
           <div class="card-header">{{gettext("Lessons")}}</div>
           <div class="card-body">
-            {% if simulation.lessons %}
+            {% if lessons %}
             <ul>
-              {% for lesson in simulation.lessons %}
+              {% for lesson in lessons %}
               <li>
                 <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
                   {{ lesson.name }}
@@ -133,13 +148,17 @@
   </div>
 
   <div class="col-md-2 mt-4">
-    <div class="card mb-4 h-50">
+    <div class="card mb-4">
       <div class="card-header">{{ gettext("Learning Goals") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          <!-- {% for goal in simulations_goals %}
-        <li>{{ gettext("category.name") }}</li>
-        {% endfor %} -->
+          {% if simulation_goals %}
+            {% for goal in simulation_goals %}
+            <li>{{ goal.name }}</li>
+            {% endfor %}
+          {% else %}
+            <li>{{ gettext("No learning goals defined") }}</li>
+          {% endif %}
         </ul>
       </div>
     </div>
