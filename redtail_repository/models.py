@@ -39,20 +39,6 @@ device_simulation_association = Table(
     db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
-supported_device_lesson = Table(
-    'supported_device_lesson',
-    db.Model.metadata,
-    db.Column('supported_device_id', db.Integer, db.ForeignKey('supported_device.id'), primary_key=True),
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
-)
-
-supported_device_simulation = Table(
-    'supported_device_simulation',
-    db.Model.metadata,
-    db.Column('supported_device_id', db.Integer, db.ForeignKey('supported_device.id'), primary_key=True),
-    db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
-)
-
 lesson_category_association = Table(
     'lesson_category_association',
     db.Model.metadata,
@@ -183,10 +169,6 @@ class Lesson(db.Model):
     )
     lesson_categories: Mapped[List['LessonCategory']] = relationship(
         secondary=lesson_category_association,
-        back_populates="lessons"
-    )
-    supported_devices: Mapped[List['SupportedDevice']] = relationship(
-        secondary=supported_device_lesson,
         back_populates="lessons"
     )
     device_frameworks: Mapped[List['DeviceFramework']] = relationship(
@@ -350,10 +332,6 @@ class Simulation(db.Model):
         secondary=device_simulation_association,
         back_populates="simulations"
     )
-    supported_devices: Mapped[List['SupportedDevice']] = relationship(
-        secondary=supported_device_simulation,
-        back_populates="simulations"
-    )
     simulation_categories: Mapped[List['SimulationCategory']] = relationship(
         secondary=simulation_category_association,
         back_populates="simulations"
@@ -389,30 +367,6 @@ class SimulationDoc(db.Model):
     )
 
     simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_documents")
-
-
-# TODO: is this used anywhere? Otherwise delete
-class SupportedDevice(db.Model):
-    __tablename__ = 'supported_device'
-
-    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(db.String(100), unique=True)
-    slug: Mapped[str] = mapped_column(db.String(100), unique=True)
-    cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
-    last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
-
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=supported_device_lesson,
-        back_populates="supported_devices"
-    )
-    simulations: Mapped[List['Simulation']] = relationship(
-        secondary=supported_device_simulation,
-        back_populates="supported_devices"
-    )
-
-    def __str__(self):
-        return self.name
-
 
 class SimulationDeviceDocument(db.Model):
     __tablename__ = 'simulation_device_document'

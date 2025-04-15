@@ -8,11 +8,10 @@ from wtforms.validators import DataRequired
 
 from ..models import (
     Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
-    Simulation, Device, LessonCategory, SupportedDevice, LessonLevel,
+    Simulation, Device, LessonCategory, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
     DeviceFramework, SimulationDeviceDocument,
     device_simulation_association, lesson_device_association,
-    supported_device_lesson, supported_device_simulation,
     author_lesson_association, lesson_simulation_association, 
     device_category_association, simulation_category_association, 
     lesson_level_association, 
@@ -81,7 +80,7 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         'id', 'name', 'slug', 'short_description', 'active',
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
         'last_updated',
-        'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
+        'authors', 'devices', 'simulations', 'lesson_categories',
         'device_frameworks',
         'videos', 'images', 'lesson_documents'
     ]
@@ -92,7 +91,7 @@ class LessonModelView(AuthedModelMixIn, ModelView):
     form_columns = [
         'id', 'name', 'slug', 'short_description', 'active',
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
-        'authors', 'devices', 'simulations', 'supported_devices', 'lesson_categories',
+        'authors', 'devices', 'simulations', 'lesson_categories',
         'device_frameworks',
         'videos', 'images', 'lesson_documents'
     ]
@@ -161,7 +160,7 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'description',
         'cover_image_url', 'last_updated',
-        'lessons', 'devices', 'supported_devices',
+        'lessons', 'devices',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
         'simulation_documents', 
@@ -169,7 +168,7 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     form_columns = [
         'id', 'name', 'slug', 'description',
         'cover_image_url',
-        'lessons', 'devices', 'supported_devices',
+        'lessons', 'devices',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
         'simulation_documents', 
@@ -254,13 +253,6 @@ class SimulationDeviceDocumentModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(SimulationDeviceDocument, db.session, *args, **kwargs)
 
-class SupportedDeviceModelView(AuthedModelMixIn, ModelView):
-    column_list = ['name', 'slug', 'lessons', 'simulations']
-    form_columns = ['name', 'slug', 'lessons', 'simulations']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(SupportedDevice, db.session, *args, **kwargs)
-
 # Category Views
 class LessonCategoryModelView(AuthedModelMixIn, ModelView):
     column_list = [
@@ -316,7 +308,6 @@ admin.add_view(SimulationDeviceDocumentModelView(name="Simulation Device Documen
 
 admin.add_view(DeviceModelView(name="Device", category="Device"))
 admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
-admin.add_view(SupportedDeviceModelView(name="Supported Device", category="Device"))
 
 admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))

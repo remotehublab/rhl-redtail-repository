@@ -4,7 +4,7 @@ from flask_babel import gettext
 
 from redtail_repository import db
 from redtail_repository.models import (
-    Lesson, LessonCategory, Simulation, Device, SimulationCategory, User, Author, SupportedDevice,
+    Lesson, LessonCategory, Simulation, Device, SimulationCategory, User, Author,
     DeviceCategory, DeviceFramework, LessonLevel
 )
 
@@ -120,7 +120,6 @@ def lesson(lesson_slug):
         joinedload(Lesson.lesson_documents),
         joinedload(Lesson.simulations),
         joinedload(Lesson.lesson_categories),
-        joinedload(Lesson.supported_devices),
         joinedload(Lesson.levels),
         joinedload(Lesson.device_frameworks)
     ).first()
@@ -193,7 +192,6 @@ def simulations():
     framework_slug = request.args.get('framework')
 
     simulations_query = db.session.query(Simulation).options(
-        joinedload(Simulation.supported_devices),
         joinedload(Simulation.simulation_categories),
         joinedload(Simulation.simulation_documents),
         joinedload(Simulation.device_frameworks)
