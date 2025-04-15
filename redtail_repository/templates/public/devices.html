@@ -10,32 +10,19 @@
         <ul class="list-unstyled">
           {% for device_category in all_device_categories|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.devices', device_category=device_category.id) }}"
-               class="{{ 'active text-primary' if selected_device_category == device_category.id|string else '' }}">
+            {% if request.args.get('device_category') == device_category.id|string or selected_device_category ==
+            device_category.id|string %}
+            <span class="text-primary fw-bold">{{ device_category.name }}</span>
+            {% else %}
+            <a href="{{ url_for('.devices', device_category=device_category.id) }}">
               {{ device_category.name }}
             </a>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
       </div>
     </div>
-
-    <!-- Device Frameworks Section -->
-    <!-- <div class="card mb-4">
-      <div class="card-header">{{ gettext("Device Frameworks") }}</div>
-      <div class="card-body">
-        <ul class="list-unstyled">
-          {% for framework in all_frameworks | sort(attribute='name') %}
-          <li>
-            <a href="{{ url_for('.devices', framework=framework.slug) }}"
-              class="{{ 'active text-primary' if selected_framework == framework.slug else '' }}">
-              {{ framework.name }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div> -->
 
     {% if selected_category or selected_device_category %}
     <div class="mb-3">
@@ -60,7 +47,8 @@
             {{ gettext("Category") }}:
             {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
             {{ selected_cat.name }}
-            <a href="{{ url_for('.devices') }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.devices', device_category=selected_device_category) }}"
+              class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
 
@@ -70,7 +58,7 @@
             {% set selected_dev_cat = all_device_categories|selectattr('id', 'equalto',
             selected_device_category|int)|first %}
             {{ selected_dev_cat.name }}
-            <a href="{{ url_for('.devices') }}" class="text-white ms-1">&times;</a>
+            <a href="{{ url_for('.devices', category=selected_category) }}" class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
         </div>
@@ -103,7 +91,8 @@
             </ul>
           </div>
           <div class="card-footer">
-            <p class="card-text"><small class="text-body-secondary">{{ gettext("Last Updated") }}: {{ device.last_updated }}</small></p>
+            <p class="card-text"><small class="text-body-secondary">{{ gettext("Last Updated") }}: {{
+                device.last_updated }}</small></p>
           </div>
         </div>
       </div>

@@ -11,13 +11,16 @@
         <ul class="list-unstyled">
           {% for category in all_categories|sort(attribute='name')%}
           <li>
+            {% if selected_category == category.slug %}
+            <span class="text-primary fw-bold">{{ category.name }}</span>
+            {% else %}
             <a href="{{ url_for('.lessons',
                               category=category.slug,
                               level=selected_level,
-                              framework=selected_framework) }}"
-              class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
+                              framework=selected_framework) }}">
               {{ category.name }}
             </a>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
@@ -35,13 +38,16 @@
             <ul>
               {% for device_framework in device.frameworks %}
               <li>
+                {% if selected_framework == device_framework.slug %}
+                <span class="text-primary fw-bold">{{ device_framework.name }}</span>
+                {% else %}
                 <a href="{{ url_for('.lessons',
-                                category=selected_category,
-                                framework=device_framework.slug,
-                                level=selected_level) }}"
-                  class="{{ 'active text-primary' if selected_framework == device_framework.slug else '' }}">
+                                  category=selected_category,
+                                  framework=device_framework.slug,
+                                  level=selected_level) }}">
                   {{ device_framework.name }}
                 </a>
+                {% endif %}
               </li>
               {% endfor %}
             </ul>
@@ -58,13 +64,16 @@
         <ul class="list-unstyled">
           {% for level in all_levels|sort(attribute='name') %}
           <li>
+            {% if selected_level == level.slug %}
+            <span class="text-primary fw-bold">{{ level.name }}</span>
+            {% else %}
             <a href="{{ url_for('.lessons',
-                              category=selected_category,
-                              framework=selected_framework,
-                              level=level.slug) }}"
-              class="{{ 'active text-primary' if selected_level == level.slug else '' }}">
+                                category=selected_category,
+                                framework=selected_framework,
+                                level=level.slug) }}">
               {{ level.name }}
             </a>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>

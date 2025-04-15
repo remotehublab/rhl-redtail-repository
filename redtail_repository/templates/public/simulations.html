@@ -11,10 +11,13 @@
         <ul class="list-unstyled">
           {% for category in all_categories|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.simulations', category=category.slug, device=selected_device) }}"
-              class="{{ 'active text-primary' if selected_category == category.slug else '' }}">
+            {% if selected_category == category.slug %}
+            <span class="text-primary fw-bold">{{ category.name }}</span>
+            {% else %}
+            <a href="{{ url_for('.simulations', category=category.slug, device=selected_device) }}">
               {{ category.name }}
             </a>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
@@ -28,10 +31,13 @@
         <ul class="list-unstyled">
           {% for device_item in devices|sort(attribute='device.name') %}
           <li>
-            <a href="{{ url_for('.simulations', device=device_item.device.id, category=selected_category) }}"
-              class="{{ 'active text-primary' if selected_device and selected_device == device_item.device.id else '' }}">
+            {% if selected_device and selected_device == device_item.device.id %}
+            <span class="text-primary fw-bold">{{ device_item.device.name }}</span>
+            {% else %}
+            <a href="{{ url_for('.simulations', device=device_item.device.id, category=selected_category) }}">
               {{ device_item.device.name }}
             </a>
+            {% endif %}
           </li>
           {% endfor %}
         </ul>
