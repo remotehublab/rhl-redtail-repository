@@ -29,7 +29,7 @@
         <img src="{{ url_for('static', filename='img/NES.png') }}" alt="TMP" class="img-fluid device-img">
       </div>
       <div class="col-md-9">
-        <h1 class="display-4">{{ gettext("%(device_name)s: frameworks", device_name=device.name) }}</h1>
+        <h1 class="display-4">{{ device.name }}</h1>
       </div>
     </div>
 

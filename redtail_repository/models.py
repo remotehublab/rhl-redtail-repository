@@ -102,6 +102,9 @@ class Author(db.Model):
         back_populates="authors"
     )
 
+    def __str__(self):
+        return self.name
+
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
 

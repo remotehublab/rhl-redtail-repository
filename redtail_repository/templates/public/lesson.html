@@ -114,10 +114,31 @@
           <div class="card-header">{{gettext("Downloads")}}</div>
           <div class="card-body">
             <p class="card-text">
-              {{gettext("Downloads")}}
+              {% if documents %}
+                <ul>
+                {% for document in documents %}
 
-              {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified %}
-              (also solutions)
+                  <li>{{ document.title }} (and also the link, etc. depending on the bottom)
+
+                  {% if document.is_solution %}
+                    {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified %}
+
+                      (showing solution link, etc.)
+                    {% else %}
+                      (not showing solution)
+
+                    {% endif %}
+                  {% endif %}
+
+                  </li>
+                {% endfor %}
+                </ul>
+
+              {% else %}
+              <div class="alert alert-warning">
+                <p>{{ gettext("There is no document associated to this lesson yet.") }}</p>
+              </div>
+
               {% endif %}
             </p>
           </div>
