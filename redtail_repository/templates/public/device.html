@@ -1,19 +1,20 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-
 <div class="row">
+  <!-- Sidebar - Categories Section -->
   <div class="col-md-2 mt-4">
-    <!-- Categories Section -->
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Device Categories") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for category in categories|sort(attribute='name') %}
-          <li><a href="{{ url_for('.devices', device_category=category.id) }}"
+          <li>
+            <a href="{{ url_for('.devices', device_category=category.id) }}"
               class="{{ 'active text-primary' if selected_device_category == category.id|string else '' }}">
               {{ category.name }}
-            </a></li>
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </div>
@@ -22,76 +23,113 @@
 
   <!-- Main Content Section -->
   <div class="col-md-10">
+    <!-- Device Header -->
     <div class="row mb-4 align-items-center">
       <div class="col-md-3 text-center">
         <img src="{{ url_for('static', filename='img/NES.png') }}" alt="TMP" class="img-fluid device-img">
       </div>
       <div class="col-md-9">
-        <h1 class="display-4">{{ gettext("%(device_name)s: frameworks", device_name=device.name)}}</h1>
+        <h1 class="display-4">{{ gettext("%(device_name)s: frameworks", device_name=device.name) }}</h1>
       </div>
     </div>
 
-    <!-- Framework Cards -->
-    <div class="row g-4">
-      <h2>{{ gettext("Device Frameworks") }}</h2>
-      {% for device_framework in device.device_frameworks %}
-      <div class="col-md-4">
-        <div class="card device-card">
-          <div class="card-header bg-light">
-            {{ device_framework.name }}
-          </div>
-          <div class="card-body">
-            <a href="#" class="framework-link text-primary d-block mb-3">{{ device_framework.name }}</a>
-            <p class="card-text mb-1">{{ gettext("Used in %(lessons)s lessons", lessons=device_framework.lessons|length)
-              }}</p>
-            <p class="card-text">{{ gettext("Used in %(simulations)s simulations",
-              simulations=device_framework.simulations|length) }}</p>
-          </div>
-          <div class="card-footer bg-transparent">
-            <p class="last-update mb-0">{{ gettext("Last update: ")}}<span>{{ device_framework.last_updated.isoformat()
-                }}</span></p>
+    <!-- Content Container to control alignment -->
+    <div class="container-fluid p-0">
+      <!-- Framework Cards Section -->
+      <section class="mb-5">
+        <div class="row mb-3">
+          <div class="col-12">
+            <h2 class="border-bottom pb-2">{{ gettext("Device Frameworks") }}</h2>
           </div>
         </div>
-      </div>
-      {% endfor %}
+
+        <div class="row g-4">
+          {% for device_framework in device.device_frameworks %}
+          <div class="col-md-4">
+            <div class="card device-card shadow-sm h-100">
+              <div class="card-header bg-light">
+                {{ device_framework.name }}
+              </div>
+              <div class="card-body">
+                <a href="#" class="framework-link text-primary d-block mb-2">{{ device_framework.name }}</a>
+                <p class="card-text mb-1 small">
+                  {{ gettext("Used in %(lessons)s lessons", lessons=device_framework.lessons|length) }}
+                </p>
+                <p class="card-text small">
+                  {{ gettext("Used in %(simulations)s simulations", simulations=device_framework.simulations|length) }}
+                </p>
+              </div>
+              <div class="card-footer bg-transparent border-top">
+                <p class="last-update mb-0 text-muted small">
+                  {{ gettext("Last update: ") }}<span>{{ device_framework.last_updated.isoformat() }}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Lessons Section -->
+      <section class="mb-5">
+        <div class="row mb-3">
+          <div class="col-12">
+            <h2 class="border-bottom pb-2">{{ gettext("Lessons") }}</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            {% if lessons %}
+            <div class="card shadow-sm">
+              <ul class="list-group list-group-flush">
+                {% for lesson in lessons %}
+                <li class="list-group-item">
+                  <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
+                    {{ lesson.name }}
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% else %}
+            <div class="alert alert-light">
+              {{ gettext("No lessons available for this device.") }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Simulations Section -->
+      <section class="mb-5">
+        <div class="row mb-3">
+          <div class="col-12">
+            <h2 class="border-bottom pb-2">{{ gettext("Simulations") }}</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            {% if simulations %}
+            <div class="card shadow-sm">
+              <ul class="list-group list-group-flush">
+                {% for simulation in simulations %}
+                <li class="list-group-item">
+                  <a href="{{ url_for('.simulation', simulation_slug=simulation.slug) }}">
+                    {{ simulation.name }}
+                  </a>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% else %}
+            <div class="alert alert-light">
+              {{ gettext("No simulations available for this device.") }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
     </div>
-
-    <!-- Lessons Section -->
-    <section class="mt-4">
-      <h2>{{ gettext("Lessons") }}</h2>
-      {% if lessons %}
-      <ul class="list-group">
-        {% for lesson in lessons %}
-        <li class="list-group-item">
-          <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
-            {{ lesson.name }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p>{{ gettext("No lessons available for this device.") }}</p>
-      {% endif %}
-    </section>
-
-    <!-- Simulations Section -->
-    <section class="mt-4">
-      <h2>{{ gettext("Simulations") }}</h2>
-      {% if simulations %}
-      <ul class="list-group">
-        {% for simulation in simulations %}
-        <li class="list-group-item">
-          <a href="{{ url_for('.simulation', simulation_slug=simulation.slug) }}">
-            {{ simulation.name }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p>{{ gettext("No simulations available for this device.") }}</p>
-      {% endif %}
-    </section>
-
   </div>
 </div>
 {% endblock %}
