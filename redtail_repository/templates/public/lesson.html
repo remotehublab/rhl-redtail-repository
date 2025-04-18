@@ -40,7 +40,6 @@
         </ul>
       </div>
     </div>
-
     <!-- Level Section -->
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Level:") }}</div>
@@ -50,6 +49,22 @@
           <li>
             <a href="{{ url_for('.lessons', level=level.slug) }}">
               {{ gettext(level.name) }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Simulations Section -->
+    <div class="card mb-4">
+      <div class="card-header">{{ gettext("Simulations Supported:") }}</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          {% for simulation in simulations|sort(attribute='name') %}
+          <li>
+            <a href="{{ url_for('.simulation', simulation_slug=simulation.slug) }}">
+              {{ gettext(simulation.name) }}
             </a>
           </li>
           {% endfor %}
@@ -67,7 +82,7 @@
       <p class="text-lead">
         {{ gettext("By:") }}
         {% for author in authors %}
-          {{ author.name }}{% if not loop.last %}, {% endif %}
+        {{ author.name }}{% if not loop.last %}, {% endif %}
         {% endfor %}
       </p>
     </div>
@@ -120,31 +135,32 @@
           <div class="card-body">
             <p class="card-text">
               {% if documents %}
-                <ul>
-                {% for document in documents %}
+            <ul>
+              {% for document in documents %}
 
-                  <li>{{ document.title }} (and also the link, etc. depending on the bottom)
+              <li>{{ document.title }} (and also the link, etc. depending on the bottom)
 
-                  {% if document.is_solution %}
-                    {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified %}
+                {% if document.is_solution %}
+                {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified
+                %}
 
-                      (showing solution link, etc.)
-                    {% else %}
-                      (not showing solution)
+                (showing solution link, etc.)
+                {% else %}
+                (not showing solution)
 
-                    {% endif %}
-                  {% endif %}
+                {% endif %}
+                {% endif %}
 
-                  </li>
-                {% endfor %}
-                </ul>
+              </li>
+              {% endfor %}
+            </ul>
 
-              {% else %}
-              <div class="alert alert-warning">
-                <p>{{ gettext("There is no document associated to this lesson yet.") }}</p>
-              </div>
+            {% else %}
+            <div class="alert alert-warning">
+              <p>{{ gettext("There is no document associated to this lesson yet.") }}</p>
+            </div>
 
-              {% endif %}
+            {% endif %}
             </p>
           </div>
         </div>
