@@ -105,6 +105,63 @@
   {% endassets %}
 
   {% block tail %}{% endblock %}
+
+  <script>
+    $(function() {
+      // Select all elements with a data-datetime attribute
+      $('[data-datetime]').each(function() {
+        var $el = $(this);
+        var utcString = $el.attr('data-datetime');
+        if (!utcString) return;
+
+        // Parse as UTC
+        var date = new Date(utcString); 
+        if (isNaN(date)) {
+          console.warn('Invalid date:', utcString);
+          return;
+        }
+
+        // Format to local string; tweak options as you like
+        var localString = date.toLocaleString([], {
+          year:   'numeric',
+          month:  '2-digit',
+          day:    '2-digit',
+          hour:   '2-digit',
+          minute: '2-digit'
+        });
+
+        // Replace element’s text (or you could set a title, append, etc.)
+        $el.text(localString);
+
+        // (Optional) store the local ISO back on the element
+        $el.attr('data-local-datetime', date.toISOString());
+      });
+
+      // Select all elements with a data-datetime attribute
+      $('[data-date]').each(function() {
+        var $el = $(this);
+        var utcString = $el.attr('data-date');
+        if (!utcString) return;
+
+        // Parse as UTC
+        var date = new Date(utcString); 
+        if (isNaN(date)) {
+          console.warn('Invalid date:', utcString);
+          return;
+        }
+
+        // Format to local string; tweak options as you like
+        var localString = date.toLocaleString([], {
+          year:   'numeric',
+          month:  '2-digit',
+          day:    '2-digit'
+        });
+
+        // Replace element’s text (or you could set a title, append, etc.)
+        $el.text(localString);
+      });
+    });
+  </script>
 </body>
 
 </html>
