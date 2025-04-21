@@ -1,6 +1,8 @@
+import os.path
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.model.form import InlineFormAdmin
+from flask_admin.contrib.fileadmin import FileAdmin
 from flask_login import current_user
 
 from wtforms import PasswordField
@@ -291,6 +293,15 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(DeviceCategory, db.session, *args, **kwargs)
 
+
+# A FileAdmin that only lets admins in
+class FileBrowser(AuthedModelMixIn, FileAdmin):
+    pass
+
+# compute the absolute paths to your two folders
+public_path  = os.path.join(os.path.abspath('.'), 'public')
+private_path = os.path.join(os.path.abspath('.'), 'private')
+
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(UserModelView(name="User", category="User"))
@@ -312,3 +323,22 @@ admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
 admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))
 admin.add_view(LessonLevelModelView(name="Lesson Level", category="Category"))
+
+admin.add_view(
+    FileBrowser(
+        public_path,
+        '/public/',
+        name='Public Files',
+        endpoint="files/public",
+        category='Files'
+    )
+)
+admin.add_view(
+    FileBrowser(
+        private_path,
+        '/private/',
+        name='Private Files',
+        endpoint="files/private",
+        category='Files'
+    )
+)
