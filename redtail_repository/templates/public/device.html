@@ -2,7 +2,7 @@
 
 {% block container %}
 <div class="row">
-  <!-- Sidebar - Categories Section -->
+  <!-- Categories Section -->
   <div class="col-md-2 mt-4">
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Device Categories") }}</div>
@@ -32,8 +32,6 @@
         <h1 class="display-4">{{ device.name }}</h1>
       </div>
     </div>
-
-    <!-- Content Container to control alignment -->
     <div class="container-fluid p-0">
       <!-- Framework Cards Section -->
       <section class="mb-5">
@@ -51,13 +49,33 @@
                 {{ device_framework.name }}
               </div>
               <div class="card-body">
-                <a href="#" class="framework-link text-primary d-block mb-2">{{ device_framework.name }}</a>
+                <p class="card-text mb-1 small">{{gettext("Used in: ")}}</p>
                 <p class="card-text mb-1 small">
-                  {{ gettext("Used in %(lessons)s lessons", lessons=device_framework.lessons|length) }}
+                  <a href="{{ url_for('.lessons', framework=device_framework.slug) }}">
+                    {{ gettext("%(lessons)s lessons", lessons=device_framework.lessons|length) }}
+                  </a>
                 </p>
-                <p class="card-text small">
-                  {{ gettext("Used in %(simulations)s simulations", simulations=device_framework.simulations|length) }}
+                <p class="card-text mb-1 small">
+                  <a href="{{ url_for('.simulations', device=device.id) }}">
+                    {{ gettext("%(simulations)s simulations", simulations=device_framework.simulations|length if
+                    device_framework.simulations else 0) }}
+                  </a>
                 </p>
+
+                <ul class="list-unstyled">
+                  {% for device_item in devices|sort(attribute='device.name') %}
+                  <li>
+                    {% if selected_device and selected_device == device_item.device.id %}
+                    <span class="text-primary fw-bold">{{ device_item.device.name }}</span>
+                    {% else %}
+                    <a href="{{ url_for('.simulations', device=device_item.device.id, category=selected_category) }}">
+                      {{ device_item.device.name }}
+                    </a>
+                    {% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+
               </div>
               <div class="card-footer bg-transparent border-top">
                 <p class="last-update mb-0 text-muted small">
@@ -67,66 +85,6 @@
             </div>
           </div>
           {% endfor %}
-        </div>
-      </section>
-
-      <!-- Lessons Section -->
-      <section class="mb-5">
-        <div class="row mb-3">
-          <div class="col-12">
-            <h2 class="border-bottom pb-2">{{ gettext("Lessons") }}</h2>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            {% if lessons %}
-            <div class="card shadow-sm">
-              <ul class="list-group list-group-flush">
-                {% for lesson in lessons %}
-                <li class="list-group-item">
-                  <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
-                    {{ lesson.name }}
-                  </a>
-                </li>
-                {% endfor %}
-              </ul>
-            </div>
-            {% else %}
-            <div class="alert alert-light">
-              {{ gettext("No lessons available for this device.") }}
-            </div>
-            {% endif %}
-          </div>
-        </div>
-      </section>
-
-      <!-- Simulations Section -->
-      <section class="mb-5">
-        <div class="row mb-3">
-          <div class="col-12">
-            <h2 class="border-bottom pb-2">{{ gettext("Simulations") }}</h2>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            {% if simulations %}
-            <div class="card shadow-sm">
-              <ul class="list-group list-group-flush">
-                {% for simulation in simulations %}
-                <li class="list-group-item">
-                  <a href="{{ url_for('.simulation', simulation_slug=simulation.slug) }}">
-                    {{ simulation.name }}
-                  </a>
-                </li>
-                {% endfor %}
-              </ul>
-            </div>
-            {% else %}
-            <div class="alert alert-light">
-              {{ gettext("No simulations available for this device.") }}
-            </div>
-            {% endif %}
-          </div>
         </div>
       </section>
     </div>
