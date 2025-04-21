@@ -18,6 +18,13 @@ author_lesson_association = Table(
     db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
 )
 
+author_simulation_association = Table(
+    'author_simulation',
+    db.Model.metadata,
+    db.Column('author_id', db.Integer, db.ForeignKey('author.id'), primary_key=True),
+    db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
+)
+
 lesson_device_association = Table(
     'lesson_device',
     db.Model.metadata,
@@ -99,6 +106,10 @@ class Author(db.Model):
     users: Mapped['User'] = relationship("User", back_populates="author")
     lessons: Mapped[List['Lesson']] = relationship(
         secondary=author_lesson_association,
+        back_populates="authors"
+    )
+    simulations: Mapped[List['Simulation']] = relationship(
+        secondary=author_simulation_association,
         back_populates="authors"
     )
 
@@ -324,6 +335,10 @@ class Simulation(db.Model):
     cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
     last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
+    authors: Mapped[List['Author']] = relationship(
+        secondary=author_simulation_association,
+        back_populates="simulations"
+    )
     simulation_documents: Mapped[List['SimulationDoc']] = relationship(
         back_populates="simulation", cascade="all, delete-orphan"
     )

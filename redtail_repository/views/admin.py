@@ -158,7 +158,7 @@ class LessonLevelModelView(AuthedModelMixIn, ModelView):
 
 class SimulationModelView(AuthedModelMixIn, ModelView):
     column_list = [
-        'id', 'name', 'slug', 'description',
+        'id', 'name', 'slug', 'authors', 'description',
         'cover_image_url', 'last_updated',
         'lessons', 'devices',
         'simulation_categories', 'simulation_device_categories',
@@ -166,7 +166,7 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
         'simulation_documents', 
     ]
     form_columns = [
-        'id', 'name', 'slug', 'description',
+        'id', 'name', 'slug', 'authors', 'description',
         'cover_image_url',
         'lessons', 'devices',
         'simulation_categories', 'simulation_device_categories',
