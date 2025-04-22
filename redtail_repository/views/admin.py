@@ -32,6 +32,18 @@ class AuthorModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(Author, db.session, *args, **kwargs)
 
+class ConnectedAuthorModelView(AuthedModelMixIn, ModelView):
+    column_list = ['login', 'name']
+
+    def get_query(self):
+        return super().get_query().join(User).filter(User.author_id == Author.id)
+
+    def get_count_query(self):
+        return super().get_count_query().join(User).filter(User.author_id == Author.id)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(Author, db.session, *args, **kwargs)
+
 class UserModelView(AuthedModelMixIn, ModelView):
     column_list = ['login', 'name', 'author', 'role', 'verified']
 
@@ -295,7 +307,9 @@ private_path = os.path.join(os.path.abspath('.'), 'private')
 
 admin = Admin(name='Admin', template_mode='bootstrap3')
 admin.add_view(AuthorModelView(name="Author", category="User"))
+admin.add_view(ConnectedAuthorModelView(name="Connected Authors", category="User", endpoint="connected_authors"))
 admin.add_view(UserModelView(name="User", category="User"))
+
 
 admin.add_view(LessonModelView(name="Lesson", category="Lesson"))
 admin.add_view(LessonImagesModelView(name="Lesson Image", category="Lesson"))

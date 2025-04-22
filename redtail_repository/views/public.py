@@ -70,7 +70,7 @@ def lessons():
     lessons_query = Lesson.query.filter_by(active=True).options(
         joinedload(Lesson.authors),
         joinedload(Lesson.lesson_categories),
-        joinedload(Lesson.videos),
+        joinedload(Lesson.video_url),
         joinedload(Lesson.images),
         joinedload(Lesson.lesson_documents),
         joinedload(Lesson.simulations),
@@ -115,7 +115,7 @@ def lessons():
 def lesson(lesson_slug):
     lesson = db.session.query(Lesson).filter_by(slug=lesson_slug, active=True).options(
         joinedload(Lesson.authors),
-        joinedload(Lesson.videos),
+        joinedload(Lesson.video_url),
         joinedload(Lesson.images),
         joinedload(Lesson.lesson_documents),
         joinedload(Lesson.simulations),
@@ -154,7 +154,7 @@ def lesson(lesson_slug):
         lesson=lesson,
         authors=lesson.authors,
         last_updated=lesson.last_updated,
-        videos=lesson.videos,
+        videos=lesson.video_url,
         images=lesson.images,
         documents=lesson.lesson_documents,
         simulations=lesson.simulations,
