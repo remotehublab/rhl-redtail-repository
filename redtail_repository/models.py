@@ -156,14 +156,13 @@ class Lesson(db.Model):
     cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
     long_description: Mapped[str] = mapped_column(db.Text, nullable=True)
     learning_goals: Mapped[str] = mapped_column(db.Text, nullable=True)
+    video_url: Mapped[str] = mapped_column(db.Text, nullable=True)
     last_updated: Mapped[datetime] = mapped_column(
         db.DateTime,
         server_default=func.now(),
         onupdate=func.now()
     )
 
-    videos: Mapped[List['LessonVideo']] = \
-        relationship("LessonVideo", back_populates="lesson", cascade="all, delete-orphan")
     images: Mapped[List['LessonImage']] = \
         relationship("LessonImage", back_populates="lesson", cascade="all, delete-orphan")
     lesson_documents: Mapped[List['LessonDoc']] = \
@@ -196,23 +195,6 @@ class Lesson(db.Model):
 
     def __str__(self):
         return self.name
-
-
-class LessonVideo(db.Model):
-    __tablename__ = 'lesson_video'
-
-    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
-    video_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
-    title: Mapped[str] = mapped_column(db.String(100), nullable=True)
-    description: Mapped[str] = mapped_column(db.Text, nullable=True)
-    last_updated: Mapped[datetime] = mapped_column(
-        db.DateTime,
-        server_default=func.now(),
-        onupdate=func.now()
-    )
-
-    lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="videos")
 
 class LessonImage(db.Model):
     __tablename__ = 'lesson_image'
@@ -333,6 +315,7 @@ class Simulation(db.Model):
     slug: Mapped[str] = mapped_column(db.String(100), unique=True)
     description: Mapped[str] = mapped_column(db.Text)
     cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
+    video_url: Mapped[str] = mapped_column(db.Text, nullable=True)
     last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
     authors: Mapped[List['Author']] = relationship(

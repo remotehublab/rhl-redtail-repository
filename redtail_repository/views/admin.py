@@ -9,7 +9,7 @@ from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
 from ..models import (
-    Author, User, Lesson, LessonVideo, LessonImage, LessonDoc, 
+    Author, User, Lesson, LessonImage, LessonDoc,
     Simulation, Device, LessonCategory, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
     DeviceFramework, SimulationDeviceDocument,
@@ -80,11 +80,12 @@ class DeviceDocForm(InlineFormAdmin):
 class LessonModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'short_description', 'active',
-        'cover_image_url', 'long_description', 'learning_goals', 'levels',
+        'cover_image_url', 'video_url', 'long_description', 
+        'learning_goals', 'levels',
         'last_updated',
         'authors', 'devices', 'simulations', 'lesson_categories',
         'device_frameworks',
-        'videos', 'images', 'lesson_documents'
+        'images', 'lesson_documents'
     ]
 
     column_searchable_list = ['name', 'slug', 'short_description', 'long_description', 'learning_goals', 'authors.name']
@@ -95,11 +96,10 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
         'authors', 'devices', 'simulations', 'lesson_categories',
         'device_frameworks',
-        'videos', 'images', 'lesson_documents'
+        'images', 'lesson_documents'
     ]
 
     inline_models = [
-        LessonVideoForm(LessonVideo),
         LessonImageForm(LessonImage),
         LessonDocsForm(LessonDoc),
     ]
@@ -111,19 +111,6 @@ class LessonModelView(AuthedModelMixIn, ModelView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(Lesson, db.session, *args, **kwargs)
-
-class LessonVideosModelView(AuthedModelMixIn, ModelView):
-    column_list = [
-        'id', 'lesson_id', 'lesson',
-        'title', 'video_url', 'description', 'last_updated'
-    ]
-    form_columns = [
-        'id', 'lesson_id', 'lesson',
-        'title', 'video_url', 'description', 'last_updated'
-    ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(LessonVideo, db.session, *args, **kwargs)
 
 class LessonImagesModelView(AuthedModelMixIn, ModelView):
     column_list = [
@@ -161,7 +148,7 @@ class LessonLevelModelView(AuthedModelMixIn, ModelView):
 class SimulationModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'authors', 'description',
-        'cover_image_url', 'last_updated',
+        'cover_image_url', 'video_url', 'last_updated',
         'lessons', 'devices',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
@@ -307,7 +294,6 @@ admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(UserModelView(name="User", category="User"))
 
 admin.add_view(LessonModelView(name="Lesson", category="Lesson"))
-admin.add_view(LessonVideosModelView(name="Lesson Video", category="Lesson"))
 admin.add_view(LessonImagesModelView(name="Lesson Image", category="Lesson"))
 admin.add_view(LessonDocsModelView(name="Lesson Document", category="Lesson"))
 
