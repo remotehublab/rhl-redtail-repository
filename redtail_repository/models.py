@@ -101,7 +101,7 @@ class Author(db.Model):
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     login: Mapped[str] = mapped_column(db.String(100), unique=True)
     name: Mapped[str] = mapped_column(db.String(255))
-    link: Mapped[str] = mapped_column(db.String(255))
+    link: Mapped[str] = mapped_column(db.String(255), nullable=True)
 
     users: Mapped['User'] = relationship("User", back_populates="author")
     lessons: Mapped[List['Lesson']] = relationship(
