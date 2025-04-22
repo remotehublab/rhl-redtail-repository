@@ -179,8 +179,9 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     ]
 
     inline_models = [
-    SimulationDocForm(SimulationDoc),
-    SimulationImageForm(SimulationImage)
+        SimulationDocForm(SimulationDoc),
+        SimulationImageForm(SimulationImage),
+        SimulationDeviceDocument,
     ]
 
     def __init__(self, *args, **kwargs):

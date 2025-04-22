@@ -23,7 +23,7 @@
         <ul class="list-unstyled">
           {% for device_item in devices|sort(attribute='device.name') %}
           <li>
-            <a href="{{ url_for('.simulations', device=device_item.device.id) }}">{{device_item.device.name}}</a>
+            <a href="{{ url_for('.device', device_slug=device_item.device.slug) }}">{{device_item.device.name}}</a>
             {% if device_item.frameworks %}
             <ul class="ms-3">
               {% for framework in device_item.frameworks %}
@@ -106,7 +106,7 @@
             <ul>
               {% for device_item in devices|sort(attribute='device.name') %}
               <li>
-                <a href="{{ url_for('.simulations', device=device_item.device.id) }}">{{ device_item.device.name }}</a>
+                <a href="{{ url_for('.device', device_slug=device_item.device.slug) }}">{{ device_item.device.name }}</a>
                 {% if device_item.frameworks %}
                 <ul>
                   {% for framework in device_item.frameworks %}
@@ -129,37 +129,39 @@
           <div class="card-header">{{gettext("Lessons")}}</div>
           <div class="card-body">
             {% if lessons %}
-            <ul>
+            <table class="table table-bordered table-hover">
+              <tr>
+                <th>{{ gettext("Lesson") }}</th>
+                <th>{{ gettext("Devices") }}</th>
+                <th>{{ gettext("Authors") }}</th>
+              </tr>
               {% for lesson in lessons %}
-              <li>
-                <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
-                  {{ lesson.name }}
-                </a>
-              </li>
+              <tr>
+                <td>
+                  <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
+                    {{ lesson.name }}
+                  </a>
+                </td>
+                <td>
+                  <ul>
+                  {% for device_framework in lesson.device_frameworks %}
+                    <li>{{ device_framework.device.name }} / {{ device_framework.name }}</li>
+                  {% endfor %}
+                  </ul>
+                </td>
+                <td>
+                  {% for author in lesson.authors %}
+                  {{ author.name }}{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
               {% endfor %}
-            </ul>
+            </table>
             {% else %}
             <p>{{gettext("No lessons available for this simulation.")}}</p>
             {% endif %}
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-2 mt-4">
-    <div class="card mb-4">
-      <div class="card-header">{{ gettext("Learning Goals") }}</div>
-      <div class="card-body">
-        <ul class="list-unstyled">
-          {% if simulation_goals %}
-            {% for goal in simulation_goals %}
-            <li>{{ goal.name }}</li>
-            {% endfor %}
-          {% else %}
-            <li>{{ gettext("No learning goals defined") }}</li>
-          {% endif %}
-        </ul>
       </div>
     </div>
   </div>
