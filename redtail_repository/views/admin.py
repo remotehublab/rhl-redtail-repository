@@ -13,7 +13,7 @@ from ..models import (
     Simulation, Device, LessonCategory, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
     DeviceFramework, SimulationDeviceDocument, SimulationImage,
-    device_simulation_association, lesson_device_association,
+    device_simulation_association,
     author_lesson_association, lesson_simulation_association, 
     device_category_association, simulation_category_association, 
     lesson_level_association, 
@@ -98,7 +98,7 @@ class LessonModelView(AuthedModelMixIn, ModelView):
         'cover_image_url', 'video_url', 'long_description', 
         'learning_goals', 'levels',
         'last_updated',
-        'authors', 'devices', 'simulations', 'lesson_categories',
+        'authors', 'simulations', 'lesson_categories',
         'device_frameworks',
         'images', 'lesson_documents'
     ]
@@ -109,7 +109,7 @@ class LessonModelView(AuthedModelMixIn, ModelView):
     form_columns = [
         'id', 'name', 'slug', 'short_description', 'active',
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
-        'authors', 'devices', 'simulations', 'lesson_categories',
+        'authors', 'simulations', 'lesson_categories',
         'device_frameworks',
         'images', 'lesson_documents'
     ]
@@ -216,12 +216,12 @@ class DeviceModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'slug', 'name', 'description',
         'cover_image_url', 'last_updated',
-        'lessons', 'simulations', 'device_categories', 'device_frameworks',
+        'simulations', 'device_categories', 'device_frameworks',
         'device_documents'
     ]
     form_columns = [
         'id', 'slug', 'name', 'description',
-        'cover_image_url', 'lessons', 'simulations', 'device_categories', 'device_frameworks',
+        'cover_image_url', 'simulations', 'device_categories', 'device_frameworks',
         'device_documents'
     ]
 

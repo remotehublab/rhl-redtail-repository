@@ -25,13 +25,6 @@ author_simulation_association = Table(
     db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
-lesson_device_association = Table(
-    'lesson_device',
-    db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
-    db.Column('device_id', db.Integer, db.ForeignKey('device.id'), primary_key=True)
-)
-
 lesson_simulation_association = Table(
     'lesson_simulation',
     db.Model.metadata,
@@ -172,10 +165,6 @@ class Lesson(db.Model):
         secondary=author_lesson_association,
         back_populates="lessons"
     )
-    devices: Mapped[List['Device']] = relationship(
-        secondary=lesson_device_association,
-        back_populates="lessons"
-    )
     simulations: Mapped[List['Simulation']] = relationship(
         secondary=lesson_simulation_association,
         back_populates="lessons"
@@ -253,10 +242,6 @@ class Device(db.Model):
     )
 
     device_documents: Mapped[List['DeviceDoc']] = relationship("DeviceDoc", back_populates="device", cascade="all, delete-orphan")
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=lesson_device_association,
-        back_populates="devices"
-    )
     simulations: Mapped[List['Simulation']] = relationship(
         secondary=device_simulation_association,
         back_populates="devices"

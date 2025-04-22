@@ -279,7 +279,6 @@ def devices():
     devices_query = db.session.query(Device).options(
         joinedload(Device.device_categories),
         joinedload(Device.device_documents),
-        joinedload(Device.lessons),
         joinedload(Device.simulations)
     )
 
@@ -316,7 +315,6 @@ def devices():
 def device(device_slug):
     device = db.session.query(Device).filter_by(slug=device_slug).options(
         joinedload(Device.device_documents),
-        joinedload(Device.lessons),
         joinedload(Device.simulations),
         joinedload(Device.device_categories),
         joinedload(Device.device_frameworks)
@@ -329,7 +327,6 @@ def device(device_slug):
         "public/device.html",
         device=device,
         documents=device.device_documents,
-        lessons=device.lessons,
         simulations=device.simulations,
         categories=device.device_categories,
         frameworks=device.device_frameworks
