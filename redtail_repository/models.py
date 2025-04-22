@@ -317,7 +317,10 @@ class Simulation(db.Model):
     cover_image_url: Mapped[str] = mapped_column(db.String(2083), nullable=True)
     video_url: Mapped[str] = mapped_column(db.Text, nullable=True)
     last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
-
+    
+    images: Mapped[List['SimulationImage']] = relationship(
+    "SimulationImage", back_populates="simulation", cascade="all, delete-orphan"
+    )
     authors: Mapped[List['Author']] = relationship(
         secondary=author_simulation_association,
         back_populates="simulations"
@@ -352,6 +355,22 @@ class Simulation(db.Model):
 
     def __str__(self):
         return self.name
+
+class SimulationImage(db.Model):
+    __tablename__ = 'simulation_image'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    simulation_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('simulation.id'), nullable=False)
+    image_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
+    title: Mapped[str] = mapped_column(db.String(100), nullable=True)
+    description: Mapped[str] = mapped_column(db.Text, nullable=True)
+    last_updated: Mapped[datetime] = mapped_column(
+        db.DateTime,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+
+    simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="images")
 
 class SimulationDoc(db.Model):
     __tablename__ = 'simulation_doc'

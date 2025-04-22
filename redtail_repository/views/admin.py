@@ -12,7 +12,7 @@ from ..models import (
     Author, User, Lesson, LessonImage, LessonDoc,
     Simulation, Device, LessonCategory, LessonLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
-    DeviceFramework, SimulationDeviceDocument,
+    DeviceFramework, SimulationDeviceDocument, SimulationImage,
     device_simulation_association, lesson_device_association,
     author_lesson_association, lesson_simulation_association, 
     device_category_association, simulation_category_association, 
@@ -75,6 +75,9 @@ class SimulationDocForm(InlineFormAdmin):
     pass
 
 class DeviceDocForm(InlineFormAdmin):
+    pass
+
+class SimulationImageForm(InlineFormAdmin):
     pass
 
 class LessonModelView(AuthedModelMixIn, ModelView):
@@ -149,22 +152,23 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'authors', 'description',
         'cover_image_url', 'video_url', 'last_updated',
-        'lessons', 'devices',
+        'lessons', 'devices', 'images',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
         'simulation_documents', 
     ]
     form_columns = [
         'id', 'name', 'slug', 'authors', 'description',
-        'cover_image_url',
-        'lessons', 'devices',
+        'cover_image_url', 
+        'lessons', 'devices', 'images',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
         'simulation_documents', 
     ]
 
     inline_models = [
-        SimulationDocForm(SimulationDoc)
+    SimulationDocForm(SimulationDoc),
+    SimulationImageForm(SimulationImage)
     ]
 
     def __init__(self, *args, **kwargs):
