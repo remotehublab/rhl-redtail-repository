@@ -26,7 +26,7 @@
     <!-- Device Header -->
     <div class="row mb-4 align-items-center">
       <div class="col-md-3 text-center">
-        <img src="{{ url_for('static', filename='img/NES.png') }}" alt="TMP" class="img-fluid device-img">
+        <img src="{{ device.cover_image_url }}" alt="device img" class="img-fluid device-img">
       </div>
       <div class="col-md-9">
         <h1 class="display-4">{{ device.name }}</h1>
@@ -78,8 +78,8 @@
 
               </div>
               <div class="card-footer bg-transparent border-top">
-                <p class="last-update mb-0 text-muted small">
-                  {{ gettext("Last update: ") }}<span>{{ device_framework.last_updated.isoformat() }}</span>
+                <p class="card-text mb-0"><small class="text-body-secondary">{{ gettext("Last Updated") }}: <span
+                  data-date="{{ device_framework.last_updated }}Z"></span></small></p>
                 </p>
               </div>
             </div>

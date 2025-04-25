@@ -79,12 +79,12 @@
       {{ gettext("Lesson: %(lesson_name)s", lesson_name=lesson.name) }}
     </h1>
     <div class="text-center">
-      <p class="text-lead">
-        {{ gettext("By:") }}
+      <h5 class="text-center text-muted mb-4">
+        {{ gettext("By") }}:
         {% for author in authors %}
         {{ author.name }}{% if not loop.last %}, {% endif %}
         {% endfor %}
-      </p>
+      </h5>
     </div>
     <!-- Carousel Section -->
     <div class="row">
