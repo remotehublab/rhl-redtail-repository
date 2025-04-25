@@ -133,21 +133,26 @@
     {% endif %}
 
     {% if lessons %}
-    <div class="row row-cols-1 row-cols-md-3 g-2">
+    <div class="row row-cols-1 row-cols-md-6 g-2">
       {% for lesson in lessons %}
       <div class="col">
-        <div class="card" style="width: 90%;">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" class="card-img-top" alt="temp">
+        <div class="card" style="width: 100%;">
+          <img src="{{ lesson.cover_image_url }}" class="card-img-top" alt="{{ lesson.name }}">
           <div class="card-body">
-            <h5 class="card-title">
+            <h5 class="card-title"
+              style="height: 3rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
               <a href="{{ url_for('.lesson', lesson_slug=lesson.slug ) }}" class="stretched-link text-decoration-none">
                 {{ lesson.name }}
               </a>
             </h5>
-            <p class="card-text">{{ lesson.short_description }}</p>
+            <p class="card-text"
+              style="height: 4.5rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+              {{ lesson.short_description }}
+            </p>
           </div>
           <div class="card-footer">
-            <p class="card-text"><small class="text-body-secondary">Last Updated: <span data-date="{{ lesson.last_updated.isoformat() }}Z"></span></small></p>
+            <p class="card-text"><small class="text-body-secondary">{{ gettext("Last Updated") }}: <span
+                  data-date="{{ lesson.last_updated.isoformat() }}Z"></span></small></p>
           </div>
         </div>
       </div>
