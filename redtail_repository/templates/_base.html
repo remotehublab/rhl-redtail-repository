@@ -36,10 +36,10 @@
               <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page"
                 href="/">{{ gettext("Home") }}</a>
             </li>
-            <!-- Lessons Tab -->
+            <!-- Laboratory Exercises Tab -->
             <li class="nav-item">
-              <a class="nav-link {% if 'public.lesson' in request.endpoint %}active{% endif %}"
-                href="{{ url_for('public.lessons') }}">{{ gettext("Lessons") }}</a>
+              <a class="nav-link {% if 'public.laboratory_exercise' in request.endpoint %}active{% endif %}"
+                href="{{ url_for('public.laboratory_exercises') }}">{{ gettext("Laboratory Exercises") }}</a>
             </li>
             </li>
             <!-- Simulations Tab -->

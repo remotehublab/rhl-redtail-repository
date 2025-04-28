@@ -4,8 +4,9 @@ from flask_babel import gettext
 
 from redtail_repository import db
 from redtail_repository.models import (
-    Lesson, LessonCategory, Simulation, Device, SimulationCategory, User, Author,
-    DeviceCategory, DeviceFramework, LessonLevel
+    LaboratoryExercise, LaboratoryExerciseCategory, LaboratoryExerciseLevel,
+    Simulation, Device, SimulationCategory, User, Author,
+    DeviceCategory, DeviceFramework
 )
 
 public_blueprint = Blueprint('public', __name__)
@@ -31,17 +32,15 @@ def view_author(author_id):
 
     return render_template("public/author.html", author=author)
 
-
 @public_blueprint.route('/authors')
 def authors():
     all_authors = db.session.query(Author).all()
     return render_template('public/authors.html', authors=all_authors)
 
-
-@public_blueprint.route('/lessons')
-def lessons():
-    all_categories = LessonCategory.query.all()
-    all_levels = LessonLevel.query.all()
+@public_blueprint.route('/laboratory_exercise')
+def laboratory_exercises():
+    all_categories = LaboratoryExerciseCategory.query.all()
+    all_levels = LaboratoryExerciseLevel.query.all()
     all_frameworks = DeviceFramework.query.all()
 
     # Create devices_by_id dictionary
@@ -67,38 +66,38 @@ def lessons():
     level_slug = request.args.get('level')
     framework_slug = request.args.get('framework')
 
-    lessons_query = Lesson.query.filter_by(active=True).options(
-        joinedload(Lesson.authors),
-        joinedload(Lesson.lesson_categories),
-        joinedload(Lesson.images),
-        joinedload(Lesson.lesson_documents),
-        joinedload(Lesson.simulations),
-        joinedload(Lesson.levels)
+    laboratory_exercises_query = LaboratoryExercise.query.filter_by(active=True).options(
+        joinedload(LaboratoryExercise.authors),
+        joinedload(LaboratoryExercise.laboratory_exercise_categories),
+        joinedload(LaboratoryExercise.laboratory_exercise_images),
+        joinedload(LaboratoryExercise.laboratory_exercise_documents),
+        joinedload(LaboratoryExercise.simulations),
+        joinedload(LaboratoryExercise.levels)
     )
 
     if category_slug:
-        category = LessonCategory.query.filter_by(slug=category_slug).first()
+        category = LaboratoryExerciseCategory.query.filter_by(slug=category_slug).first()
         if category:
-            lessons_query = lessons_query.filter(
-                Lesson.lesson_categories.contains(category))
+            laboratory_exercises_query = laboratory_exercises_query.filter(
+                LaboratoryExercise.laboratory_exercise_categories.contains(category))
 
     if level_slug:
-        level = LessonLevel.query.filter_by(slug=level_slug).first()
+        level = LaboratoryExerciseLevel.query.filter_by(slug=level_slug).first()
         if level:
-            lessons_query = lessons_query.filter(Lesson.levels.contains(level))
+            laboratory_exercises_query = laboratory_exercises_query.filter(
+                LaboratoryExercise.levels.contains(level))
 
     if framework_slug:
-        framework = DeviceFramework.query.filter_by(
-            slug=framework_slug).first()
+        framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
         if framework:
-            lessons_query = lessons_query.join(Lesson.device_frameworks).filter(
-                DeviceFramework.id == framework.id)
+            laboratory_exercises_query = laboratory_exercises_query.join(
+                LaboratoryExercise.device_frameworks).filter(DeviceFramework.id == framework.id)
 
-    lessons = lessons_query.all()
+    laboratory_exercises = laboratory_exercises_query.all()
 
     return render_template(
-        'public/lessons.html',
-        lessons=lessons,
+        'public/laboratory_exercises.html',
+        laboratory_exercises=laboratory_exercises,
         devices=devices,
         devices_by_id=devices_by_id,
         all_categories=all_categories,
@@ -109,28 +108,24 @@ def lessons():
         selected_framework=framework_slug
     )
 
-
-@public_blueprint.route('/lessons/<lesson_slug>')
-def lesson(lesson_slug):
-    lesson = db.session.query(Lesson).filter_by(slug=lesson_slug, active=True).options(
-        joinedload(Lesson.authors),
-        joinedload(Lesson.images),
-        joinedload(Lesson.lesson_documents),
-        joinedload(Lesson.simulations),
-        joinedload(Lesson.lesson_categories),
-        joinedload(Lesson.levels),
-        joinedload(Lesson.device_frameworks)
+@public_blueprint.route('/laboratory_exercises/<laboratory_exercise_slug>')
+def laboratory_exercise(laboratory_exercise_slug):
+    laboratory_exercise = db.session.query(LaboratoryExercise).filter_by(slug=laboratory_exercise_slug, active=True).options(
+        joinedload(LaboratoryExercise.authors),
+        joinedload(LaboratoryExercise.laboratory_exercise_images),
+        joinedload(LaboratoryExercise.laboratory_exercise_documents),
+        joinedload(LaboratoryExercise.simulations),
+        joinedload(LaboratoryExercise.laboratory_exercise_categories),
+        joinedload(LaboratoryExercise.levels),
+        joinedload(LaboratoryExercise.device_frameworks)
     ).first()
 
-    if not lesson:
-        return render_template("public/error.html", message=gettext("Lesson not found")), 404
+    if not laboratory_exercise:
+        return render_template("public/error.html", message=gettext("Laboratory Exercise not found")), 404
 
-    # Create devices_by_id dictionary
     devices_by_id = {device.id: device for device in Device.query.all()}
-
-    # Get all frameworks for this lesson
     all_frameworks = DeviceFramework.query.filter(
-        DeviceFramework.id.in_([framework.id for framework in lesson.device_frameworks])
+        DeviceFramework.id.in_([framework.id for framework in laboratory_exercise.device_frameworks])
     ).all()
 
     # Group frameworks by device
@@ -148,20 +143,19 @@ def lesson(lesson_slug):
     ]
 
     return render_template(
-        "public/lesson.html",
-        lesson=lesson,
-        authors=lesson.authors,
-        last_updated=lesson.last_updated,
-        videos=lesson.video_url,
-        images=lesson.images,
-        documents=lesson.lesson_documents,
-        simulations=lesson.simulations,
-        categories=lesson.lesson_categories,
+        "public/laboratory_exercise.html",
+        laboratory_exercise=laboratory_exercise,
+        authors=laboratory_exercise.authors,
+        last_updated=laboratory_exercise.last_updated,
+        videos=laboratory_exercise.video_url,
+        images=laboratory_exercise.laboratory_exercise_images,
+        documents=laboratory_exercise.laboratory_exercise_documents,
+        simulations=laboratory_exercise.simulations,
+        categories=laboratory_exercise.laboratory_exercise_categories,
         devices=devices,
-        learning_goals=lesson.learning_goals,
-        levels=lesson.levels,
+        learning_goals=laboratory_exercise.learning_goals,
+        levels=laboratory_exercise.levels,
     )
-
 
 @public_blueprint.route('/simulations')
 def simulations():
@@ -231,7 +225,7 @@ def simulations():
 @public_blueprint.route('/simulations/<simulation_slug>')
 def simulation(simulation_slug):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).options(
-        joinedload(Simulation.lessons),
+        joinedload(Simulation.laboratory_exercises),
         joinedload(Simulation.device_frameworks).joinedload(DeviceFramework.device),
         joinedload(Simulation.simulation_categories),
         joinedload(Simulation.simulation_documents)
@@ -260,7 +254,7 @@ def simulation(simulation_slug):
     return render_template(
         "public/simulation.html",
         simulation=simulation,
-        lessons=simulation.lessons,
+        laboratory_exercises=simulation.laboratory_exercises,
         devices=devices,
         devices_by_id=devices_by_id,
         categories=simulation.simulation_categories,

@@ -9,15 +9,14 @@ from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
 from ..models import (
-    Author, User, Lesson, LessonImage, LessonDoc,
-    Simulation, Device, LessonCategory, LessonLevel,
+    Author, User, LaboratoryExercise, LaboratoryExerciseImage, LaboratoryExerciseDoc,
+    Simulation, Device, LaboratoryExerciseCategory, LaboratoryExerciseLevel,
     DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
     DeviceFramework, SimulationDeviceDocument, SimulationImage,
-    device_simulation_association,
-    author_lesson_association, lesson_simulation_association, 
+    device_simulation_association, author_laboratory_exercise_association,
+    laboratory_exercise_simulation_association, laboratory_exercise_device_framework_association,
     device_category_association, simulation_category_association, 
-    lesson_level_association, 
-    lesson_device_framework_association, simulation_framework_association,
+    laboratory_exercise_level_association, simulation_framework_association,
     db
 )
 
@@ -74,13 +73,13 @@ class UserModelView(AuthedModelMixIn, ModelView):
 
         return super().on_model_change(form, model, is_created)
 
-class LessonVideoForm(InlineFormAdmin):
+class LaboratoryExerciseVideoForm(InlineFormAdmin):
     pass
 
-class LessonImageForm(InlineFormAdmin):
+class LaboratoryExerciseImageForm(InlineFormAdmin):
     pass
 
-class LessonDocsForm(InlineFormAdmin):
+class LaboratoryExerciseDocsForm(InlineFormAdmin):
     pass
 
 class SimulationDocForm(InlineFormAdmin):
@@ -92,15 +91,13 @@ class DeviceDocForm(InlineFormAdmin):
 class SimulationImageForm(InlineFormAdmin):
     pass
 
-class LessonModelView(AuthedModelMixIn, ModelView):
+class LaboratoryExerciseModelView(AuthedModelMixIn, ModelView):
     column_list = [
-        'id', 'name', 'slug', 'short_description', 'active',
-        'cover_image_url', 'video_url', 'long_description', 
-        'learning_goals', 'levels',
+        'id', 'name', 'slug', 'short_description', 'long_description', 'active',
+        'cover_image_url', 'video_url', 'learning_goals', 'levels',
         'last_updated',
-        'authors', 'simulations', 'lesson_categories',
-        'device_frameworks',
-        'images', 'lesson_documents'
+        'authors', 'simulations', 'laboratory_exercise_categories',
+        'device_frameworks','laboratory_exercise_images', 'laboratory_exercise_documents'
     ]
 
     column_searchable_list = ['name', 'slug', 'short_description', 'long_description', 'learning_goals', 'authors.name']
@@ -109,62 +106,75 @@ class LessonModelView(AuthedModelMixIn, ModelView):
     form_columns = [
         'id', 'name', 'slug', 'short_description', 'active',
         'cover_image_url', 'long_description', 'learning_goals', 'levels',
-        'authors', 'simulations', 'lesson_categories',
+        'authors', 'simulations', 'laboratory_exercise_categories',
         'device_frameworks',
-        'images', 'lesson_documents'
+        'laboratory_exercise_images', 'laboratory_exercise_documents'
     ]
 
     inline_models = [
-        LessonImageForm(LessonImage),
-        LessonDocsForm(LessonDoc),
+        LaboratoryExerciseImageForm(LaboratoryExerciseImage),
+        LaboratoryExerciseDocsForm(LaboratoryExerciseDoc),
     ]
 
     def _format_categories(view, context, model, name):
-        return ", ".join(category.name for category in model.lesson_categories) if model.lesson_categories else "No Categories"
+        return ", ".join(category.name for category in model.laboratory_exercise_categories) if model.laboratory_exercise_categories else "No Categories"
 
-    column_formatters = {'lesson_categories': _format_categories}
+    column_formatters = {'laboratory_exercise_categories': _format_categories}
 
     def __init__(self, *args, **kwargs):
-        super().__init__(Lesson, db.session, *args, **kwargs)
+        super().__init__(LaboratoryExercise, db.session, *args, **kwargs)
 
-class LessonImagesModelView(AuthedModelMixIn, ModelView):
+class LaboratoryExerciseImagesModelView(AuthedModelMixIn, ModelView):
     column_list = [
-        'id', 'lesson_id', 'lesson',
+        'id', 'laboratory_exercise_id', 'laboratory_exercise',
         'title', 'image_url', 'description', 'last_updated'
     ]
     form_columns = [
-        'id', 'lesson_id', 'lesson',
+        'id', 'laboratory_exercise_id', 'laboratory_exercise',
         'title', 'image_url', 'description', 'last_updated'
     ]
 
     def __init__(self, *args, **kwargs):
-        super().__init__(LessonImage, db.session, *args, **kwargs)
+        super().__init__(LaboratoryExerciseImage, db.session, *args, **kwargs)
 
-class LessonDocsModelView(AuthedModelMixIn, ModelView):
+class LaboratoryExerciseDocsModelView(AuthedModelMixIn, ModelView):
     column_list = [
-        'id', 'lesson_id', 'lesson',
+        'id', 'laboratory_exercise_id', 'laboratory_exercise',
         'title', 'doc_url', 'description', 'is_solution', 'last_updated'
     ]
     form_columns = [
-        'id', 'lesson_id', 'lesson',
+        'id', 'laboratory_exercise_id', 'laboratory_exercise',
         'title', 'doc_url', 'description', 'is_solution', 'last_updated'
     ]
 
     def __init__(self, *args, **kwargs):
-        super().__init__(LessonDoc, db.session, *args, **kwargs)
+        super().__init__(LaboratoryExerciseDoc, db.session, *args, **kwargs)
 
-class LessonLevelModelView(AuthedModelMixIn, ModelView):
-    column_list = ['id', 'name', 'slug', 'last_updated', 'lessons']
-    form_columns = ['name', 'slug', 'lessons']
+class LaboratoryExerciseLevelModelView(AuthedModelMixIn, ModelView):
+    column_list = ['id', 'name', 'slug', 'last_updated', 'laboratory_exercises']
+    form_columns = ['name', 'slug', 'laboratory_exercises']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(LessonLevel, db.session, *args, **kwargs)
+        super().__init__(LaboratoryExerciseLevel, db.session, *args, **kwargs)
+
+class LaboratoryExerciseCategoryModelView(AuthedModelMixIn, ModelView):
+    column_list = [
+        'id', 'name', 'slug', 'last_updated',
+        'laboratory_exercises'
+    ]
+    form_columns = [
+        'id', 'name', 'slug', 'last_updated',
+        'laboratory_exercises'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(LaboratoryExerciseCategory, db.session, *args, **kwargs)
 
 class SimulationModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'authors', 'description',
         'cover_image_url', 'video_url', 'last_updated',
-        'lessons', 'devices', 'images',
+        'laboratory_exercises', 'devices', 'simulation_images',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
         'simulation_documents', 
@@ -172,7 +182,7 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     form_columns = [
         'id', 'name', 'slug', 'authors', 'description',
         'cover_image_url', 
-        'lessons', 'devices', 'images',
+        'laboratory_exercises', 'devices', 'simulation_images',
         'simulation_categories', 'simulation_device_categories',
         'device_frameworks',
         'simulation_documents', 
@@ -259,20 +269,6 @@ class SimulationDeviceDocumentModelView(AuthedModelMixIn, ModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(SimulationDeviceDocument, db.session, *args, **kwargs)
 
-# Category Views
-class LessonCategoryModelView(AuthedModelMixIn, ModelView):
-    column_list = [
-        'id', 'name', 'slug', 'last_updated',
-        'lessons'
-    ]
-    form_columns = [
-        'id', 'name', 'slug', 'last_updated',
-        'lessons'
-    ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(LessonCategory, db.session, *args, **kwargs)
-
 class SimulationCategoryModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'name', 'slug', 'last_updated', 'simulations'
@@ -311,23 +307,21 @@ admin.add_view(AuthorModelView(name="Author", category="User"))
 admin.add_view(ConnectedAuthorModelView(name="Connected Authors", category="User", endpoint="connected_authors"))
 admin.add_view(UserModelView(name="User", category="User"))
 
-
-admin.add_view(LessonModelView(name="Lesson", category="Lesson"))
-admin.add_view(LessonImagesModelView(name="Lesson Image", category="Lesson"))
-admin.add_view(LessonDocsModelView(name="Lesson Document", category="Lesson"))
+admin.add_view(LaboratoryExerciseModelView(name="Laboratory Exercise", category="Laboratory Exercise"))
+admin.add_view(LaboratoryExerciseImagesModelView(name="Laboratory Exercise Image", category="Laboratory Exercise"))
+admin.add_view(LaboratoryExerciseDocsModelView(name="Laboratory Exercise Document", category="Laboratory Exercise"))
 
 admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
 admin.add_view(SimulationDocModelView(name="Simulation Document", category="Simulation"))
 admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
 admin.add_view(SimulationDeviceDocumentModelView(name="Simulation Device Document", category="Simulation"))
 
-
 admin.add_view(DeviceModelView(name="Device", category="Device"))
 admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
 
-admin.add_view(LessonCategoryModelView(name="Lesson Category", category="Category"))
+admin.add_view(LaboratoryExerciseCategoryModelView(name="Laboratory Exercise Category", category="Category"))
 admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))
-admin.add_view(LessonLevelModelView(name="Lesson Level", category="Category"))
+admin.add_view(LaboratoryExerciseLevelModelView(name="Laboratory Exercise Level", category="Category"))
 
 admin.add_view(
     FileBrowser(

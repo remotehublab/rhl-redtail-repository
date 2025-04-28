@@ -11,7 +11,7 @@
         <ul class="list-unstyled">
           {% for category in categories|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.lessons', category=category.slug) }}">
+            <a href="{{ url_for('.laboratory_exercises', category=category.slug) }}">
               {{ gettext(category.name) }}
             </a>
           </li>
@@ -47,7 +47,7 @@
         <ul class="list-unstyled">
           {% for level in levels|sort(attribute='name') %}
           <li>
-            <a href="{{ url_for('.lessons', level=level.slug) }}">
+            <a href="{{ url_for('.laboratory_exercises', level=level.slug) }}">
               {{ gettext(level.name) }}
             </a>
           </li>
@@ -76,7 +76,7 @@
   <!-- Main Content Section -->
   <div class="col-md-8">
     <h1 class="text-center">
-      {{ gettext("Lesson: %(lesson_name)s", lesson_name=lesson.name) }}
+      {{ gettext("Laboratory Exercise: %(laboratory_exercise_name)s", laboratory_exercise_name=laboratory_exercise.name) }}
     </h1>
     <div class="text-center">
       <h5 class="text-center text-muted mb-4">
@@ -93,7 +93,7 @@
           <div class="carousel-inner">
 
             <div class="carousel-item active">
-              <img src="{{ lesson.cover_image_url }}" class="d-block w-100 img-fluid"
+              <img src="{{ laboratory_exercise.cover_image_url }}" class="d-block w-100 img-fluid"
                 style="height: 400px; object-fit: cover;" alt="...">
             </div>
           </div>
@@ -114,13 +114,13 @@
     </div>
 
     <!-- Description Section -->
-    {% if lesson.long_description %}
+    {% if laboratory_exercise.long_description %}
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light" style="height: 200px;">
           <div class="card-header">{{gettext("Description")}}</div>
           <div class="card-body">
-            <p class="card-text">{{ lesson.long_description|safe }}</p>
+            <p class="card-text">{{ laboratory_exercise.long_description|safe }}</p>
           </div>
         </div>
       </div>
@@ -157,7 +157,7 @@
 
             {% else %}
             <div class="alert alert-warning">
-              <p>{{ gettext("There is no document associated to this lesson yet.") }}</p>
+              <p>{{ gettext("There is no document associated to this laboratory exercise yet.") }}</p>
             </div>
 
             {% endif %}
@@ -173,7 +173,7 @@
       <div class="card-header">{{ gettext("Learning Goals") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {{ lesson.learning_goals|safe }}
+          {{ laboratory_exercise.learning_goals|safe }}
         </ul>
       </div>
     </div>

@@ -11,11 +11,11 @@ from datetime import datetime
 from redtail_repository import db
 
 # Association Tables
-author_lesson_association = Table(
-    'author_lesson',
+author_laboratory_exercise_association = Table(
+    'author_laboratory_exercise',
     db.Model.metadata,
     db.Column('author_id', db.Integer, db.ForeignKey('author.id'), primary_key=True),
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True)
+    db.Column('laboratory_exercise_id', db.Integer, db.ForeignKey('laboratory_exercise.id'), primary_key=True)
 )
 
 author_simulation_association = Table(
@@ -25,10 +25,10 @@ author_simulation_association = Table(
     db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
-lesson_simulation_association = Table(
-    'lesson_simulation',
+laboratory_exercise_simulation_association = Table(
+    'laboratory_exercise_simulation',
     db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
+    db.Column('laboratory_exercise_id', db.Integer, db.ForeignKey('laboratory_exercise.id'), primary_key=True),
     db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
@@ -39,11 +39,11 @@ device_simulation_association = Table(
     db.Column('simulation_id', db.Integer, db.ForeignKey('simulation.id'), primary_key=True)
 )
 
-lesson_category_association = Table(
-    'lesson_category_association',
+laboratory_exercise_category_association = Table(
+    'laboratory_exercise_category_association',
     db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
-    db.Column('category_id', db.Integer, db.ForeignKey('lesson_category.id'), primary_key=True)
+    db.Column('laboratory_exercise_id', db.Integer, db.ForeignKey('laboratory_exercise.id'), primary_key=True),
+    db.Column('category_id', db.Integer, db.ForeignKey('laboratory_exercise_category.id'), primary_key=True)
 )
 
 device_category_association = Table(
@@ -67,10 +67,10 @@ simulation_device_category_association = Table(
     db.Column('device_category_id', db.Integer, db.ForeignKey('device_category.id'), primary_key=True)
 )
 
-lesson_device_framework_association = Table(
-    'lesson_device_framework_association',
+laboratory_exercise_device_framework_association = Table(
+    'laboratory_exercise_device_framework_association',
     db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
+    db.Column('laboratory_exercise_id', db.Integer, db.ForeignKey('laboratory_exercise.id'), primary_key=True),
     db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
 )
 
@@ -81,11 +81,11 @@ simulation_framework_association = Table(
     db.Column('framework_id', db.Integer, db.ForeignKey('device_framework.id'), primary_key=True)
 )
 
-lesson_level_association = Table(
-    'lesson_level_association',
+laboratory_exercise_level_association = Table(
+    'laboratory_exercise_level_association',
     db.Model.metadata,
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
-    db.Column('level_id', db.Integer, db.ForeignKey('lesson_level.id'), primary_key=True)
+    db.Column('laboratory_exercise_id', db.Integer, db.ForeignKey('laboratory_exercise.id'), primary_key=True),
+    db.Column('level_id', db.Integer, db.ForeignKey('laboratory_exercise_level.id'), primary_key=True)
 )
 
 class Author(db.Model):
@@ -97,8 +97,8 @@ class Author(db.Model):
     link: Mapped[str] = mapped_column(db.String(255), nullable=True)
 
     users: Mapped['User'] = relationship("User", back_populates="author")
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=author_lesson_association,
+    laboratory_exercises: Mapped[List['LaboratoryExercise']] = relationship(
+        secondary=author_laboratory_exercise_association,
         back_populates="authors"
     )
     simulations: Mapped[List['Simulation']] = relationship(
@@ -138,8 +138,8 @@ class User(db.Model, UserMixin):
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-class Lesson(db.Model):
-    __tablename__ = 'lesson'
+class LaboratoryExercise(db.Model):
+    __tablename__ = 'laboratory_exercise'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True)
@@ -156,40 +156,42 @@ class Lesson(db.Model):
         onupdate=func.now()
     )
 
-    images: Mapped[List['LessonImage']] = \
-        relationship("LessonImage", back_populates="lesson", cascade="all, delete-orphan")
-    lesson_documents: Mapped[List['LessonDoc']] = \
-        relationship("LessonDoc", back_populates="lesson", cascade="all, delete-orphan")
+    laboratory_exercise_images: Mapped[List['LaboratoryExerciseImage']] = relationship(
+        "LaboratoryExerciseImage", back_populates="laboratory_exercise", cascade="all, delete-orphan"
+    )
+    laboratory_exercise_documents: Mapped[List['LaboratoryExerciseDoc']] = relationship(
+        "LaboratoryExerciseDoc", back_populates="laboratory_exercise", cascade="all, delete-orphan"
+    )
 
     authors: Mapped[List['Author']] = relationship(
-        secondary=author_lesson_association,
-        back_populates="lessons"
+        secondary=author_laboratory_exercise_association,
+        back_populates="laboratory_exercises"
     )
     simulations: Mapped[List['Simulation']] = relationship(
-        secondary=lesson_simulation_association,
-        back_populates="lessons"
+        secondary=laboratory_exercise_simulation_association,
+        back_populates="laboratory_exercises"
     )
-    lesson_categories: Mapped[List['LessonCategory']] = relationship(
-        secondary=lesson_category_association,
-        back_populates="lessons"
+    laboratory_exercise_categories: Mapped[List['LaboratoryExerciseCategory']] = relationship(
+        secondary=laboratory_exercise_category_association,
+        back_populates="laboratory_exercises"
     )
     device_frameworks: Mapped[List['DeviceFramework']] = relationship(
-        secondary=lesson_device_framework_association,
-        back_populates="lessons"
+        secondary=laboratory_exercise_device_framework_association,
+        back_populates="laboratory_exercises"
     )
-    levels: Mapped[List['LessonLevel']] = relationship(
-        secondary=lesson_level_association,
-        back_populates="lessons"
+    levels: Mapped[List['LaboratoryExerciseLevel']] = relationship(
+        secondary=laboratory_exercise_level_association,
+        back_populates="laboratory_exercises"
     )
 
     def __str__(self):
         return self.name
 
-class LessonImage(db.Model):
-    __tablename__ = 'lesson_image'
+class LaboratoryExerciseImage(db.Model):
+    __tablename__ = 'laboratory_exercise_image'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
+    laboratory_exercise_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('laboratory_exercise.id'), nullable=False)
     image_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
     title: Mapped[str] = mapped_column(db.String(100), nullable=True)
     description: Mapped[str] = mapped_column(db.Text, nullable=True)
@@ -199,13 +201,14 @@ class LessonImage(db.Model):
         onupdate=func.now()
     )
 
-    lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="images")
+    laboratory_exercise: Mapped['LaboratoryExercise'] = relationship(
+        "LaboratoryExercise", back_populates="laboratory_exercise_images")
 
-class LessonDoc(db.Model):
-    __tablename__ = 'lesson_doc'
+class LaboratoryExerciseDoc(db.Model):
+    __tablename__ = 'laboratory_exercise_doc'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('lesson.id'), nullable=False)
+    laboratory_exercise_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('laboratory_exercise.id'), nullable=False)
     doc_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
     title: Mapped[str] = mapped_column(db.String(100), nullable=True)
     description: Mapped[str] = mapped_column(db.Text, nullable=True)
@@ -216,7 +219,9 @@ class LessonDoc(db.Model):
         onupdate=func.now()
     )
 
-    lesson: Mapped['Lesson'] = relationship("Lesson", back_populates="lesson_documents")
+    laboratory_exercise: Mapped['LaboratoryExercise'] = relationship(
+        "LaboratoryExercise", back_populates="laboratory_exercise_documents"
+    )
 
 class Device(db.Model):
     __tablename__ = 'device'
@@ -270,8 +275,8 @@ class DeviceDoc(db.Model):
 
     device: Mapped['Device'] = relationship("Device", back_populates="device_documents")
 
-class LessonLevel(db.Model):
-    __tablename__ = 'lesson_level'
+class LaboratoryExerciseLevel(db.Model):
+    __tablename__ = 'laboratory_exercise_level'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
@@ -283,9 +288,8 @@ class LessonLevel(db.Model):
         onupdate=func.now()
     )
 
-    # Many-to-many back to Lesson
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=lesson_level_association,
+    laboratory_exercises: Mapped[List['LaboratoryExercise']] = relationship(
+        secondary=laboratory_exercise_level_association,
         back_populates="levels"
     )
 
@@ -303,8 +307,8 @@ class Simulation(db.Model):
     video_url: Mapped[str] = mapped_column(db.Text, nullable=True)
     last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
     
-    images: Mapped[List['SimulationImage']] = relationship(
-    "SimulationImage", back_populates="simulation", cascade="all, delete-orphan"
+    simulation_images: Mapped[List['SimulationImage']] = relationship(
+        "SimulationImage", back_populates="simulation", cascade="all, delete-orphan"
     )
     authors: Mapped[List['Author']] = relationship(
         secondary=author_simulation_association,
@@ -313,8 +317,8 @@ class Simulation(db.Model):
     simulation_documents: Mapped[List['SimulationDoc']] = relationship(
         back_populates="simulation", cascade="all, delete-orphan"
     )
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=lesson_simulation_association,
+    laboratory_exercises: Mapped[List['LaboratoryExercise']] = relationship(
+        secondary=laboratory_exercise_simulation_association,
         back_populates="simulations"
     )
     devices: Mapped[List['Device']] = relationship(
@@ -337,7 +341,6 @@ class Simulation(db.Model):
         back_populates="simulation"
     )
 
-
     def __str__(self):
         return self.name
 
@@ -355,7 +358,7 @@ class SimulationImage(db.Model):
         onupdate=func.now()
     )
 
-    simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="images")
+    simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_images")
 
 class SimulationDoc(db.Model):
     __tablename__ = 'simulation_doc'
@@ -390,17 +393,17 @@ class SimulationDeviceDocument(db.Model):
         back_populates="simulation_documents"
     )
 
-class LessonCategory(db.Model):
-    __tablename__ = 'lesson_category'
+class LaboratoryExerciseCategory(db.Model):
+    __tablename__ = 'laboratory_exercise_category'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)
     last_updated: Mapped[datetime] = mapped_column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=lesson_category_association,
-        back_populates="lesson_categories"
+    laboratory_exercises: Mapped[List['LaboratoryExercise']] = relationship(
+        secondary=laboratory_exercise_category_association,
+        back_populates="laboratory_exercise_categories"
     )
 
     def __str__(self):
@@ -441,8 +444,8 @@ class DeviceFramework(db.Model):
     device_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('device.id'), nullable=False)
     device: Mapped['Device'] = relationship("Device", back_populates="device_frameworks")
 
-    lessons: Mapped[List['Lesson']] = relationship(
-        secondary=lesson_device_framework_association,
+    laboratory_exercises: Mapped[List['LaboratoryExercise']] = relationship(
+        secondary=laboratory_exercise_device_framework_association,
         back_populates="device_frameworks"
     )
     simulations: Mapped[List['Simulation']] = relationship(

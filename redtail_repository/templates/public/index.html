@@ -13,7 +13,7 @@
   </div>
   <div class="card-body">
     <h5 class="card-title">{{ gettext("REDTAIL repository of simulations and digital twins for remote laboratories") }}</h5>
-    <p class="card-text">{{ gettext("Find simulations that are connected to real remote laboratories, as well as lessons for them and what devices are supported") }}</p>
+    <p class="card-text">{{ gettext("Find simulations that are connected to real remote laboratories, as well as laboratory_exercises for them and what devices are supported") }}</p>
     <a href="{{ url_for(".simulations") }}" class="btn btn-primary">{{ gettext("Go to the simulations") }}</a>
   </div>
 </div>
@@ -48,7 +48,7 @@
       <div class="card-body">
         <h5 class="card-title">{{ gettext("REDTAIL simulations and digital twins") }}</h5>
         <p class="card-text">{{ gettext("In REDTAIL, we connect simulations and digital twins to real hardware. That way, we expand the laboratory experience so students can access real hardware connected to these simulations.") }}</p>
-        <p class="card-text">{{ gettext("By default, you cannot see the solutions to the lessons, but if you <a href='%(link)s'>register</a>, we will validate your email address and if you are a professor or instructor we will share them with you.", link=url_for('login.register')) }}</p>
+        <p class="card-text">{{ gettext("By default, you cannot see the solutions to the laboratory exercises, but if you <a href='%(link)s'>register</a>, we will validate your email address and if you are a professor or instructor we will share them with you.", link=url_for('login.register')) }}</p>
       </div>
     </div>
   </div>
@@ -56,7 +56,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">{{ gettext("Join us!") }}</h5>
-        <p class="card-text">{{ gettext("Are you working on remote laboratories? Either creating lessons, developing remote labs, or want to build simulations? Join us in our mission of expanding the laboratory experience by contacting us <a href='%(link)s' target=_blank>here</a>", link="https://rhlab.ece.uw.edu/join-us/") }}</p>
+        <p class="card-text">{{ gettext("Are you working on remote laboratories? Either creating laboratory exercises, developing remote labs, or want to build simulations? Join us in our mission of expanding the laboratory experience by contacting us <a href='%(link)s' target=_blank>here</a>", link="https://rhlab.ece.uw.edu/join-us/") }}</p>
       </div>
     </div>
   </div>

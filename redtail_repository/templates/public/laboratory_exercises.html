@@ -14,7 +14,7 @@
             {% if selected_category == category.slug %}
             <span class="text-primary fw-bold">{{ category.name }}</span>
             {% else %}
-            <a href="{{ url_for('.lessons',
+            <a href="{{ url_for('.laboratory_exercises',
                               category=category.slug,
                               level=selected_level,
                               framework=selected_framework) }}">
@@ -41,7 +41,7 @@
                 {% if selected_framework == device_framework.slug %}
                 <span class="text-primary fw-bold">{{ device_framework.name }}</span>
                 {% else %}
-                <a href="{{ url_for('.lessons',
+                <a href="{{ url_for('.laboratory_exercises',
                                   category=selected_category,
                                   framework=device_framework.slug,
                                   level=selected_level) }}">
@@ -67,7 +67,7 @@
             {% if selected_level == level.slug %}
             <span class="text-primary fw-bold">{{ level.name }}</span>
             {% else %}
-            <a href="{{ url_for('.lessons',
+            <a href="{{ url_for('.laboratory_exercises',
                                 category=selected_category,
                                 framework=selected_framework,
                                 level=level.slug) }}">
@@ -82,7 +82,7 @@
 
     {% if selected_category or selected_level or selected_framework %}
     <div class="mb-3">
-      <a href="{{ url_for('.lessons') }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ url_for('.laboratory_exercises') }}" class="btn btn-outline-secondary btn-sm">
         {{ gettext("Clear Filters") }}
       </a>
     </div>
@@ -91,7 +91,7 @@
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">{{ gettext("Lessons") }}</h1>
+    <h1 class="text-center">{{ gettext("Laboratory Exercises") }}</h1>
 
     {# Current Filter Selections Section #}
     {% if selected_category or selected_level or selected_framework %}
@@ -103,7 +103,7 @@
             {{ gettext("Category") }}:
             {% set selected_cat = all_categories|selectattr('slug', 'equalto', selected_category)|first %}
             {{ selected_cat.name }}
-            <a href="{{ url_for('.lessons', level=selected_level, framework=selected_framework) }}"
+            <a href="{{ url_for('.laboratory_exercises', level=selected_level, framework=selected_framework) }}"
               class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
@@ -113,7 +113,7 @@
             {{ gettext("Framework") }}:
             {% set selected_fw = all_frameworks|selectattr('slug', 'equalto', selected_framework)|first %}
             {{ selected_fw.name }}
-            <a href="{{ url_for('.lessons', category=selected_category, level=selected_level) }}"
+            <a href="{{ url_for('.laboratory_exercises', category=selected_category, level=selected_level) }}"
               class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
@@ -123,7 +123,7 @@
             {{ gettext("Level") }}:
             {% set selected_lvl = all_levels|selectattr('slug', 'equalto', selected_level)|first %}
             {{ selected_lvl.name }}
-            <a href="{{ url_for('.lessons', category=selected_category, framework=selected_framework) }}"
+            <a href="{{ url_for('.laboratory_exercises', category=selected_category, framework=selected_framework) }}"
               class="text-white ms-1">&times;</a>
           </span>
           {% endif %}
@@ -132,27 +132,27 @@
     </div>
     {% endif %}
 
-    {% if lessons %}
+    {% if laboratory_exercises %}
     <div class="row row-cols-1 row-cols-md-4 g-2">
-      {% for lesson in lessons %}
+      {% for laboratory_exercise in laboratory_exercises %}
       <div class="col">
         <div class="card" style="width: 100%;">
-          <img src="{{ lesson.cover_image_url }}" class="card-img-top" alt="{{ lesson.name }}">
+          <img src="{{ laboratory_exercise.cover_image_url }}" class="card-img-top" alt="{{ laboratory_exercise.name }}">
           <div class="card-body">
             <h5 class="card-title"
               style="height: 3rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-              <a href="{{ url_for('.lesson', lesson_slug=lesson.slug ) }}" class="stretched-link text-decoration-none">
-                {{ lesson.name }}
+              <a href="{{ url_for('.laboratory_exercise', laboratory_exercise_slug=laboratory_exercise.slug ) }}" class="stretched-link text-decoration-none">
+                {{ laboratory_exercise.name }}
               </a>
             </h5>
             <p class="card-text"
               style="height: 4.5rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-              {{ lesson.short_description }}
+              {{ laboratory_exercise.short_description }}
             </p>
           </div>
           <div class="card-footer">
             <p class="card-text"><small class="text-body-secondary">{{ gettext("Last Updated") }}: <span
-                  data-date="{{ lesson.last_updated.isoformat() }}Z"></span></small></p>
+                  data-date="{{ laboratory_exercise.last_updated.isoformat() }}Z"></span></small></p>
           </div>
         </div>
       </div>
@@ -160,7 +160,7 @@
     </div>
     {% else %}
     <div class="alert alert-info text-center">
-      {{ gettext("No lessons found matching your current filters.") }}
+      {{ gettext("No laboratory exercises found matching your current filters.") }}
     </div>
     {% endif %}
   </div>

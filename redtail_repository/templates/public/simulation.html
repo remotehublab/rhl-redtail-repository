@@ -191,35 +191,34 @@
       </div>
     </div>
 
-    <!-- Lessons -->
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light">
-          <div class="card-header">{{gettext("Lessons")}}</div>
+          <div class="card-header">{{gettext("Laboratory Exercises")}}</div>
           <div class="card-body">
-            {% if lessons %}
+            {% if laboratory_exercises %}
             <table class="table table-bordered table-hover">
               <tr>
-                <th>{{ gettext("Lesson") }}</th>
+                <th>{{ gettext("Laboratory Exercises") }}</th>
                 <th>{{ gettext("Devices") }}</th>
                 <th>{{ gettext("Authors") }}</th>
               </tr>
-              {% for lesson in lessons %}
+              {% for laboratory_exercise in laboratory_exercises %}
               <tr>
                 <td>
-                  <a href="{{ url_for('.lesson', lesson_slug=lesson.slug) }}">
-                    {{ lesson.name }}
+                  <a href="{{ url_for('.laboratory_exercise', laboratory_exercise_slug=laboratory_exercise.slug) }}">
+                    {{ laboratory_exercise.name }}
                   </a>
                 </td>
                 <td>
                   <ul>
-                    {% for device_framework in lesson.device_frameworks %}
+                    {% for device_framework in laboratory_exercise.device_frameworks %}
                     <li>{{ device_framework.device.name }} / {{ device_framework.name }}</li>
                     {% endfor %}
                   </ul>
                 </td>
                 <td>
-                  {% for author in lesson.authors %}
+                  {% for author in laboratory_exercise.authors %}
                   {{ author.name }}{% if not loop.last %}, {% endif %}
                   {% endfor %}
                 </td>
@@ -227,7 +226,7 @@
               {% endfor %}
             </table>
             {% else %}
-            <p>{{gettext("No lessons available for this simulation.")}}</p>
+            <p>{{gettext("No laboratory exercises available for this simulation.")}}</p>
             {% endif %}
           </div>
         </div>

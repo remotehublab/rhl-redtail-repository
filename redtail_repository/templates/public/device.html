@@ -51,8 +51,8 @@
               <div class="card-body">
                 <p class="card-text mb-1 small">{{gettext("Used in: ")}}</p>
                 <p class="card-text mb-1 small">
-                  <a href="{{ url_for('.lessons', framework=device_framework.slug) }}">
-                    {{ gettext("%(lessons)s lessons", lessons=device_framework.lessons|length) }}
+                  <a href="{{ url_for('.laboratory_exercises', framework=device_framework.slug) }}">
+                    {{ gettext("%(laboratory_exercises)s laboratory_exercises", laboratory_exercises=device_framework.laboratory_exercises|length) }}
                   </a>
                 </p>
                 <p class="card-text mb-1 small">
