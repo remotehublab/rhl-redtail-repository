@@ -35,7 +35,7 @@
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">{{ gettext("Devices") }}</h1>
+    <h1 class="text-center m-4">{{ gettext("Devices") }}</h1>
 
     {# Current Filter Selections Section #}
     {% if selected_category or selected_device_category %}
@@ -70,8 +70,8 @@
     <div class="row row-cols-1 row-cols-md-5 g-2">
       {% for device in devices %}
       <div class="col">
-        <div class="card h-100" style="width: 100%;">
-          <img src="{{ device.cover_image_url }}" class="card-img-top" alt="{{ device.name }}"
+        <div class="card h-100 overflow-hidden" style="width: 100%; border-width: 2px;">
+          <img src="{{ device.cover_image_url }}" class="card-img-top border-bottom" alt="{{ device.name }}"
             style="height: 190px; object-fit: cover;">
           <div class="card-body d-flex flex-column">
             <h5 class="card-title"
@@ -80,6 +80,9 @@
                 {{ device.name }}
               </a>
             </h5>
+            
+            <hr class="my-2">
+
             <p class="card-text mb-3"
               style="height: 4.5rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
               {{ device.description }}

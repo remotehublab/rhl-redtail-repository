@@ -91,7 +91,7 @@
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">{{ gettext("Laboratory Exercises") }}</h1>
+    <h1 class="text-center m-4">{{ gettext("Laboratory Exercises") }}</h1>
 
     {# Current Filter Selections Section #}
     {% if selected_category or selected_level or selected_framework %}
@@ -136,8 +136,13 @@
     <div class="row row-cols-1 row-cols-md-4 g-2">
       {% for laboratory_exercise in laboratory_exercises %}
       <div class="col">
-        <div class="card" style="width: 100%;">
-          <img src="{{ laboratory_exercise.cover_image_url }}" class="card-img-top" alt="{{ laboratory_exercise.name }}">
+        <div class="card overflow-hidden" style="width: 100%; border-width: 3px">
+          <div class="ratio ratio-1x1 d-flex align-items-center justify-content-center bg-light">
+            <img src="{{ laboratory_exercise.cover_image_url }}"
+              class="card-img-top rounded-top border-bottom"
+              alt="{{ laboratory_exercise.name }}"
+              style="max-width: 100%; max-height: 100%; object-fit: contain;">
+          </div>
           <div class="card-body">
             <h5 class="card-title"
               style="height: 3rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
@@ -145,6 +150,9 @@
                 {{ laboratory_exercise.name }}
               </a>
             </h5>
+
+            <hr class="my-2">
+            
             <p class="card-text"
               style="height: 4.5rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
               {{ laboratory_exercise.short_description }}

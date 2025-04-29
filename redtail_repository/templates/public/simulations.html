@@ -56,7 +56,7 @@
 
   <!-- Main Content Section -->
   <div class="col-md-9">
-    <h1 class="text-center">{{ gettext("Simulations") }}</h1>
+    <h1 class="text-center m-4">{{ gettext("Simulations") }}</h1>
 
     {# Current Filter Selections Section #}
     {% if selected_category or selected_device %}
@@ -88,16 +88,19 @@
     <div class="row row-cols-1 row-cols-md-4 g-2">
       {% for simulation in simulations %}
       <div class="col">
-        <div class="card" style="width: 100%;">
-          <img src="{{ simulation.cover_image_url }}" class="card-img-top" alt="{{ simulation.name }}">
+        <div class="card overflow-hidden" style="width: 100%; border-width: 3px;">
+          <img src="{{ simulation.cover_image_url }}" class="card-img-top border-bottom" alt="{{ simulation.name }}">
           <div class="card-body">
             <h5 class="card-title"
-              style="height: 3rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+              style="height: 2rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
               <a href="{{ url_for('.simulation', simulation_slug=simulation.slug ) }}"
                 class="stretched-link text-decoration-none">
                 {{ simulation.name }}
               </a>
             </h5>
+
+            <hr class="my-2">
+
             <p class="card-text"
               style="height: 4.5rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
               {{ simulation.description }}
