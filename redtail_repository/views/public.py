@@ -37,7 +37,7 @@ def authors():
     all_authors = db.session.query(Author).all()
     return render_template('public/authors.html', authors=all_authors)
 
-@public_blueprint.route('/laboratory_exercise')
+@public_blueprint.route('/laboratory-exercises')
 def laboratory_exercises():
     all_categories = LaboratoryExerciseCategory.query.all()
     all_levels = LaboratoryExerciseLevel.query.all()
@@ -108,7 +108,7 @@ def laboratory_exercises():
         selected_framework=framework_slug
     )
 
-@public_blueprint.route('/laboratory_exercises/<laboratory_exercise_slug>')
+@public_blueprint.route('/laboratory-exercises/<laboratory_exercise_slug>')
 def laboratory_exercise(laboratory_exercise_slug):
     laboratory_exercise = db.session.query(LaboratoryExercise).filter_by(slug=laboratory_exercise_slug, active=True).options(
         joinedload(LaboratoryExercise.authors),
