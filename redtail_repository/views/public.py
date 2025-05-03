@@ -1,6 +1,7 @@
 from flask import Blueprint, request, render_template, abort, redirect, url_for, make_response
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext
+from flask_login import current_user
 
 from redtail_repository import db
 from redtail_repository.models import (
@@ -142,6 +143,11 @@ def laboratory_exercise(laboratory_exercise_slug):
         for device_id in devices_to_frameworks
     ]
 
+    if current_user.is_authenticated and getattr(current_user, "verified", True):
+        documents = laboratory_exercise.laboratory_exercise_documents
+    else:
+        documents = [doc for doc in laboratory_exercise.laboratory_exercise_documents if not doc.is_solution]
+
     return render_template(
         "public/laboratory_exercise.html",
         laboratory_exercise=laboratory_exercise,
@@ -149,7 +155,7 @@ def laboratory_exercise(laboratory_exercise_slug):
         last_updated=laboratory_exercise.last_updated,
         videos=laboratory_exercise.video_url,
         images=laboratory_exercise.laboratory_exercise_images,
-        documents=laboratory_exercise.laboratory_exercise_documents,
+        documents=documents,
         simulations=laboratory_exercise.simulations,
         categories=laboratory_exercise.laboratory_exercise_categories,
         devices=devices,
