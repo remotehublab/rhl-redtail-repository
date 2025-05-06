@@ -77,7 +77,7 @@
     {% endif %}
 
     <!-- Image Carousel - Only display if images exist -->
-    {% if simulation.images and simulation.images|length > 0 %}
+    {% if simulation.simulation_images and simulation.simulation_images|length > 0 %}
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light mb-3">
@@ -85,9 +85,9 @@
           <div class="card-body p-0">
             <div id="simulationImageCarousel" class="carousel slide" data-bs-ride="carousel">
               <!-- Carousel indicators -->
-              {% if simulation.images|length > 1 %}
+              {% if simulation.simulation_images|length > 1 %}
               <div class="carousel-indicators">
-                {% for image in simulation.images %}
+                {% for image in simulation.simulation_images %}
                 <button type="button" data-bs-target="#simulationImageCarousel" data-bs-slide-to="{{ loop.index0 }}" {%
                   if loop.first %}class="active" aria-current="true" {% endif %}
                   aria-label="Slide {{ loop.index }}"></button>
@@ -97,9 +97,9 @@
 
               <!-- Carousel items -->
               <div class="carousel-inner">
-                {% for image in simulation.images %}
+                {% for image in simulation.simulation_images %}
                 <div class="carousel-item {% if loop.first %}active{% endif %}">
-                  <img src="{{ image.url }}" class="d-block w-100"
+                  <img src="{{ image.image_url }}" class="d-block w-100"
                     alt="{{ image.alt|default('Simulation image ' + loop.index|string) }}">
                   {% if image.caption %}
                   <div class="carousel-caption d-none d-md-block">
@@ -111,7 +111,7 @@
               </div>
 
               <!-- Carousel controls - only if multiple images -->
-              {% if simulation.images|length > 1 %}
+              {% if simulation.simulation_images|length > 1 %}
               <button class="carousel-control-prev" type="button" data-bs-target="#simulationImageCarousel"
                 data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -123,9 +123,6 @@
                 <span class="visually-hidden">{{ gettext("Next") }}</span>
               </button>
               {% endif %}
-            </div>
-            <div class="p-3">
-              <p class="text-muted">{{ gettext("Images of the simulation") }}</p>
             </div>
           </div>
         </div>

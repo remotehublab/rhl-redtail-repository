@@ -234,7 +234,8 @@ def simulation(simulation_slug):
         joinedload(Simulation.laboratory_exercises),
         joinedload(Simulation.device_frameworks).joinedload(DeviceFramework.device),
         joinedload(Simulation.simulation_categories),
-        joinedload(Simulation.simulation_documents)
+        joinedload(Simulation.simulation_documents),
+        joinedload(Simulation.simulation_images)
     ).first()
 
     if not simulation:
