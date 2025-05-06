@@ -96,7 +96,12 @@
       <h5 class="text-center text-muted mb-4">
         {{ gettext("By") }}:
         {% for author in authors %}
-        {{ author.name }}{% if not loop.last %}, {% endif %}
+          {% if author.link %}
+            <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
+          {% else %}
+            {{ author.name }}
+          {% endif %}
+          {% if not loop.last %}, {% endif %}
         {% endfor %}
       </h5>
     </div>
