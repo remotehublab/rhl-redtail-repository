@@ -156,21 +156,15 @@
               {% if documents %}
             <ul>
               {% for document in documents %}
-
-              <li><a href="{{ document.doc_url }}">{{ document.title }}</a>
-
                 {% if document.is_solution %}
-                {% if current_user.is_active and current_user.role in ('admin', 'instructor') and current_user.verified
-                %}
-
-                (showing solution link, etc.)
+                  {% if verified_user %}
+                    <li><a href="{{ document.doc_url }}">{{ document.title }}</a> ({{ gettext("Only available for verified instructors.") }})</li>
+                  {% else %}
+                    <li>{{ document.title }} ({{ gettext("Only available for verified instructors.") }} <a href="{{ url_for('login.register', next=request.full_path) }}">{{ gettext("Register") }}</a> <a href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("or log in.") }}</a>)</li>
+                  {% endif %}
                 {% else %}
-                (not showing solution)
-
+                  <li><a href="{{ document.doc_url }}">{{ document.title }}</a></li>
                 {% endif %}
-                {% endif %}
-
-              </li>
               {% endfor %}
             </ul>
 

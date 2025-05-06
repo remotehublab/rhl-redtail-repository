@@ -143,19 +143,17 @@ def laboratory_exercise(laboratory_exercise_slug):
         for device_id in devices_to_frameworks
     ]
 
-    if current_user.is_authenticated and getattr(current_user, "verified", True):
-        documents = laboratory_exercise.laboratory_exercise_documents
-    else:
-        documents = [doc for doc in laboratory_exercise.laboratory_exercise_documents if not doc.is_solution]
+    verified_user = current_user.is_authenticated and getattr(current_user, "verified", True)
 
     return render_template(
         "public/laboratory_exercise.html",
+        verified_user=verified_user,
         laboratory_exercise=laboratory_exercise,
         authors=laboratory_exercise.authors,
         last_updated=laboratory_exercise.last_updated,
         videos=laboratory_exercise.video_url,
         images=laboratory_exercise.laboratory_exercise_images,
-        documents=documents,
+        documents=laboratory_exercise.laboratory_exercise_documents,
         simulations=laboratory_exercise.simulations,
         categories=laboratory_exercise.laboratory_exercise_categories,
         devices=devices,
@@ -251,16 +249,27 @@ def simulation(simulation_slug):
         devices_by_id[device.id] = device
         devices_to_frameworks.setdefault(device.id, []).append(framework)
 
+    device_documents_by_device_id = {
+        # device_id: [ document1, document2 ]
+    }
+    
+    for document in simulation.device_documents:
+        device_documents_by_device_id.setdefault(document.device_id, []).append(document)
+
+    any_device_documents = len(device_documents_by_device_id) > 0
+
     devices = [
         {
             "device": devices_by_id[device_id],
-            "frameworks": devices_to_frameworks[device_id]
+            "frameworks": devices_to_frameworks[device_id],
+            "documents": device_documents_by_device_id.get(device_id, [])
         }
         for device_id in devices_to_frameworks
     ]
 
     return render_template(
         "public/simulation.html",
+        any_device_documents=any_device_documents,
         simulation=simulation,
         laboratory_exercises=simulation.laboratory_exercises,
         devices=devices,

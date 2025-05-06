@@ -40,30 +40,38 @@
 
   <!-- Main Content Section -->
   <div class="col-md-8">
-    <h1 class="text-center">
-      {{ gettext("Simulation: %(simulations_name)s", simulations_name=simulation.name) }}
-    </h1>
+    <br>
+    <div class="row">
+      <div class="col-md-4">
+        <img src="{{ simulation.cover_image_url }}" style="width: 100%; max-width: 200px" class="rounded float-end" alt="{{ simulation.name }}">
+      </div>
+      <div class="col-md-8">
+        <h1 class="">
+          {{ gettext("Simulation: %(simulations_name)s", simulations_name=simulation.name) }}
+        </h1>
 
-    <!-- Authors as Subheading -->
-    {% if simulation.authors %}
-    <h5 class="text-center text-muted mb-4">
-      {{ gettext("By") }}:
-      {% for author in simulation.authors %}
-      {% if author.link %}
-      <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
-      {% else %}
-      {{ author.name }}
-      {% endif %}
-      {% if not loop.last %}, {% endif %}
-      {% endfor %}
-    </h5>
-    {% endif %}
+        <!-- Authors as Subheading -->
+        {% if simulation.authors %}
+        <h5 class="text-muted mb-4">
+          {{ gettext("By") }}:
+          {% for author in simulation.authors %}
+          {% if author.link %}
+          <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
+          {% else %}
+          {{ author.name }}
+          {% endif %}
+          {% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </h5>
+        {% endif %}
+      </div>      
+    </div>
 
     <!-- Video or Cover Image Section -->
+    {% if simulation.video_url %}
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-6 offset-md-3">
         <div class="card text-start bg-light mb-2">
-          {% if simulation.video_url %}
           <div class="card-header">{{ gettext("Video Preview") }}</div>
           <div class="card-body p-2">
             <div class="ratio ratio-16x9">
@@ -76,14 +84,10 @@
               <p class="text-muted mb-0">{{ gettext("Video demonstration of the simulation") }}</p>
             </div>
           </div>
-          {% else %}
-          <div class="card-body p-2">
-            <img src="{{ simulation.cover_image_url }}" class="img-fluid rounded border" alt="{{ simulation.name }}">
-          </div>
-          {% endif %}
         </div>
       </div>
     </div>
+    {% endif %}
 
 
     <!-- Image Carousel - Only display if images exist -->
@@ -158,15 +162,32 @@
         <div class="card text-start bg-light">
           <div class="card-header">{{gettext("Downloads")}}</div>
           <div class="card-body">
-            {% if documents %}
+            {% if documents or any_device_documents%}
             <ul>
               {% for document in documents %}
               <li><a href="{{ document.doc_url }}" target="_blank">{{ document.title }}</a></li>
               {% endfor %}
+
+              {% for device_item in devices|sort(attribute='device.name') %}
+                {% if device_item.documents %}
+                <li>
+                  {{ device_item.device.name }}:
+                  <ul>
+                    {% for document in device_item.documents %}
+                      <li>
+                        <a href="{{ document.doc_url }}">{{ document.name }}</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </li>
+                {% endif %}
+              {% endfor %}
+
             </ul>
             {% else %}
             <p>{{gettext("No downloads available for this simulation.")}}</p>
             {% endif %}
+
           </div>
         </div>
       </div>
