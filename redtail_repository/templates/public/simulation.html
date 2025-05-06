@@ -16,9 +16,9 @@
       </div>
     </div>
 
-    <!-- Devices Section -->
+    <!-- Supported Devices Section -->
     <div class="card mb-4">
-      <div class="card-header">{{ gettext("Devices:") }}</div>
+      <div class="card-header">{{ gettext("Supported Devices:") }}</div>
       <div class="card-body">
         <ul class="list-unstyled">
           {% for device_item in devices|sort(attribute='device.name') %}
@@ -166,33 +166,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Supported Devices -->
-    <div class="row mt-3">
-      <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
-        <div class="card text-start bg-light">
-          <div class="card-header">{{gettext("Compatible Devices")}}</div>
-          <div class="card-body">
-            <ul>
-              {% for device_item in devices|sort(attribute='device.name') %}
-              <li>
-                <a href="{{ url_for('.device', device_slug=device_item.device.slug) }}">{{ device_item.device.name
-                  }}</a>
-                {% if device_item.frameworks %}
-                <ul>
-                  {% for framework in device_item.frameworks %}
-                  <li>{{ framework.name }}</li>
-                  {% endfor %}
-                </ul>
-                {% endif %}
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light">
