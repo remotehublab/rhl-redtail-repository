@@ -1,0 +1,15 @@
+{% extends "public/_base.html" %}
+
+{% block container %}
+<div class="row">
+
+    <h1>{{ gettext("Document viewer") }}</h1>
+
+    <p><a href="{{ path }}">{{ path }}</a></p>
+
+    <a href="{{ url_for('.word_converter', path=path) }}">{{ gettext("Download as Word document") }}</a>
+
+    <hr>
+    {{ html_content|safe }}
+</div>
+{% endblock %}

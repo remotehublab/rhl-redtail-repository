@@ -1,0 +1,78 @@
+{% extends "public/_base.html" %}
+
+{% block container %}
+<div class="row">
+  <!-- Sidebar Section -->
+  <div class="col-md-2 mt-4">
+    <!-- Categories Section -->
+    <div class="card mb-3">
+      <div class="card-header">{{ gettext("Categories:") }}</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          {% for category in categories|sort(attribute='name') %}
+          <li><a href="{{ url_for('.simulations', category=category.slug) }}">{{category.name}}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Supported Devices Section -->
+    <div class="card mb-4">
+      <div class="card-header">{{ gettext("Supported Devices:") }}</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          {% for device_item in devices|sort(attribute='device.name') %}
+          <li>
+            <a href="{{ url_for('.device', device_slug=device_item.device.slug) }}">{{device_item.device.name}}</a>
+            {% if device_item.frameworks %}
+            <ul class="ms-3">
+              {% for framework in device_item.frameworks %}
+              <li>{{ framework.name }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Section -->
+  <div class="col-md-8">
+    <br>
+    <div class="row">
+      <div class="col-md-4">
+        <img src="{{ simulation.cover_image_url }}" style="width: 100%; max-width: 200px" class="rounded float-end" alt="{{ simulation.name }}">
+      </div>
+      <div class="col-md-8">
+        <h1 class="">
+          {{ gettext("Simulation: %(simulations_name)s", simulations_name=simulation.name) }}
+        </h1>
+
+        <!-- Authors as Subheading -->
+        {% if simulation.authors %}
+        <h5 class="text-muted mb-4">
+          {{ gettext("By") }}:
+          {% for author in simulation.authors %}
+          {% if author.link %}
+          <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
+          {% else %}
+          {{ author.name }}
+          {% endif %}
+          {% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </h5>
+        {% endif %}
+      </div>      
+    </div>
+
+    <h2>{{ doc.title }}</h2>
+    <p>{{ doc.description }}</p>
+
+    {# <a href="{{ url_for('.word_converter', path=path) }}">{{ gettext("Download as Word document") }}</a> #}
+    <hr>
+    {{ html_content|safe }}
+  </div>
+</div>
+{% endblock %}

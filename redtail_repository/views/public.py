@@ -1,4 +1,17 @@
-from flask import Blueprint, request, render_template, abort, redirect, url_for, make_response
+import os
+import logging
+import tempfile
+import traceback
+
+logger = logging.getLogger(__name__)
+
+import requests
+import pypandoc
+
+from markdown import markdown
+
+from urllib.parse import urlparse
+from flask import Blueprint, request, render_template, abort, redirect, url_for, make_response, send_file
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext
 from flask_login import current_user
@@ -6,7 +19,7 @@ from flask_login import current_user
 from redtail_repository import db
 from redtail_repository.models import (
     LaboratoryExercise, LaboratoryExerciseCategory, LaboratoryExerciseLevel,
-    Simulation, Device, SimulationCategory, User, Author,
+    Simulation, SimulationDoc, SimulationDeviceDocument, Device, SimulationCategory, User, Author,
     DeviceCategory, DeviceFramework
 )
 
@@ -278,6 +291,149 @@ def simulation(simulation_slug):
         documents=simulation.simulation_documents
     )
 
+@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>.md')
+def simulation_doc_md(simulation_slug, doc_id: int):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).options(
+        joinedload(Simulation.device_frameworks).joinedload(DeviceFramework.device),
+        joinedload(Simulation.simulation_categories),
+        joinedload(Simulation.authors)
+    ).first()
+
+    if not simulation:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    doc = db.session.query(SimulationDoc).filter_by(id=doc_id, simulation_id=simulation.id).first()
+    if doc is None:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    if not doc.doc_url.lower().endswith('.md'):
+        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+
+    # Organize frameworks by device for consistency with parent route
+    devices_by_id = {}
+    devices_to_frameworks = {}
+
+    for framework in simulation.device_frameworks:
+        device = framework.device
+        devices_by_id[device.id] = device
+        devices_to_frameworks.setdefault(device.id, []).append(framework)
+
+    device_documents_by_device_id = {
+        # device_id: [ document1, document2 ]
+    }
+    
+    for document in simulation.device_documents:
+        device_documents_by_device_id.setdefault(document.device_id, []).append(document)
+
+    any_device_documents = len(device_documents_by_device_id) > 0
+
+    devices = [
+        {
+            "device": devices_by_id[device_id],
+            "frameworks": devices_to_frameworks[device_id],
+            "documents": device_documents_by_device_id.get(device_id, [])
+        }
+        for device_id in devices_to_frameworks
+    ]
+    
+    response = _get_html(doc.doc_url)
+    if not isinstance(response, str):
+        return response
+
+    return render_template("public/simulation_md.html", simulation=simulation, doc=doc, html_content=response, 
+        categories=simulation.simulation_categories, devices=devices)
+
+
+@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>.docx')
+def simulation_doc_word(simulation_slug, doc_id: int):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
+
+    if not simulation:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    doc = db.session.query(SimulationDoc).filter_by(id=doc_id, simulation_id=simulation.id).first()
+    if doc is None:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    if not doc.doc_url.lower().endswith('.md'):
+        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+    
+    return _get_word(doc.doc_url)
+
+@public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>.md')
+def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
+
+    if not simulation:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    device = db.session.query(Device).filter_by(slug=device_slug).first()
+    if not device:
+        return render_template("public/error.html", message=gettext("Device not found")), 404
+
+    doc = db.session.query(SimulationDeviceDocument).filter_by(id=doc_id, simulation_id=simulation.id, device_id=device.id).first()
+    if doc is None:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    if not doc.doc_url.lower().endswith('.md'):
+        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+
+    # Organize frameworks by device for consistency with parent route
+    devices_by_id = {}
+    devices_to_frameworks = {}
+
+    for framework in simulation.device_frameworks:
+        device = framework.device
+        devices_by_id[device.id] = device
+        devices_to_frameworks.setdefault(device.id, []).append(framework)
+
+    device_documents_by_device_id = {
+        # device_id: [ document1, document2 ]
+    }
+    
+    for document in simulation.device_documents:
+        device_documents_by_device_id.setdefault(document.device_id, []).append(document)
+
+    any_device_documents = len(device_documents_by_device_id) > 0
+
+    devices = [
+        {
+            "device": devices_by_id[device_id],
+            "frameworks": devices_to_frameworks[device_id],
+            "documents": device_documents_by_device_id.get(device_id, [])
+        }
+        for device_id in devices_to_frameworks
+    ]
+
+    response = _get_html(doc.doc_url)
+    if not isinstance(response, str):
+        return response
+
+    return render_template("public/simulation_device_md.html", simulation=simulation, device=device, doc=doc, html=response,
+            categories=simulation.simulation_categories, devices=devices)
+
+@public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>.docx')
+def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: int):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
+
+    if not simulation:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+    device = db.session.query(Device).filter_by(slug=device_slug).first()
+    if not device:
+        return render_template("public/error.html", message=gettext("Device not found")), 404
+
+    doc = db.session.query(SimulationDeviceDocument).filter_by(id=doc_id, simulation_id=simulation.id, device_id=device.id).first()
+    if doc is None:
+        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+
+
+    if not doc.doc_url.lower().endswith('.md'):
+        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+    
+    return _get_word(doc.doc_url)
+
+
 
 @public_blueprint.route('/devices')
 def devices():
@@ -342,3 +498,54 @@ def device(device_slug):
         categories=device.device_categories,
         frameworks=device.device_frameworks
     )
+
+@public_blueprint.route('/docs/markdown-viewer/<path:path>')
+def md_viewer(path):
+    response = _get_html(path)
+    if not isinstance(response, str):
+        return response
+    return render_template("public/markdown-viewer.html", html_content=response, path=path)
+
+@public_blueprint.route('/docs/word-converter/<path:path>')
+def word_converter(path):
+    return _get_word(path)
+
+def _get_word(path: str, filename: str = 'document.docx'):
+    response = _get_md(path)
+    if not isinstance(response, str):
+        return response
+        
+    with tempfile.NamedTemporaryFile(suffix=".md", delete=False, mode='w') as md_file:
+        md_file.write(response)
+        md_path = md_file.name
+
+    docx_path = md_path.replace(".md", ".docx")
+    try:
+        pypandoc.convert_file(md_path, 'docx', outputfile=docx_path)
+        return send_file(docx_path, as_attachment=True, download_name=filename)
+    finally:
+        os.remove(md_path)
+        if os.path.exists(docx_path):
+            os.remove(docx_path)
+
+def _get_md(path: str):
+    known_domains = [ d.strip() for d in (os.environ.get('KNOWN_DOMAINS') or "redtail.rhlab.ece.uw.edu").split(',') ]
+
+    domain = urlparse(path).netloc
+    if domain not in known_domains:
+        return "Not found", 404
+
+    try:
+        req = requests.get(path)
+        req.raise_for_status()
+        return req.text
+    except Exception as err:
+        logger.warning(f"Could not retrieve {path}: {err}", exc_info=True)
+        traceback.print_exc()
+        return f"Could not retrieve {path}", 500
+
+def _get_html(path: str):
+    response = _get_md(path)
+    if isinstance(response, str):
+        return markdown(response)
+    return response

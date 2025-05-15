@@ -34,6 +34,12 @@ $ flask run
 
 ## Development commands
 
+Requires pandoc:
+```
+sudo apt install pandoc         # Linux
+brew install pandoc             # macOS
+choco install pandoc            # Windows
+```
 
 
 ```
