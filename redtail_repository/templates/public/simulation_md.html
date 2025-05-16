@@ -47,7 +47,7 @@
       </div>
       <div class="col-md-8">
         <h1 class="">
-          {{ gettext("Simulation: %(simulations_name)s", simulations_name=simulation.name) }}
+            {{ gettext("Simulation: <a href='%(link)s'>%(simulations_name)s</a>", simulations_name=simulation.name, link=url_for('.simulation', simulation_slug=simulation.slug)) }}
         </h1>
 
         <!-- Authors as Subheading -->
