@@ -551,5 +551,5 @@ def _get_md(path: str):
 def _get_html(path: str):
     response = _get_md(path)
     if isinstance(response, str):
-        return markdown(response)
+        return markdown(response, extensions=['extra'])
     return response
