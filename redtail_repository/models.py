@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from slugify import slugify
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -376,6 +378,10 @@ class SimulationDoc(db.Model):
 
     simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_documents")
 
+    @property
+    def slugified_title(self):
+        return slugify(self.title)
+
 class SimulationDeviceDocument(db.Model):
     __tablename__ = 'simulation_device_document'
 
@@ -392,6 +398,10 @@ class SimulationDeviceDocument(db.Model):
     device: Mapped[Device] = relationship(
         back_populates="simulation_documents"
     )
+
+    @property
+    def slugified_name(self):
+        return slugify(self.name)
 
 class LaboratoryExerciseCategory(db.Model):
     __tablename__ = 'laboratory_exercise_category'

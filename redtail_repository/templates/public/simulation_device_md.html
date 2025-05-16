@@ -67,10 +67,10 @@
       </div>      
     </div>
 
-    <h2>{{ doc.title }}</h2>
-    <p>{{ doc.description }}</p>
+    <br><br>
 
-    {# <a href="{{ url_for('.word_converter', path=path) }}">{{ gettext("Download as Word document") }}</a> #}
+    <h2>{{ doc.name }}</h2>
+    <a class="btn btn-sm btn-primary" href="{{ url_for(".simulation_device_doc_word", simulation_slug=simulation.slug, device_slug=device.slug, doc_id=doc.id, name=doc.slugified_name) }}">{{ gettext("Download Word version") }}</a>
     <hr>
     {{ html_content|safe }}
   </div>

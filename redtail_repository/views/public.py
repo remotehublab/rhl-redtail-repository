@@ -291,8 +291,8 @@ def simulation(simulation_slug):
         documents=simulation.simulation_documents
     )
 
-@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>.md')
-def simulation_doc_md(simulation_slug, doc_id: int):
+@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>-<title>.md')
+def simulation_doc_md(simulation_slug, doc_id: int, title: str):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).options(
         joinedload(Simulation.device_frameworks).joinedload(DeviceFramework.device),
         joinedload(Simulation.simulation_categories),
@@ -344,8 +344,8 @@ def simulation_doc_md(simulation_slug, doc_id: int):
         categories=simulation.simulation_categories, devices=devices)
 
 
-@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>.docx')
-def simulation_doc_word(simulation_slug, doc_id: int):
+@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>-<title>.docx')
+def simulation_doc_word(simulation_slug, doc_id: int, title):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
 
     if not simulation:
@@ -358,10 +358,12 @@ def simulation_doc_word(simulation_slug, doc_id: int):
     if not doc.doc_url.lower().endswith('.md'):
         return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
     
-    return _get_word(doc.doc_url)
+    title = f"{simulation.name}-{doc.title}.docx"
 
-@public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>.md')
-def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int):
+    return _get_word(doc.doc_url, title)
+
+@public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>-<name>.md')
+def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int, name):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
 
     if not simulation:
@@ -383,9 +385,9 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
     devices_to_frameworks = {}
 
     for framework in simulation.device_frameworks:
-        device = framework.device
-        devices_by_id[device.id] = device
-        devices_to_frameworks.setdefault(device.id, []).append(framework)
+        dev = framework.device
+        devices_by_id[dev.id] = dev
+        devices_to_frameworks.setdefault(dev.id, []).append(framework)
 
     device_documents_by_device_id = {
         # device_id: [ document1, document2 ]
@@ -409,11 +411,11 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
     if not isinstance(response, str):
         return response
 
-    return render_template("public/simulation_device_md.html", simulation=simulation, device=device, doc=doc, html=response,
+    return render_template("public/simulation_device_md.html", simulation=simulation, device=device, doc=doc, html_content=response,
             categories=simulation.simulation_categories, devices=devices)
 
-@public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>.docx')
-def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: int):
+@public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>-<name>.docx')
+def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: int, name):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
 
     if not simulation:
@@ -425,13 +427,15 @@ def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: i
 
     doc = db.session.query(SimulationDeviceDocument).filter_by(id=doc_id, simulation_id=simulation.id, device_id=device.id).first()
     if doc is None:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        return render_template("public/error.html", message=gettext("Simulation Device Document not found for %(device_name)s and %(simulation_name)s", simulation_name=simulation.name, device_name=device.name)), 404
 
 
     if not doc.doc_url.lower().endswith('.md'):
         return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+
+    title = f"{simulation.name}-{device.name}-{doc.name}.docx"
     
-    return _get_word(doc.doc_url)
+    return _get_word(doc.doc_url, title)
 
 
 

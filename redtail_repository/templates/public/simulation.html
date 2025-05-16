@@ -166,7 +166,7 @@
             <ul>
               {% for document in documents %}
               {% if document.doc_url and document.doc_url.lower().endswith('.md') %}
-              <li><a href="{{ url_for('.simulation_doc_md', simulation_slug=simulation.slug, doc_id=document.id) }}">{{ document.title }}</a></li>
+              <li><a href="{{ url_for('.simulation_doc_md', simulation_slug=simulation.slug, doc_id=document.id, title=document.slugified_title) }}">{{ document.title }}</a></li>
               {% else %}
               <li><a href="{{ document.doc_url }}" target="_blank">{{ document.title }}</a></li>
               {% endif %}
@@ -180,7 +180,7 @@
                     {% for document in device_item.documents %}
                       <li>
                         {% if document.doc_url and document.doc_url.lower().endswith('.md') %}
-                        <a href="{{ url_for('.simulation_device_doc_md', simulation_slug=simulation.slug, device_slug=device_item.device.slug, doc_id=document.id) }}">{{ document.name }}</a>
+                        <a href="{{ url_for('.simulation_device_doc_md', simulation_slug=simulation.slug, device_slug=device_item.device.slug, doc_id=document.id, name=document.slugified_name) }}">{{ document.name }}</a>
                         {% else %}
                         <a href="{{ document.doc_url }}">{{ document.name }}</a>
                         {% endif %}
