@@ -1,5 +1,6 @@
-import re
 import os
+import re
+import shutil
 import logging
 import tempfile
 import traceback
@@ -11,7 +12,7 @@ import pypandoc
 
 from markdown import markdown
 
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse, urljoin
 from flask import Blueprint, request, render_template, abort, redirect, url_for, make_response, send_file, current_app, send_from_directory
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext
@@ -519,17 +520,60 @@ def _get_word(path: str, filename: str = 'document.docx'):
     response = _get_md(path)
     if not isinstance(response, str):
         return response
-        
-    with tempfile.NamedTemporaryFile(suffix=".md", delete=False, mode='w') as md_file:
-        md_file.write(response)
-        md_path = md_file.name
 
-    docx_path = md_path.replace(".md", ".docx")
+    parsed = urlparse(path)
+    is_url = parsed.scheme in ('http', 'https')
+
+    if is_url:
+        base_url = path.rsplit('/', 1)[0] + '/'
+        temp_dir = tempfile.mkdtemp()
+        md_path = os.path.join(temp_dir, 'document.md')
+
+        # Download relative images
+        def replace_image(match):
+            alt_text, img_path = match.groups()
+            if img_path.startswith(('http://', 'https://', '/')):
+                return match.group(0)  # leave as-is
+            # Download image
+            img_url = urljoin(base_url, img_path)
+            local_img_path = os.path.join(temp_dir, os.path.basename(img_path))
+            try:
+                img_data = requests.get(img_url, timeout=5)
+                img_data.raise_for_status()
+                with open(local_img_path, 'wb') as img_file:
+                    img_file.write(img_data.content)
+                return f'![{alt_text}]({os.path.basename(img_path)})'
+            except Exception as e:
+                print(f"Warning: failed to download {img_url}: {e}")
+                return match.group(0)  # keep original
+
+        # Replace image paths in Markdown
+        updated_md = re.sub(r'!\[(.*?)\]\((.*?)\)', replace_image, response)
+
+        # Write Markdown file
+        with open(md_path, 'w', encoding='utf-8') as f:
+            f.write(updated_md)
+
+        resource_path = temp_dir
+
+    else:
+        # Local file: use its directory as base for image lookup
+        md_path = os.path.abspath(path)
+        resource_path = os.path.dirname(md_path)
+
+    docx_path = os.path.join(tempfile.gettempdir(), filename)
+
     try:
-        pypandoc.convert_file(md_path, 'docx', outputfile=docx_path)
+        pypandoc.convert_file(
+            md_path,
+            'docx',
+            outputfile=docx_path,
+            extra_args=['--resource-path=.:{}'.format(resource_path)]
+        )
         return send_file(docx_path, as_attachment=True, download_name=filename)
     finally:
-        os.remove(md_path)
+        if is_url:
+            shutil.rmtree(temp_dir, ignore_errors=True)
         if os.path.exists(docx_path):
             os.remove(docx_path)
 
