@@ -71,7 +71,12 @@
 
     <h2>{{ doc.name }}</h2>
     <a class="btn btn-sm btn-primary" href="{{ url_for(".simulation_device_doc_word", simulation_slug=simulation.slug, device_slug=device.slug, doc_id=doc.id, name=doc.slugified_name) }}">{{ gettext("Download Word version") }}</a>
-    <a class="btn btn-sm btn-success" href="{{ doc.doc_url }}">{{ gettext("Download Markdown version") }}</a>
+    {% if doc.doc_url.startswith(('http://', 'https://')) %}
+        {% set doc_url = doc.doc_url %}
+    {% else %}
+        {% set doc_url = url_for('.serve_public', filename=doc.doc_url.replace('public/', '')) %}
+    {% endif %}
+    <a class="btn btn-sm btn-success" href="{{ doc_url }}">{{ gettext("Download Markdown version") }}</a>
     <hr>
     <div class="markdown-block">
         {{ html_content|safe }}

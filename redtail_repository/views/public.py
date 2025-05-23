@@ -1,3 +1,4 @@
+import re
 import os
 import logging
 import tempfile
@@ -10,8 +11,8 @@ import pypandoc
 
 from markdown import markdown
 
-from urllib.parse import urlparse
-from flask import Blueprint, request, render_template, abort, redirect, url_for, make_response, send_file
+from urllib.parse import urlparse, urlunparse
+from flask import Blueprint, request, render_template, abort, redirect, url_for, make_response, send_file, current_app, send_from_directory
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext
 from flask_login import current_user
@@ -533,23 +534,72 @@ def _get_word(path: str, filename: str = 'document.docx'):
             os.remove(docx_path)
 
 def _get_md(path: str):
-    known_domains = [ d.strip() for d in (os.environ.get('KNOWN_DOMAINS') or "redtail.rhlab.ece.uw.edu").split(',') ]
+    # Ensure it ends with .md
+    if not path.lower().endswith('.md'):
+        return "Unsupported file type", 400
 
-    domain = urlparse(path).netloc
-    if domain not in known_domains:
-        return "Not found", 404
+    # Handle known domains for URLs
+    parsed = urlparse(path)
+    if parsed.scheme in ('http', 'https'):
+        known_domains = [d.strip() for d in (os.environ.get('KNOWN_DOMAINS') or "redtail.rhlab.ece.uw.edu").split(',')]
+        domain = parsed.netloc
+        if domain not in known_domains:
+            return "Domain not allowed", 403
 
+        try:
+            req = requests.get(path)
+            req.raise_for_status()
+            return req.text
+        except Exception as err:
+            logger.warning(f"Could not retrieve {path}: {err}", exc_info=True)
+            traceback.print_exc()
+            return f"Path not found: {path}", 404
+
+    # Handle local file access
     try:
-        req = requests.get(path)
-        req.raise_for_status()
-        return req.text
+        abs_path = os.path.abspath(path)
+        cwd = os.path.abspath(os.getcwd())
+        if not abs_path.startswith(cwd + os.sep):
+            return "Access denied", 403
+
+        with open(abs_path, 'r', encoding='utf-8') as f:
+            return f.read()
     except Exception as err:
-        logger.warning(f"Could not retrieve {path}: {err}", exc_info=True)
+        logger.warning(f"Could not open local file {path}: {err}", exc_info=True)
         traceback.print_exc()
-        return f"Could not retrieve {path}", 500
+        return f"Could not open local file {path}", 500
+
+def secure_image_paths(md_text, image_base_url):
+    # Rewrite only local images (not starting with http, https, or /)
+    return re.sub(
+        r'!\[(.*?)\]\((?!https?://|/)(.*?)\)',
+        lambda m: f'![{m.group(1)}]({image_base_url}{m.group(2)})',
+        md_text
+    )
+
+def get_image_base_url(path):
+    parsed = urlparse(path)
+    
+    if parsed.scheme in ('http', 'https'):
+        # It's a URL: reconstruct with directory path
+        base_path = os.path.dirname(parsed.path) + '/'
+        return urlunparse((parsed.scheme, parsed.netloc, base_path, '', '', ''))
+    else:
+        # It's a local file path: return it as a web path
+        return '/' + os.path.dirname(path).replace('\\', '/') + '/'
 
 def _get_html(path: str):
     response = _get_md(path)
     if isinstance(response, str):
-        return markdown(response, extensions=['extra'])
+        image_base_url = get_image_base_url(path)
+        safe_md = secure_image_paths(response, image_base_url)
+        return markdown(safe_md, extensions=['extra'])
     return response
+
+@public_blueprint.route('/public/<path:filename>')
+def serve_public(filename: str):
+    if current_app.debug or app.env == 'development':
+        public_dir = os.path.join(os.path.abspath('.'), 'public')
+        return send_from_directory(public_dir, filename)
+    
+    return "/public only works in development", 404
