@@ -18,8 +18,8 @@
           width: 100%;
         }
 
-        .markdown-block table, 
-        .markdown-block th, 
+        .markdown-block table,
+        .markdown-block th,
         .markdown-block td {
           border: 1px solid black;
           padding: 6px;
@@ -68,6 +68,13 @@
               <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}"
                 href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
             </li>
+            <!-- Submission Tab -->
+            <li class="nav-item">
+              <a class="nav-link {% if 'public.file_submission' in request.endpoint %}active{% endif %}"
+                href="{{ url_for('public.file_submission') }}">
+                {{ gettext("File Submission") }}
+              </a>
+            </li>
           </ul>
           <!-- Login/Register Button -->
           {% if current_user.is_authenticated %}
@@ -97,7 +104,7 @@
   {% endblock %}
     </main>
 
-    
+
 
 <footer class="footer mt-auto py-3 bg-light">
   <div class="container">
@@ -130,7 +137,7 @@
         if (!utcString) return;
 
         // Parse as UTC
-        var date = new Date(utcString); 
+        var date = new Date(utcString);
         if (isNaN(date)) {
           console.warn('Invalid date:', utcString);
           return;
@@ -159,7 +166,7 @@
         if (!utcString) return;
 
         // Parse as UTC
-        var date = new Date(utcString); 
+        var date = new Date(utcString);
         if (isNaN(date)) {
           console.warn('Invalid date:', utcString);
           return;

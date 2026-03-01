@@ -53,6 +53,40 @@ def authors():
     all_authors = db.session.query(Author).all()
     return render_template('public/authors.html', authors=all_authors)
 
+@public_blueprint.route('/file_submission', methods=['GET', 'POST'])
+def file_submission():
+    if request.method == 'POST':
+        uploaded_file = request.files.get('file')
+
+        if not uploaded_file or uploaded_file.filename == '':
+            return render_template(
+                "public/file_submission.html",
+                error=gettext("Please select a file to upload.")
+            )
+
+        allowed_extensions = {'.pdf', '.docx', '.md', '.txt'}
+        _, ext = os.path.splitext(uploaded_file.filename.lower())
+
+        if ext not in allowed_extensions:
+            return render_template(
+                "public/file_submission.html",
+                error=gettext("Unsupported file type.")
+            )
+
+        upload_folder = os.path.join(current_app.root_path, 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+
+        save_path = os.path.join(upload_folder, uploaded_file.filename)
+        uploaded_file.save(save_path)
+
+        return render_template(
+            "public/file_submission.html",
+            success=gettext("File uploaded successfully.")
+        )
+
+    return render_template("public/file_submission.html")
+
+
 @public_blueprint.route('/laboratory-exercises')
 def laboratory_exercises():
     all_categories = LaboratoryExerciseCategory.query.all()
@@ -267,7 +301,7 @@ def simulation(simulation_slug):
     device_documents_by_device_id = {
         # device_id: [ document1, document2 ]
     }
-    
+
     for document in simulation.device_documents:
         device_documents_by_device_id.setdefault(document.device_id, []).append(document)
 
@@ -323,7 +357,7 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
     device_documents_by_device_id = {
         # device_id: [ document1, document2 ]
     }
-    
+
     for document in simulation.device_documents:
         device_documents_by_device_id.setdefault(document.device_id, []).append(document)
 
@@ -337,12 +371,12 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
         }
         for device_id in devices_to_frameworks
     ]
-    
+
     response = _get_html(doc.doc_url)
     if not isinstance(response, str):
         return response
 
-    return render_template("public/simulation_md.html", simulation=simulation, doc=doc, html_content=response, 
+    return render_template("public/simulation_md.html", simulation=simulation, doc=doc, html_content=response,
         categories=simulation.simulation_categories, devices=devices)
 
 
@@ -359,7 +393,7 @@ def simulation_doc_word(simulation_slug, doc_id: int, title):
 
     if not doc.doc_url.lower().endswith('.md'):
         return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
-    
+
     title = f"{simulation.name}-{doc.title}.docx"
 
     return _get_word(doc.doc_url, title)
@@ -394,7 +428,7 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
     device_documents_by_device_id = {
         # device_id: [ document1, document2 ]
     }
-    
+
     for document in simulation.device_documents:
         device_documents_by_device_id.setdefault(document.device_id, []).append(document)
 
@@ -436,7 +470,7 @@ def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: i
         return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
 
     title = f"{simulation.name}-{device.name}-{doc.name}.docx"
-    
+
     return _get_word(doc.doc_url, title)
 
 
@@ -623,7 +657,7 @@ def secure_image_paths(md_text, image_base_url):
 
 def get_image_base_url(path):
     parsed = urlparse(path)
-    
+
     if parsed.scheme in ('http', 'https'):
         # It's a URL: reconstruct with directory path
         base_path = os.path.dirname(parsed.path) + '/'
@@ -645,5 +679,5 @@ def serve_public(filename: str):
     if current_app.debug or app.env == 'development':
         public_dir = os.path.join(os.path.abspath('.'), 'public')
         return send_from_directory(public_dir, filename)
-    
+
     return "/public only works in development", 404

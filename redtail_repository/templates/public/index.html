@@ -1,150 +1,183 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<div class="container my-5">
+<style>
+html {
+  scroll-behavior: smooth;
+}
+</style>
 
-  <!-- 1. Overview -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("What is REDTAIL?") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("REDTAIL is a repository of simulations and digital twins connected to real remote laboratories. It enables students to interact with real hardware through simulations, expanding access to hands-on laboratory experiences.") }}
-      </p>
-      <p class="card-text">
-        {{ gettext("The REDTAIL project is developed by the <a href='https://rhlab.ece.uw.edu' target=_blank>Remote Hub Lab research group</a> at the <a href='https://uw.edu' target=_blank>University of Washington</a> and <a href='https://labsland.com' target=_blank>LabsLand</a>.") }}
-      </p>
-    </div>
-  </div>
+<div class="row">
 
-  <!-- 2. Supported Use Cases -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("Supported Use Cases") }}
-    </div>
-    <div class="card-body">
-      <ul class="mb-0">
-        <li>{{ gettext("Remote laboratory exercises for undergraduate courses") }}</li>
-        <li>{{ gettext("Digital twins synchronized with real hardware") }}</li>
-        <li>{{ gettext("Pre-lab simulation and post-lab analysis") }}</li>
-        <li>{{ gettext("Online and hybrid laboratory instruction") }}</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- 3. Hardware Availability -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("Hardware Availability") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("REDTAIL simulations are connected to real, remotely accessible laboratory hardware.") }}
-      </p>
-      <p class="card-text mb-0">
-        {{ gettext("Each simulation page lists supported devices and access requirements.") }}
-      </p>
-    </div>
-  </div>
-
-  <!-- 4. Getting Started (Instructors) -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("Getting Started for Instructors") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("Instructors can browse simulations, review laboratory exercises, and request solution materials.") }}
-      </p>
-      <p class="card-text mb-0">
-        {{ gettext("If you <a href='%(link)s'>register</a> with an academic email address, we will validate your account and provide instructor-only access.", link=url_for('login.register')) }}
-      </p>
-    </div>
-  </div>
-
-  <!-- 5. Getting Started (Students) -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("Getting Started for Students") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("Students can explore simulations and digital twins connected to real laboratory equipment.") }}
-      </p>
-      <p class="card-text mb-0">
-        {{ gettext("Your instructor will indicate which simulations are part of your course.") }}
-      </p>
-    </div>
-  </div>
-
-  <!-- 6. Canonical Assignment -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("Canonical Assignment") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("REDTAIL provides canonical laboratory assignments demonstrating best practices for integrating simulations with real hardware.") }}
-      </p>
-      <p class="card-text mb-0">
-        {{ gettext("These assignments serve as reference implementations for instructors.") }}
-      </p>
-    </div>
-  </div>
-
-  <!-- 7. GitHub -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("GitHub") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("All REDTAIL source code is open-source and publicly available on GitHub.") }}
-      </p>
-      <a href="https://github.com" target="_blank" class="btn btn-outline-primary">
-        {{ gettext("Visit the REDTAIL GitHub Repository") }}
-      </a>
-    </div>
-  </div>
-
-  <!-- 8. YouTube -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("YouTube") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("Watch demonstrations and walkthroughs of REDTAIL simulations and digital twins.") }}
-      </p>
-      <div class="ratio ratio-16x9">
-        <iframe
-          src="https://www.youtube.com/embed/9_RL6gZpP1I"
-          title="REDTAIL YouTube video"
-          allow="autoplay; encrypted-media"
-          allowfullscreen>
-        </iframe>
+  <!-- Sidebar (Like Devices Page) -->
+  <div class="col-md-2 mt-4">
+    <div class="card mb-4">
+      <div class="card-header">
+        {{ gettext("On This Page") }}
+      </div>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <li><a href="#overview">{{ gettext("What is REDTAIL?") }}</a></li>
+          <li><a href="#use-cases">{{ gettext("Supported Use Cases") }}</a></li>
+          <li><a href="#hardware">{{ gettext("Hardware Availability") }}</a></li>
+          <li><a href="#instructors">{{ gettext("Getting Started for Instructors") }}</a></li>
+          <li><a href="#students">{{ gettext("Getting Started for Students") }}</a></li>
+          <li><a href="#canonical">{{ gettext("Canonical Assignment") }}</a></li>
+          <li><a href="#github">{{ gettext("GitHub") }}</a></li>
+          <li><a href="#youtube">{{ gettext("YouTube") }}</a></li>
+          <li><a href="#support">{{ gettext("Support & Contact Information") }}</a></li>
+        </ul>
       </div>
     </div>
   </div>
 
-  <!-- 9. Support & Contact -->
-  <div class="card mb-4">
-    <div class="card-header">
-      {{ gettext("Support & Contact Information") }}
-    </div>
-    <div class="card-body">
-      <p class="card-text">
-        {{ gettext("Are you working on remote laboratories, simulations, or laboratory exercises?") }}
-      </p>
-      <p class="card-text">
-        {{ gettext("Contact the REDTAIL team <a href='%(link)s' target=_blank>here</a>.", link="https://rhlab.ece.uw.edu/join-us/") }}
-      </p>
-      <p class="text-muted mb-0">
-        {{ gettext("Supported by the National Science Foundation under Grant #2336745.") }}
-      </p>
-    </div>
-  </div>
+  <!-- Main Content -->
+  <div class="col-md-9">
 
+    <!-- 1. Overview -->
+    <div id="overview" class="card mb-4 mt-4">
+      <div class="card-header">
+        {{ gettext("What is REDTAIL?") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("REDTAIL is a repository of simulations and digital twins connected to real remote laboratories. It enables students to interact with real hardware through simulations, expanding access to hands-on laboratory experiences.") }}
+        </p>
+        <p class="card-text">
+          {{ gettext("The REDTAIL project is developed by the <a href='https://rhlab.ece.uw.edu' target=_blank>Remote Hub Lab research group</a> at the <a href='https://uw.edu' target=_blank>University of Washington</a> and <a href='https://labsland.com' target=_blank>LabsLand</a>.") }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 2. Supported Use Cases -->
+    <div id="use-cases" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("Supported Use Cases") }}
+      </div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>{{ gettext("Remote laboratory exercises for undergraduate courses") }}</li>
+          <li>{{ gettext("Digital twins synchronized with real hardware") }}</li>
+          <li>{{ gettext("Pre-lab simulation and post-lab analysis") }}</li>
+          <li>{{ gettext("Online and hybrid laboratory instruction") }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 3. Hardware -->
+    <div id="hardware" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("Hardware Availability") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("REDTAIL simulations are connected to real, remotely accessible laboratory hardware.") }}
+        </p>
+        <p class="card-text mb-0">
+          {{ gettext("Each simulation page lists supported devices and access requirements.") }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 4. Instructors -->
+    <div id="instructors" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("Getting Started for Instructors") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("Instructors can browse simulations, review laboratory exercises, and request solution materials.") }}
+        </p>
+        <p class="card-text mb-0">
+          {{ gettext("If you <a href='%(link)s'>register</a> with an academic email address, we will validate your account and provide instructor-only access.", link=url_for('login.register')) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 5. Students -->
+    <div id="students" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("Getting Started for Students") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("Students can explore simulations and digital twins connected to real laboratory equipment.") }}
+        </p>
+        <p class="card-text mb-0">
+          {{ gettext("Your instructor will indicate which simulations are part of your course.") }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 6. Canonical -->
+    <div id="canonical" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("Canonical Assignment") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("REDTAIL provides canonical laboratory assignments demonstrating best practices for integrating simulations with real hardware.") }}
+        </p>
+        <p class="card-text mb-0">
+          {{ gettext("These assignments serve as reference implementations for instructors.") }}
+        </p>
+      </div>
+    </div>
+
+    <!-- 7. GitHub -->
+    <div id="github" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("GitHub") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("All REDTAIL source code is open-source and publicly available on GitHub.") }}
+        </p>
+        <a href="https://github.com" target="_blank" class="btn btn-outline-primary">
+          {{ gettext("Visit the REDTAIL GitHub Repository") }}
+        </a>
+      </div>
+    </div>
+
+    <!-- 8. YouTube -->
+    <div id="youtube" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("YouTube") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("Watch demonstrations and walkthroughs of REDTAIL simulations and digital twins.") }}
+        </p>
+        <div class="ratio ratio-16x9">
+          <iframe
+            src="https://www.youtube.com/embed/9_RL6gZpP1I"
+            title="REDTAIL YouTube video"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Support -->
+    <div id="support" class="card mb-4">
+      <div class="card-header">
+        {{ gettext("Support & Contact Information") }}
+      </div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ gettext("Are you working on remote laboratories, simulations, or laboratory exercises?") }}
+        </p>
+        <p class="card-text">
+          {{ gettext("Contact the REDTAIL team <a href='%(link)s' target=_blank>here</a>.", link="https://rhlab.ece.uw.edu/join-us/") }}
+        </p>
+        <p class="text-muted mb-0">
+          {{ gettext("Supported by the National Science Foundation under Grant #2336745.") }}
+        </p>
+      </div>
+    </div>
+
+  </div>
 </div>
+
 {% endblock %}
