@@ -105,7 +105,7 @@ def file_submission():
         
         try:
             uploaded_file.save(save_path)
-            doc_url = f"uploads/{unique_filename}" 
+            doc_url = f"/uploads/{unique_filename}" 
             
             new_doc = LaboratoryExerciseDoc(
                 laboratory_exercise_id=int(lab_exercise_id),

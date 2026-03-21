@@ -1,7 +1,7 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
- <!-- Experimenting with disappearing buttons -->
+<!-- Experimenting with disappearing buttons -->
 <style>
   #carouselExample .carousel-control-prev,
   #carouselExample .carousel-control-next {
@@ -90,18 +90,19 @@
   <!-- Main Content Section -->
   <div class="col-md-8 mt-4">
     <h1 class="text-center">
-      {{ gettext("Laboratory Exercise: %(laboratory_exercise_name)s", laboratory_exercise_name=laboratory_exercise.name) }}
+      {{ gettext("Laboratory Exercise: %(laboratory_exercise_name)s", laboratory_exercise_name=laboratory_exercise.name)
+      }}
     </h1>
     <div class="text-center">
       <h5 class="text-center text-muted mb-4">
         {{ gettext("By") }}:
         {% for author in authors %}
-          {% if author.link %}
-            <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
-          {% else %}
-            {{ author.name }}
-          {% endif %}
-          {% if not loop.last %}, {% endif %}
+        {% if author.link %}
+        <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
+        {% else %}
+        {{ author.name }}
+        {% endif %}
+        {% if not loop.last %}, {% endif %}
         {% endfor %}
       </h5>
     </div>
@@ -156,15 +157,21 @@
               {% if documents %}
             <ul>
               {% for document in documents %}
-                {% if document.is_solution %}
-                  {% if verified_user %}
-                    <li><a href="{{ document.doc_url }}">{{ document.title }}</a> ({{ gettext("Only available for verified instructors.") }})</li>
-                  {% else %}
-                    <li>{{ document.title }} ({{ gettext("Only available for verified instructors.") }} <a href="{{ url_for('login.register', next=request.full_path) }}">{{ gettext("Register") }}</a> <a href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("or log in.") }}</a>)</li>
-                  {% endif %}
-                {% else %}
-                  <li><a href="{{ document.doc_url }}">{{ document.title }}</a></li>
-                {% endif %}
+              {% set safe_url = '/' + document.doc_url if document.doc_url.startswith('uploads/') else document.doc_url
+              %}
+
+              {% if document.is_solution %}
+              {% if verified_user %}
+              <li><a href="{{ safe_url }}" target="_blank">{{ document.title }}</a> ({{ gettext("Only available for
+                verified instructors.") }})</li>
+              {% else %}
+              <li>{{ document.title }} ({{ gettext("Only available for verified instructors.") }} <a
+                  href="{{ url_for('login.register', next=request.full_path) }}">{{ gettext("Register") }}</a> <a
+                  href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("or log in.") }}</a>)</li>
+              {% endif %}
+              {% else %}
+              <li><a href="{{ safe_url }}" target="_blank">{{ document.title }}</a></li>
+              {% endif %}
               {% endfor %}
             </ul>
 
