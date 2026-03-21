@@ -1,11 +1,9 @@
-# rhl-redtail-repository
-
-RHL REDTAIL Repository
+# RHL-Redtail-Repository
 
 ## Installation
 
 ```
-# mysql -uroot
+# mysql -uroot -p
 mysql> create database redtail;
 Query OK, 1 row affected, 1 warning (0.00 sec)
 

@@ -4,6 +4,7 @@ import shutil
 import logging
 import tempfile
 import traceback
+from redtail_repository.models import LaboratoryExerciseDoc 
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ from flask import Blueprint, request, render_template, abort, redirect, url_for,
 from sqlalchemy.orm import joinedload
 from flask_babel import gettext
 from flask_login import current_user
+from werkzeug.utils import secure_filename
 
 from redtail_repository import db
 from redtail_repository.models import (
@@ -55,36 +57,63 @@ def authors():
 
 @public_blueprint.route('/file_submission', methods=['GET', 'POST'])
 def file_submission():
+    exercises = db.session.query(LaboratoryExercise).filter_by(active=True).all()
+
     if request.method == 'POST':
         uploaded_file = request.files.get('file')
+        title = request.form.get('title')
+        description = request.form.get('description')
+        lab_exercise_id = request.form.get('laboratory_exercise_id')
+        is_solution = request.form.get('is_solution') == 'on'
 
         if not uploaded_file or uploaded_file.filename == '':
-            return render_template(
-                "public/file_submission.html",
-                error=gettext("Please select a file to upload.")
-            )
+            return render_template("public/file_submission.html", error=gettext("Please select a file to upload."), exercises=exercises)
+        if not lab_exercise_id or not title:
+             return render_template("public/file_submission.html", error=gettext("Title and Laboratory Exercise are required."), exercises=exercises)
 
         allowed_extensions = {'.pdf', '.docx', '.md', '.txt'}
         _, ext = os.path.splitext(uploaded_file.filename.lower())
 
         if ext not in allowed_extensions:
-            return render_template(
-                "public/file_submission.html",
-                error=gettext("Unsupported file type.")
-            )
+            return render_template("public/file_submission.html", error=gettext("Unsupported file type."), exercises=exercises)
 
+        safe_filename = secure_filename(uploaded_file.filename)
         upload_folder = os.path.join(current_app.root_path, 'uploads')
         os.makedirs(upload_folder, exist_ok=True)
+        
+        import time
+        unique_filename = f"{int(time.time())}_{safe_filename}"
+        save_path = os.path.join(upload_folder, unique_filename)
+        
+        try:
+            uploaded_file.save(save_path)
+            doc_url = f"uploads/{unique_filename}" 
+            
+            new_doc = LaboratoryExerciseDoc(
+                laboratory_exercise_id=int(lab_exercise_id),
+                title=title,
+                description=description,
+                doc_url=doc_url,
+                is_solution=is_solution
+            )
+            
+            db.session.add(new_doc)
+            db.session.commit()
 
-        save_path = os.path.join(upload_folder, uploaded_file.filename)
-        uploaded_file.save(save_path)
+            return render_template("public/file_submission.html", success=gettext("File uploaded and linked successfully!"), exercises=exercises)
 
-        return render_template(
-            "public/file_submission.html",
-            success=gettext("File uploaded successfully.")
-        )
+        except Exception as e:
+            logger.error(f"Error saving document: {e}", exc_info=True)
+            db.session.rollback()
+            return render_template("public/file_submission.html", error=gettext("An error occurred while saving the file."), exercises=exercises)
 
-    return render_template("public/file_submission.html")
+    return render_template("public/file_submission.html", exercises=exercises)
+
+
+@public_blueprint.route('/uploads/<path:filename>')
+def serve_uploads(filename):
+    upload_folder = os.path.join(current_app.root_path, 'uploads')
+    return send_from_directory(upload_folder, filename)
 
 
 @public_blueprint.route('/laboratory-exercises')
