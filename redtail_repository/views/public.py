@@ -19,6 +19,9 @@ from sqlalchemy.orm import joinedload
 from flask_babel import gettext
 from flask_login import current_user
 from werkzeug.utils import secure_filename
+from functools import wraps
+from flask import flash, redirect, url_for, request, abort
+from flask_login import current_user, login_required
 
 from redtail_repository import db
 from redtail_repository.models import (
@@ -55,7 +58,22 @@ def authors():
     all_authors = db.session.query(Author).all()
     return render_template('public/authors.html', authors=all_authors)
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash(gettext("Please log in to access this page."), "warning")
+            return redirect(url_for('login.login', next=request.url))
+            
+        if current_user.role != 'admin':
+            flash(gettext("You must be an admin to view this page."), "danger")
+            return redirect(url_for('public.index'))
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
 @public_blueprint.route('/file_submission', methods=['GET', 'POST'])
+# @admin_required
 def file_submission():
     exercises = db.session.query(LaboratoryExercise).filter_by(active=True).all()
 
@@ -125,10 +143,7 @@ def laboratory_exercises():
     # Create devices_by_id dictionary
     devices_by_id = {device.id: device for device in Device.query.all()}
 
-    # What's this for? @todo
-    devices_to_frameworks = {
-        # device.id: [ device frameworks ]
-    }
+    devices_to_frameworks = {}
 
     for device_framework in all_frameworks:
         devices_to_frameworks.setdefault(device_framework.device_id, []).append(device_framework)
@@ -688,11 +703,9 @@ def get_image_base_url(path):
     parsed = urlparse(path)
 
     if parsed.scheme in ('http', 'https'):
-        # It's a URL: reconstruct with directory path
         base_path = os.path.dirname(parsed.path) + '/'
         return urlunparse((parsed.scheme, parsed.netloc, base_path, '', '', ''))
     else:
-        # It's a local file path: return it as a web path
         return '/' + os.path.dirname(path).replace('\\', '/') + '/'
 
 def _get_html(path: str):

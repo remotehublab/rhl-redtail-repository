@@ -3,30 +3,44 @@
 {% block container %}
 <div class="container my-5">
   <div class="row justify-content-center">
-    <div class="col-md-8"> <div class="card">
-        <div class="card-header">
-          {{ gettext("Upload Laboratory Exercise Document") }}
+    <div class="col-md-8">
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">{{ gettext("Upload Laboratory Document") }}</h5>
         </div>
 
         <div class="card-body">
-
           {% if error %}
-          <div class="alert alert-danger">
-            {{ error }}
-          </div>
+          <div class="alert alert-danger">{{ error }}</div>
           {% endif %}
-
           {% if success %}
-          <div class="alert alert-success">
-            {{ success }}
-          </div>
+          <div class="alert alert-success">{{ success }}</div>
           {% endif %}
 
           <form method="POST" enctype="multipart/form-data">
             
-            <div class="mb-3">
-              <label class="form-label fw-bold">{{ gettext("Related Laboratory Exercise") }}</label>
-              <select name="laboratory_exercise_id" class="form-select" required>
+            <div class="mb-4 p-3 bg-light border rounded">
+              <label class="form-label fw-bold">{{ gettext("Where does this document belong?") }}</label>
+              
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="exercise_mode" id="modeExisting" value="existing" checked onchange="toggleExerciseMode()">
+                <label class="form-check-label" for="modeExisting">
+                  {{ gettext("Add to an Existing Exercise") }}
+                </label>
+              </div>
+              
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="exercise_mode" id="modeNew" value="new" onchange="toggleExerciseMode()">
+                <label class="form-check-label" for="modeNew">
+                  {{ gettext("Create a New Exercise") }}
+                </label>
+              </div>
+            </div>
+
+            <div id="existingExerciseSection" class="mb-3">
+              <label class="form-label fw-bold">{{ gettext("Select Exercise") }}</label>
+              <select name="laboratory_exercise_id" class="form-select">
                 <option value="" disabled selected>{{ gettext("Select an exercise...") }}</option>
                 {% for exercise in exercises %}
                   <option value="{{ exercise.id }}">{{ exercise.name }}</option>
@@ -34,14 +48,30 @@
               </select>
             </div>
 
+            <div id="newExerciseSection" class="mb-4 p-3 border border-primary rounded" style="display: none;">
+              <h6 class="text-primary mb-3">{{ gettext("New Exercise Details") }}</h6>
+              
+              <div class="mb-2">
+                <label class="form-label fw-bold">{{ gettext("Exercise Name") }}</label>
+                <input type="text" name="new_exercise_name" class="form-control" placeholder="e.g., Intro to Circuitry">
+              </div>
+              
+              <div>
+                <label class="form-label fw-bold">{{ gettext("Short Description") }}</label>
+                <input type="text" name="new_exercise_desc" class="form-control" placeholder="A brief summary of the lab...">
+              </div>
+            </div>
+
+            <hr>
+
             <div class="mb-3">
               <label class="form-label fw-bold">{{ gettext("Document Title") }}</label>
               <input type="text" name="title" class="form-control" placeholder="e.g., Week 1 Lab Instructions" required>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold">{{ gettext("Description (Optional)") }}</label>
-              <textarea name="description" class="form-control" rows="3" placeholder="Briefly describe the contents of this document..."></textarea>
+              <label class="form-label fw-bold">{{ gettext("Document Description (Optional)") }}</label>
+              <textarea name="description" class="form-control" rows="2"></textarea>
             </div>
 
             <div class="mb-4">
@@ -56,15 +86,28 @@
               </label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">
-              {{ gettext("Upload Document") }}
-            </button>
+            <button type="submit" class="btn btn-primary w-100">{{ gettext("Submit") }}</button>
           </form>
-
         </div>
       </div>
 
     </div>
   </div>
 </div>
+
+<script>
+function toggleExerciseMode() {
+  const isNew = document.getElementById('modeNew').checked;
+  const existingSection = document.getElementById('existingExerciseSection');
+  const newSection = document.getElementById('newExerciseSection');
+  
+  if (isNew) {
+    existingSection.style.display = 'none';
+    newSection.style.display = 'block';
+  } else {
+    existingSection.style.display = 'block';
+    newSection.style.display = 'none';
+  }
+}
+</script>
 {% endblock %}
