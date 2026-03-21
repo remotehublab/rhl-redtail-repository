@@ -43,7 +43,8 @@
     <br>
     <div class="row">
       <div class="col-md-4">
-        <img src="{{ simulation.cover_image_url }}" style="width: 100%; max-width: 200px" class="rounded float-end" alt="{{ simulation.name }}">
+        <img src="{{ simulation.cover_image_url }}" style="width: 100%; max-width: 200px" class="rounded float-end"
+          alt="{{ simulation.name }}">
       </div>
       <div class="col-md-8">
         <h1 class="">
@@ -64,7 +65,7 @@
           {% endfor %}
         </h5>
         {% endif %}
-      </div>      
+      </div>
     </div>
 
     <!-- Video or Cover Image Section -->
@@ -166,29 +167,41 @@
             <ul>
               {% for document in documents %}
               {% if document.doc_url and document.doc_url.lower().endswith('.md') %}
-              <li><a href="{{ url_for('.simulation_doc_md', simulation_slug=simulation.slug, doc_id=document.id, title=document.slugified_title) }}">{{ document.title }}</a></li>
+              <li><a
+                  href="{{ url_for('.simulation_doc_md', simulation_slug=simulation.slug, doc_id=document.id, title=document.slugified_title) }}">{{
+                  document.title }}</a></li>
               {% else %}
-              <li><a href="{{ document.doc_url }}" target="_blank">{{ document.title }}</a></li>
+              {% set safe_url = document.doc_url %}
+              {% if safe_url and not safe_url.startswith('http') and not safe_url.startswith('/') %}
+              {% set safe_url = '/' + safe_url %}
+              {% endif %}
+
+              <li><a href="{{ safe_url }}" target="_blank">{{ document.title }}</a></li>
               {% endif %}
               {% endfor %}
 
               {% for device_item in devices|sort(attribute='device.name') %}
-                {% if device_item.documents %}
-                <li>
-                  {{ device_item.device.name }}:
-                  <ul>
-                    {% for document in device_item.documents %}
-                      <li>
-                        {% if document.doc_url and document.doc_url.lower().endswith('.md') %}
-                        <a href="{{ url_for('.simulation_device_doc_md', simulation_slug=simulation.slug, device_slug=device_item.device.slug, doc_id=document.id, name=document.slugified_name) }}">{{ document.name }}</a>
-                        {% else %}
-                        <a href="{{ document.doc_url }}">{{ document.name }}</a>
-                        {% endif %}
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </li>
-                {% endif %}
+              {% if device_item.documents %}
+              <li>
+                {{ device_item.device.name }}:
+                <ul>
+                  {% for document in device_item.documents %}
+                  {% if document.doc_url and document.doc_url.lower().endswith('.md') %}
+                  <li><a
+                      href="{{ url_for('.simulation_device_doc_md', simulation_slug=simulation.slug, device_slug=device_item.device.slug, doc_id=document.id, name=document.slugified_name) }}">{{
+                      document.name }}</a></li>
+                  {% else %}
+                  {% set safe_url = document.doc_url %}
+                  {% if safe_url and not safe_url.startswith('http') and not safe_url.startswith('/') %}
+                  {% set safe_url = '/' + safe_url %}
+                  {% endif %}
+
+                  <li><a href="{{ safe_url }}" target="_blank">{{ document.name }}</a></li>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              </li>
+              {% endif %}
               {% endfor %}
 
             </ul>
