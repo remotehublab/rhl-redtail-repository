@@ -4,22 +4,13 @@
 <div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-md-10">
-
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">{{ gettext("Upload Document & Create Resources") }}</h5>
+          <h5 class="mb-0">{{ gettext("Upload Document & Update Exercise") }}</h5>
         </div>
 
         <div class="card-body">
-          {% if error %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endif %}
-          {% if success %}
-          <div class="alert alert-success">{{ success }}</div>
-          {% endif %}
-
           <form method="POST" enctype="multipart/form-data">
-
             <div class="mb-4 p-3 bg-light border rounded">
               <label class="form-label fw-bold">{{ gettext("What is this document for?") }}</label>
               <select name="target_type" id="targetType" class="form-select" onchange="toggleTargetSections()" required>
@@ -31,7 +22,7 @@
             <div id="exerciseSection">
               <div class="mb-3" id="existingExerciseDropdown">
                 <label class="form-label fw-bold">{{ gettext("Select Existing Exercise") }}</label>
-                <select name="laboratory_exercise_id" class="form-select">
+                <select name="laboratory_exercise_id" id="labSelect" class="form-select">
                   <option value="" disabled selected>{{ gettext("Select an exercise...") }}</option>
                   {% for exercise in exercises %}
                   <option value="{{ exercise.id }}">{{ exercise.name }}</option>
@@ -39,166 +30,62 @@
                 </select>
               </div>
 
-              <div class="form-check mb-4 border-bottom pb-3">
-                <input class="form-check-input" type="radio" name="exercise_mode" value="existing" id="modeExisting"
-                  checked onchange="toggleNewExerciseForm()">
-                <label class="form-check-label" for="modeExisting">
-                  {{ gettext("Add to an Existing Exercise") }}
-                </label>
-              </div>
-
-              <div class="form-check mb-4 border-bottom pb-3">
-                <input class="form-check-input" type="radio" name="exercise_mode" value="new" id="modeNew"
-                  onchange="toggleNewExerciseForm()">
-                <label class="form-check-label fw-bold text-success" for="modeNew">
-                  {{ gettext("+ CREATE A NEW Exercise") }}
-                </label>
-              </div>
-
-              <div id="newExerciseMegaForm" class="mb-4 p-4 border border-success rounded bg-light"
-                style="display: none;">
-                <h5 class="text-success border-bottom pb-2 mb-3">{{ gettext("New Exercise Details") }}</h5>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Exercise Name") }}</label>
-                      <input type="text" name="new_exercise_name" class="form-control"
-                        placeholder="e.g., Parking Lot (Breadboard)">
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Short Description") }}</label>
-                      <input type="text" name="new_exercise_desc" class="form-control"
-                        placeholder="Brief summary for cards">
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Cover Image") }}</label>
-                      <input type="file" name="new_exercise_cover" class="form-control" accept="image/*">
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Long Description") }}</label>
-                      <textarea name="new_exercise_long_desc" class="form-control" rows="4"
-                        placeholder="HTML or Markdown supported"></textarea>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Learning Goals") }}</label>
-                      <textarea name="new_exercise_goals" class="form-control" rows="3"
-                        placeholder="List learning objectives"></textarea>
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <p class="text-muted small mb-2">{{ gettext("Hold Ctrl/Cmd to select multiple.") }}</p>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Authors") }}</label>
-                      <select name="author_ids" class="form-select" multiple size="3">
-                        {% for author in authors %}<option value="{{ author.id }}">{{ author.name }}</option>{% endfor
-                        %}
-                      </select>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Categories") }}</label>
-                      <select name="category_ids" class="form-select" multiple size="3">
-                        {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}
-                      </select>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Levels") }}</label>
-                      <select name="level_ids" class="form-select" multiple size="2">
-                        {% for level in levels %}<option value="{{ level.id }}">{{ level.name }}</option>{% endfor %}
-                      </select>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Device Frameworks") }}</label>
-                      <select name="framework_ids" class="form-select" multiple size="3">
-                        {% for fw in frameworks %}<option value="{{ fw.id }}">{{ fw.name }}</option>{% endfor %}
-                      </select>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label fw-bold">{{ gettext("Supported Simulations") }}</label>
-                      <select name="simulation_ids" class="form-select" multiple size="3">
-                        {% for sim in simulations %}<option value="{{ sim.id }}">{{ sim.name }}</option>{% endfor %}
-                      </select>
-                    </div>
-                  </div>
+              <div class="d-flex gap-3 mb-4 border-bottom pb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="exercise_mode" value="existing" id="modeExisting" checked onchange="toggleNewExerciseForm()">
+                  <label class="form-check-label" for="modeExisting">{{ gettext("Update Existing") }}</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="exercise_mode" value="new" id="modeNew" onchange="toggleNewExerciseForm()">
+                  <label class="form-check-label fw-bold text-success" for="modeNew">{{ gettext("+ Create New") }}</label>
                 </div>
               </div>
-            </div>
 
-            <div id="simulationSection" class="mb-4 pb-3 border-bottom" style="display: none;">
-              <label class="form-label fw-bold">{{ gettext("Select Simulation") }}</label>
-              <select name="simulation_id" class="form-select">
-                <option value="" disabled selected>{{ gettext("Select a simulation...") }}</option>
-                {% for sim in simulations %}
-                <option value="{{ sim.id }}">{{ sim.name }}</option>
-                {% endfor %}
-              </select>
+              <div class="mb-4 p-3 border rounded bg-light">
+                <label class="form-label fw-bold">{{ gettext("Exercise Cover Image") }}</label>
+                <small class="text-muted d-block mb-2">{{ gettext("Upload a file here to set or replace the current cover image.") }}</small>
+                <input type="file" name="new_exercise_cover" class="form-control" accept="image/*">
+              </div>
+
+              <div id="newExerciseMegaForm" class="mb-4 p-4 border border-success rounded" style="display: none;">
+                </div>
             </div>
 
             <hr>
 
-            <h5 class="mt-4 mb-3">{{ gettext("Document to Upload") }}</h5>
-            <div class="mb-3">
-              <label class="form-label fw-bold">{{ gettext("Document Title") }}</label>
-              <input type="text" name="title" class="form-control" placeholder="e.g., Week 1 Lab Manual" required>
+            <h5 class="mt-4 mb-3">{{ gettext("Document / Handout") }}</h5>
+
+            <div class="mb-3" id="replaceHandoutGroup">
+                <label class="form-label fw-bold">{{ gettext("Action") }}</label>
+                <select name="replace_doc_id" class="form-select">
+                    <option value="">{{ gettext("-- Add as New Handout --") }}</option>
+                    </select>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold">{{ gettext("Document Description (Optional)") }}</label>
-              <textarea name="description" class="form-control" rows="2"></textarea>
+              <label class="form-label fw-bold">{{ gettext("Document Title") }}</label>
+              <input type="text" name="title" class="form-control" required>
             </div>
 
             <div class="mb-4">
-              <label class="form-label fw-bold">{{ gettext("Select File (.pdf, .docx, .md, .txt)") }}</label>
-              <input type="file" name="file" class="form-control" accept=".pdf,.docx,.md,.txt" required>
+              <label class="form-label fw-bold">{{ gettext("Select File") }}</label>
+              <input type="file" name="file" class="form-control" required>
             </div>
 
-            <div class="form-check mb-4" id="solutionCheckboxGroup">
-              <input class="form-check-input" type="checkbox" name="is_solution" id="isSolutionCheck">
-              <label class="form-check-label fw-bold" for="isSolutionCheck">
-                {{ gettext("Mark as a Solution Document (Verified Instructors Only)") }}
-              </label>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg w-100">{{ gettext("Submit & Save") }}</button>
+            <button type="submit" class="btn btn-primary btn-lg w-100">{{ gettext("Apply Changes") }}</button>
           </form>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
 <script>
-  function toggleTargetSections() {
-    const targetType = document.getElementById('targetType').value;
-    const exerciseSection = document.getElementById('exerciseSection');
-    const simulationSection = document.getElementById('simulationSection');
-    const solutionCheckbox = document.getElementById('solutionCheckboxGroup');
-
-    if (targetType === 'simulation') {
-      exerciseSection.style.display = 'none';
-      simulationSection.style.display = 'block';
-      solutionCheckbox.style.display = 'none';
-    } else {
-      exerciseSection.style.display = 'block';
-      simulationSection.style.display = 'none';
-      solutionCheckbox.style.display = 'block';
-    }
-  }
-
   function toggleNewExerciseForm() {
     const isNew = document.getElementById('modeNew').checked;
-    const megaForm = document.getElementById('newExerciseMegaForm');
-    const existingDropdown = document.getElementById('existingExerciseDropdown');
-
-    if (isNew) {
-      megaForm.style.display = 'block';
-      existingDropdown.style.display = 'none';
-    } else {
-      megaForm.style.display = 'none';
-      existingDropdown.style.display = 'block';
-    }
+    document.getElementById('newExerciseMegaForm').style.display = isNew ? 'block' : 'none';
+    document.getElementById('existingExerciseDropdown').style.display = isNew ? 'none' : 'block';
+    document.getElementById('replaceHandoutGroup').style.display = isNew ? 'none' : 'block';
   }
 </script>
 {% endblock %}

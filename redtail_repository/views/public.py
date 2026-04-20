@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 import pypandoc
 import requests
 from flask import (
-    Blueprint, abort, current_app, flash, make_response, redirect, 
+    Blueprint, abort, current_app, flash, make_response, redirect,
     render_template, request, send_file, send_from_directory, url_for
 )
 from flask_babel import gettext
@@ -25,18 +25,18 @@ from werkzeug.utils import secure_filename
 
 from redtail_repository import db
 from redtail_repository.models import (
-    Author, 
-    Device, 
-    DeviceCategory, 
+    Author,
+    Device,
+    DeviceCategory,
     DeviceFramework,
-    LaboratoryExercise, 
-    LaboratoryExerciseCategory, 
-    LaboratoryExerciseDoc, 
+    LaboratoryExercise,
+    LaboratoryExerciseCategory,
+    LaboratoryExerciseDoc,
     LaboratoryExerciseLevel,
-    Simulation, 
-    SimulationCategory, 
-    SimulationDeviceDocument, 
-    SimulationDoc, 
+    Simulation,
+    SimulationCategory,
+    SimulationDeviceDocument,
+    SimulationDoc,
     User
 )
 
@@ -81,11 +81,11 @@ def admin_required(f):
         if not current_user.is_authenticated:
             flash(gettext("Please log in to access this page."), "warning")
             return redirect(url_for('login.login', next=request.url))
-            
+
         if current_user.role != 'admin':
             flash(gettext("You must be an admin to view this page."), "danger")
             return redirect(url_for('public.index'))
-            
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -103,7 +103,7 @@ def file_submission():
         uploaded_file = request.files.get('file')
         title = request.form.get('title')
         description = request.form.get('description')
-        target_type = request.form.get('target_type') 
+        target_type = request.form.get('target_type')
         is_solution = request.form.get('is_solution') == 'on'
 
         if not uploaded_file or uploaded_file.filename == '':
@@ -111,35 +111,31 @@ def file_submission():
         if not title:
             return render_template("public/file_submission.html", error=gettext("A Document Title is required."), **locals())
 
+        # Save the primary document
         safe_filename = secure_filename(uploaded_file.filename)
         unique_filename = f"{int(time.time())}_{safe_filename}"
         upload_folder = os.path.join(current_app.root_path, 'uploads')
         os.makedirs(upload_folder, exist_ok=True)
         save_path = os.path.join(upload_folder, unique_filename)
         uploaded_file.save(save_path)
-        doc_url = f"/uploads/{unique_filename}" 
+        doc_url = f"/uploads/{unique_filename}"
 
         try:
             if target_type == 'simulation':
                 sim_id = request.form.get('simulation_id')
                 if not sim_id:
                      return render_template("public/file_submission.html", error=gettext("Please select a simulation."), **locals())
-                
+
                 new_doc = SimulationDoc(simulation_id=int(sim_id), title=title, description=description, doc_url=doc_url)
                 db.session.add(new_doc)
-                
+
             else:
                 exercise_mode = request.form.get('exercise_mode')
                 lab_exercise_id = None
 
                 if exercise_mode == 'new':
                     new_name = request.form.get('new_exercise_name')
-                    if not new_name:
-                        return render_template("public/file_submission.html", error=gettext("Exercise Name is required."), **locals())
-                    
                     slug = slugify(new_name)
-                    if LaboratoryExercise.query.filter_by(slug=slug).first():
-                        return render_template("public/file_submission.html", error=gettext("An exercise with that name already exists."), **locals())
 
                     cover_image_url = ""
                     cover_file = request.files.get('new_exercise_cover')
@@ -151,62 +147,54 @@ def file_submission():
                         cover_image_url = f"/uploads/{cover_filename}"
 
                     new_exercise = LaboratoryExercise(
-                        name=new_name,
-                        slug=slug,
+                        name=new_name, slug=slug,
                         short_description=request.form.get('new_exercise_desc', ''),
                         long_description=request.form.get('new_exercise_long_desc', ''),
                         learning_goals=request.form.get('new_exercise_goals', ''),
-                        cover_image_url=cover_image_url,
-                        active=True
+                        cover_image_url=cover_image_url, active=True
                     )
-
-                    author_ids = request.form.getlist('author_ids')
-                    if author_ids:
-                        new_exercise.authors = db.session.query(Author).filter(Author.id.in_(author_ids)).all()
-                    
-                    cat_ids = request.form.getlist('category_ids')
-                    if cat_ids:
-                        new_exercise.laboratory_exercise_categories = db.session.query(LaboratoryExerciseCategory).filter(LaboratoryExerciseCategory.id.in_(cat_ids)).all()
-                    
-                    level_ids = request.form.getlist('level_ids')
-                    if level_ids:
-                        new_exercise.levels = db.session.query(LaboratoryExerciseLevel).filter(LaboratoryExerciseLevel.id.in_(level_ids)).all()
-                        
-                    framework_ids = request.form.getlist('framework_ids')
-                    if framework_ids:
-                        new_exercise.device_frameworks = db.session.query(DeviceFramework).filter(DeviceFramework.id.in_(framework_ids)).all()
-                        
-                    sim_ids = request.form.getlist('simulation_ids')
-                    if sim_ids:
-                        new_exercise.simulations = db.session.query(Simulation).filter(Simulation.id.in_(sim_ids)).all()
-
                     db.session.add(new_exercise)
-                    db.session.flush() 
+                    db.session.flush()
                     lab_exercise_id = new_exercise.id
-
                 else:
+                    # UPDATED: Handle Existing Exercise Updates
                     lab_exercise_id = request.form.get('laboratory_exercise_id')
                     if not lab_exercise_id:
-                        return render_template("public/file_submission.html", error=gettext("Select an existing exercise or choose Create New."), **locals())
-                
-                new_doc = LaboratoryExerciseDoc(
-                    laboratory_exercise_id=int(lab_exercise_id),
-                    title=title,
-                    description=description,
-                    doc_url=doc_url,
-                    is_solution=is_solution
-                )
-                db.session.add(new_doc)
+                        return render_template("public/file_submission.html", error=gettext("Select an exercise."), **locals())
+
+                    exercise = db.session.get(LaboratoryExercise, int(lab_exercise_id))
+
+                    # Replace Cover Image if a new one is provided
+                    cover_file = request.files.get('new_exercise_cover')
+                    if cover_file and cover_file.filename != '':
+                        safe_cover = secure_filename(cover_file.filename)
+                        cover_filename = f"cover_{int(time.time())}_{safe_cover}"
+                        cover_path = os.path.join(upload_folder, cover_filename)
+                        cover_file.save(cover_path)
+                        exercise.cover_image_url = f"/uploads/{cover_filename}"
+
+                replace_doc_id = request.form.get('replace_doc_id')
+                if replace_doc_id:
+                    existing_doc = db.session.get(LaboratoryExerciseDoc, int(replace_doc_id))
+                    if existing_doc:
+                        existing_doc.title = title
+                        existing_doc.description = description
+                        existing_doc.doc_url = doc_url
+                        existing_doc.is_solution = is_solution
+                else:
+                    new_doc = LaboratoryExerciseDoc(
+                        laboratory_exercise_id=int(lab_exercise_id),
+                        title=title, description=description,
+                        doc_url=doc_url, is_solution=is_solution
+                    )
+                    db.session.add(new_doc)
 
             db.session.commit()
-            
-            exercises = db.session.query(LaboratoryExercise).filter_by(active=True).all()
-            return render_template("public/file_submission.html", success=gettext("Successfully uploaded and linked!"), **locals())
+            return render_template("public/file_submission.html", success=gettext("Successfully updated!"), **locals())
 
         except Exception as e:
-            logger.error(f"Error saving document/exercise: {e}", exc_info=True)
             db.session.rollback()
-            return render_template("public/file_submission.html", error=gettext("An error occurred while saving to the database."), **locals())
+            return render_template("public/file_submission.html", error=str(e), **locals())
 
     return render_template("public/file_submission.html", **locals())
 
