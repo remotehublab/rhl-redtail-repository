@@ -1,7 +1,6 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<!-- Experimenting with disappearing buttons -->
 <style>
   #carouselExample .carousel-control-prev,
   #carouselExample .carousel-control-next {
@@ -15,10 +14,23 @@
   }
 </style>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="row mt-3">
+      <div class="col-12">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+{% endwith %}
+
 <div class="row">
-  <!-- Sidebar Section -->
   <div class="col-md-2 mt-4">
-    <!-- Categories Section -->
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
@@ -34,7 +46,6 @@
       </div>
     </div>
 
-    <!-- Devices Section -->
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Devices:") }}</div>
       <div class="card-body">
@@ -54,7 +65,6 @@
         </ul>
       </div>
     </div>
-    <!-- Level Section -->
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Level:") }}</div>
       <div class="card-body">
@@ -70,7 +80,6 @@
       </div>
     </div>
 
-    <!-- Simulations Section -->
     <div class="card mb-4">
       <div class="card-header">{{ gettext("Simulations Supported:") }}</div>
       <div class="card-body">
@@ -87,7 +96,6 @@
     </div>
   </div>
 
-  <!-- Main Content Section -->
   <div class="col-md-8 mt-4">
     <h1 class="text-center">
       {{ gettext("Laboratory Exercise: %(laboratory_exercise_name)s", laboratory_exercise_name=laboratory_exercise.name)
@@ -106,7 +114,6 @@
         {% endfor %}
       </h5>
     </div>
-    <!-- Carousel Section -->
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
@@ -117,13 +124,11 @@
                 style="height: 400px; object-fit: cover;" alt="...">
             </div>
           </div>
-          <!-- Previous Button -->
           <button class="carousel-control-prev shadow-lg bg-dark bg-opacity-50 rounded" type="button"
             data-bs-target="#carouselExample" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">{{ gettext("Previous") }}</span>
           </button>
-          <!-- Next Button -->
           <button class="carousel-control-next shadow-lg bg-dark bg-opacity-50 rounded" type="button"
             data-bs-target="#carouselExample" data-bs-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
@@ -133,7 +138,6 @@
       </div>
     </div>
 
-    <!-- Description Section -->
     {% if laboratory_exercise.long_description %}
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
@@ -147,31 +151,62 @@
     </div>
     {% endif %}
 
-    <!-- Downloads -->
     <div class="row mt-3">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
         <div class="card text-start bg-light">
           <div class="card-header">{{gettext("Downloads")}}</div>
           <div class="card-body">
             <p class="card-text">
-              {% if documents %}
-            <ul>
+            {% if documents %}
+            <ul class="list-unstyled ps-3">
               {% for document in documents %}
-              {% set safe_url = '/' + document.doc_url if document.doc_url.startswith('uploads/') else document.doc_url
-              %}
+              {% set safe_url = '/' + document.doc_url if document.doc_url and document.doc_url.startswith('uploads/') else document.doc_url %}
 
-              {% if document.is_solution %}
-              {% if verified_user %}
-              <li><a href="{{ safe_url }}" target="_blank">{{ document.title }}</a> ({{ gettext("Only available for
-                verified instructors.") }})</li>
-              {% else %}
-              <li>{{ document.title }} ({{ gettext("Only available for verified instructors.") }} <a
-                  href="{{ url_for('login.register', next=request.full_path) }}">{{ gettext("Register") }}</a> <a
-                  href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("or log in.") }}</a>)</li>
-              {% endif %}
-              {% else %}
-              <li><a href="{{ safe_url }}" target="_blank">{{ document.title }}</a></li>
-              {% endif %}
+              <li class="mb-2">
+                {% if document.is_solution %}
+                  {% if verified_user %}
+                    <a href="{{ safe_url }}" target="_blank">{{ document.title }}</a> ({{ gettext("Only available for verified instructors.") }})
+                  {% else %}
+                    {{ document.title }} ({{ gettext("Only available for verified instructors.") }} <a href="{{ url_for('login.register', next=request.full_path) }}">{{ gettext("Register") }}</a> <a href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("or log in.") }}</a>)
+                  {% endif %}
+                {% else %}
+                  <a href="{{ safe_url }}" target="_blank">{{ document.title }}</a>
+                {% endif %}
+
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                  <button type="button" class="btn btn-sm btn-outline-secondary py-0 ms-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#replaceDocModal{{ document.id }}">
+                    Edit / Replace
+                  </button>
+
+                  <div class="modal fade" id="replaceDocModal{{ document.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form action="{{ url_for('public.replace_document', doc_type='exercise', doc_id=document.id) }}" method="POST" enctype="multipart/form-data">
+                          <div class="modal-header bg-light">
+                            <h5 class="modal-title">{{ gettext("Edit Document:") }} {{ document.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body text-start">
+                            <div class="mb-3">
+                              <label class="form-label fw-bold">{{ gettext("Document Title") }}</label>
+                              <input type="text" name="new_title" class="form-control" value="{{ document.title }}" required>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label fw-bold">{{ gettext("Replace File (Optional)") }}</label>
+                              <input type="file" name="new_file" class="form-control" accept=".pdf,.docx,.md,.txt">
+                              <small class="text-muted d-block mt-1">{{ gettext("Leave file blank if you only want to rename the title. Uploading a new file will permanently delete the old one from the server.") }}</small>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ gettext("Cancel") }}</button>
+                            <button type="submit" class="btn btn-primary">{{ gettext("Save Changes") }}</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+                </li>
               {% endfor %}
             </ul>
 
@@ -179,7 +214,6 @@
             <div class="alert alert-warning">
               <p>{{ gettext("There is no document associated to this laboratory exercise yet.") }}</p>
             </div>
-
             {% endif %}
             </p>
           </div>

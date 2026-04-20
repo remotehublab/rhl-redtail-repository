@@ -198,6 +198,53 @@ def file_submission():
 
     return render_template("public/file_submission.html", **locals())
 
+@public_blueprint.route('/replace_document/<doc_type>/<int:doc_id>', methods=['POST'])
+@admin_required
+def replace_document(doc_type, doc_id):
+    if doc_type == 'exercise':
+        doc = LaboratoryExerciseDoc.query.get_or_404(doc_id)
+        redirect_url = url_for('.laboratory_exercise', slug=doc.laboratory_exercise.slug)
+    elif doc_type == 'simulation':
+        doc = SimulationDoc.query.get_or_404(doc_id)
+        redirect_url = url_for('.simulation', slug=doc.simulation.slug)
+    else:
+        abort(400)
+
+    new_file = request.files.get('new_file')
+    new_title = request.form.get('new_title')
+
+    if new_file and new_file.filename != '':
+        if doc.doc_url and doc.doc_url.startswith('/uploads/'):
+            old_filename = doc.doc_url.replace('/uploads/', '')
+            old_filepath = os.path.join(current_app.root_path, 'uploads', old_filename)
+            if os.path.exists(old_filepath):
+                try:
+                    os.remove(old_filepath)
+                except Exception as e:
+                    logger.error(f"Failed to delete old file {old_filepath}: {e}")
+
+        safe_filename = secure_filename(new_file.filename)
+        unique_filename = f"{int(time.time())}_{safe_filename}"
+        upload_folder = os.path.join(current_app.root_path, 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+        save_path = os.path.join(upload_folder, unique_filename)
+        new_file.save(save_path)
+
+        doc.doc_url = f"/uploads/{unique_filename}"
+
+    if new_title:
+        doc.title = new_title
+
+    try:
+        db.session.commit()
+        flash(gettext("Document updated successfully!"), "success")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error replacing document: {e}")
+        flash(gettext("An error occurred while updating the document."), "danger")
+
+    return redirect(redirect_url)
+
 @public_blueprint.route('/uploads/<path:filename>')
 def serve_uploads(filename):
     upload_folder = os.path.join(current_app.root_path, 'uploads')
