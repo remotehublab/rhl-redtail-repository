@@ -2,14 +2,14 @@
 
 {% block container %}
 <style>
-html {
-  scroll-behavior: smooth;
-}
+  html {
+    scroll-behavior: smooth;
+  }
 </style>
 
 <div class="row">
 
-  <!-- Sidebar (Like Devices Page) -->
+  <!-- Sidebar -->
   <div class="col-md-2 mt-4">
     <div class="card mb-4">
       <div class="card-header">
@@ -41,11 +41,21 @@ html {
       </div>
       <div class="card-body">
         <p class="card-text">
-          {{ gettext("REDTAIL is a repository of simulations and digital twins connected to real remote laboratories. It enables students to interact with real hardware through simulations, expanding access to hands-on laboratory experiences.") }}
+          {{ gettext("REDTAIL is a repository of simulations and digital twins connected to real remote laboratories. It
+          enables students to interact with real hardware through simulations, expanding access to hands-on laboratory
+          experiences.") }}
         </p>
         <p class="card-text">
-          {{ gettext("The REDTAIL project is developed by the <a href='https://rhlab.ece.uw.edu' target=_blank>Remote Hub Lab research group</a> at the <a href='https://uw.edu' target=_blank>University of Washington</a> and <a href='https://labsland.com' target=_blank>LabsLand</a>.") }}
+          {{ gettext("The REDTAIL project is developed by the <a href='https://rhlab.ece.uw.edu' target=_blank>Remote
+            Hub Lab research group</a> at the <a href='https://uw.edu' target=_blank>University of Washington</a> and <a
+            href='https://labsland.com' target=_blank>LabsLand</a>.") }}
         </p>
+        <div style="width: 500px; height: 304px; overflow: hidden; position: relative; margin: 1rem auto;">
+          <iframe src="https://www.youtube.com/embed/cfuF6VmhtMM" title="What is REDTAIL?"
+            style="position: absolute; top: 0; left: -20px; width: 540px; height: 304px;"
+            allow="autoplay; encrypted-media" allowfullscreen>
+          </iframe>
+        </div>
       </div>
     </div>
 
@@ -86,10 +96,12 @@ html {
       </div>
       <div class="card-body">
         <p class="card-text">
-          {{ gettext("Instructors can browse simulations, review laboratory exercises, and request solution materials.") }}
+          {{ gettext("Instructors can browse simulations, review laboratory exercises, and request solution materials.")
+          }}
         </p>
         <p class="card-text mb-0">
-          {{ gettext("If you <a href='%(link)s'>register</a> with an academic email address, we will validate your account and provide instructor-only access.", link=url_for('login.register')) }}
+          {{ gettext("If you <a href='%(link)s'>register</a> with an academic email address, we will validate your
+          account and provide instructor-only access.", link=url_for('login.register')) }}
         </p>
       </div>
     </div>
@@ -116,7 +128,8 @@ html {
       </div>
       <div class="card-body">
         <p class="card-text">
-          {{ gettext("REDTAIL provides canonical laboratory assignments demonstrating best practices for integrating simulations with real hardware.") }}
+          {{ gettext("REDTAIL provides canonical laboratory assignments demonstrating best practices for integrating
+          simulations with real hardware.") }}
         </p>
         <p class="card-text mb-0">
           {{ gettext("These assignments serve as reference implementations for instructors.") }}
@@ -149,11 +162,8 @@ html {
           {{ gettext("Watch demonstrations and walkthroughs of REDTAIL simulations and digital twins.") }}
         </p>
         <div class="ratio ratio-16x9">
-          <iframe
-            src="https://www.youtube.com/embed/9_RL6gZpP1I"
-            title="REDTAIL YouTube video"
-            allow="autoplay; encrypted-media"
-            allowfullscreen>
+          <iframe src="https://www.youtube.com/embed/9_RL6gZpP1I" title="REDTAIL YouTube video"
+            allow="autoplay; encrypted-media" allowfullscreen>
           </iframe>
         </div>
       </div>
@@ -169,7 +179,8 @@ html {
           {{ gettext("Are you working on remote laboratories, simulations, or laboratory exercises?") }}
         </p>
         <p class="card-text">
-          {{ gettext("Contact the REDTAIL team <a href='%(link)s' target=_blank>here</a>.", link="https://rhlab.ece.uw.edu/join-us/") }}
+          {{ gettext("Contact the REDTAIL team <a href='%(link)s' target=_blank>here</a>.",
+          link="https://rhlab.ece.uw.edu/join-us/") }}
         </p>
         <p class="text-muted mb-0">
           {{ gettext("Supported by the National Science Foundation under Grant #2336745.") }}
