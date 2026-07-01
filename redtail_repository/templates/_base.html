@@ -13,6 +13,23 @@
   {% endassets %}
 
     <style>
+        :root {
+
+          --primary-color: #8b5cf6;
+          --primary-hover: #7c3aed;
+          --brand-grad-start: #FF2400;
+          --brand-grad-end: #ff7a59;
+
+          --nav-bg: rgba(255, 255, 255, 0.85);
+          --nav-link-text: #475569;
+          --nav-link-hover-text: #0f172a;
+          --nav-link-hover-bg: #f1f5f9;
+
+          --pill-bg: #f8fafc;
+          --pill-border: #e2e8f0;
+          --pill-text: #334155;
+        }
+
         .markdown-block table {
           border-collapse: collapse;
           width: 100%;
@@ -25,6 +42,80 @@
           padding: 6px;
           text-align: left;
         }
+
+        .navbar-modern {
+          background: var(--nav-bg);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          transition: all 0.3s ease;
+        }
+
+        .navbar-modern .nav-link {
+          font-weight: 500;
+          color: var(--nav-link-text) !important;
+          padding: 0.5rem 1rem !important;
+          margin: 0 0.25rem;
+          border-radius: 8px;
+          transition: all 0.2s ease-in-out;
+        }
+
+        .navbar-modern .nav-link:hover,
+        .navbar-modern .nav-link.active {
+          color: var(--nav-link-hover-text) !important;
+          background-color: var(--nav-link-hover-bg);
+        }
+
+        .brand-text {
+          font-weight: 700;
+          font-size: 1.25rem;
+          background: linear-gradient(90deg, var(--brand-grad-start), var(--brand-grad-end));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          letter-spacing: -0.5px;
+        }
+
+        .user-pill {
+          display: flex;
+          align-items: center;
+          background-color: var(--pill-bg);
+          border: 1px solid var(--pill-border);
+          border-radius: 9999px;
+          padding: 0.25rem 0.25rem 0.25rem 1rem;
+          gap: 0.75rem;
+        }
+
+        .user-name {
+          font-weight: 600;
+          color: var(--pill-text);
+          font-size: 0.95rem;
+        }
+
+        .btn-ghost {
+          color: var(--nav-link-text);
+          font-weight: 600;
+          transition: all 0.2s ease;
+        }
+
+        .btn-ghost:hover {
+          color: var(--nav-link-hover-text);
+          background-color: var(--nav-link-hover-bg);
+        }
+
+        .btn-brand-primary {
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          font-weight: 600;
+          transition: background-color 0.2s ease;
+        }
+
+        .btn-brand-primary:hover,
+        .btn-brand-primary:focus {
+          background-color: var(--primary-hover);
+          color: white;
+        }
     </style>
 
   {% block head %}{% endblock %}
@@ -33,67 +124,53 @@
 <body class="d-flex flex-column h-100">
 
   <main class="flex-shrink-0">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/" style="color:#FF2400">
-          <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo" width="30"
-            height="24" class="d-inline-block align-text-top"> RedTail
+    <nav class="navbar navbar-expand-lg navbar-modern sticky-top">
+      <div class="container-fluid px-lg-4">
+
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+          <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo" width="30" height="24">
+          <span class="brand-text">RedTail</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <!-- Home Tab -->
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" aria-current="page"
-                href="/">{{ gettext("Home") }}</a>
+              <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" href="/">{{ gettext("Home") }}</a>
             </li>
-            <!-- Laboratory Exercises Tab -->
             <li class="nav-item">
-              <a class="nav-link {% if 'public.laboratory_exercise' in request.endpoint %}active{% endif %}"
-                href="{{ url_for('public.laboratory_exercises') }}">{{ gettext("Laboratory Exercises") }}</a>
+              <a class="nav-link {% if 'public.laboratory_exercise' in request.endpoint %}active{% endif %}" href="{{ url_for('public.laboratory_exercises') }}">{{ gettext("Laboratory Exercises") }}</a>
             </li>
-            </li>
-            <!-- Simulations Tab -->
             <li class="nav-item">
-              <a class="nav-link {% if 'public.simulation' in request.endpoint %}active{% endif %}"
-              href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
+              <a class="nav-link {% if 'public.simulation' in request.endpoint %}active{% endif %}" href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
             </li>
-            </li>
-            <!-- Devices Tab -->
             <li class="nav-item">
-              <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}"
-                href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
+              <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}" href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
             </li>
-            <!-- Submission Tab -->
             <li class="nav-item">
-              <a class="nav-link {% if 'public.file_submission' in request.endpoint %}active{% endif %}"
-                href="{{ url_for('public.file_submission') }}">
-                {{ gettext("File Submission") }}
-              </a>
+              <a class="nav-link {% if 'public.file_submission' in request.endpoint %}active{% endif %}" href="{{ url_for('public.file_submission') }}">{{ gettext("File Submission") }}</a>
             </li>
           </ul>
-          <!-- Login/Register Button -->
-          {% if current_user.is_authenticated %}
-          <div class="d-flex align-items-center">
-            <span class="me-2 text-white">Welcome,</span>
-            <input type="text" class="form-control me-2" value="{{ current_user.name | e }}" readonly
-              style="width: auto; background-color: #333; color: white; border: 2px solid white; border-radius: 5px; text-align: center; padding: 3px 8px;">
-            <a class="btn btn-primary" href="{{ url_for('login.logout', url=request.full_path) }}" role="button">{{
-              gettext("Logout") }}</a>
-          </div>
-          {% else %}
-          <a class="btn btn-primary" href="{{ url_for('login.login', url=request.full_path) }}" role="button">
-            {{ gettext("Login") }}
-          </a>
-          <a class="btn btn-secondary ms-2" href="{{ url_for('login.register', url=request.full_path) }}" role="button">
-            {{ gettext("Register") }}
-          </a>
 
-          {% endif %}
+          <div class="d-flex align-items-center gap-3">
+            {% if current_user.is_authenticated %}
+              <div class="user-pill shadow-sm">
+                <span class="user-name">{{ current_user.name | e }}</span>
+                <a class="btn btn-sm btn-outline-danger rounded-pill px-3" href="{{ url_for('login.logout', url=request.full_path) }}">{{ gettext("Logout") }}</a>
+              </div>
+            {% else %}
+              <a class="btn btn-ghost rounded-pill px-3" href="{{ url_for('login.login', url=request.full_path) }}">
+                {{ gettext("Login") }}
+              </a>
+              <a class="btn btn-brand-primary rounded-pill px-4" href="{{ url_for('login.register', url=request.full_path) }}">
+                {{ gettext("Register") }}
+              </a>
+            {% endif %}
+          </div>
 
         </div>
       </div>
@@ -130,20 +207,17 @@
 
   <script>
     $(function() {
-      // Select all elements with a data-datetime attribute
       $('[data-datetime]').each(function() {
         var $el = $(this);
         var utcString = $el.attr('data-datetime');
         if (!utcString) return;
 
-        // Parse as UTC
         var date = new Date(utcString);
         if (isNaN(date)) {
           console.warn('Invalid date:', utcString);
           return;
         }
 
-        // Format to local string; tweak options as you like
         var localString = date.toLocaleString([], {
           year:   'numeric',
           month:  '2-digit',
@@ -152,34 +226,28 @@
           minute: '2-digit'
         });
 
-        // Replace element’s text (or you could set a title, append, etc.)
         $el.text(localString);
 
-        // (Optional) store the local ISO back on the element
         $el.attr('data-local-datetime', date.toISOString());
       });
 
-      // Select all elements with a data-datetime attribute
       $('[data-date]').each(function() {
         var $el = $(this);
         var utcString = $el.attr('data-date');
         if (!utcString) return;
 
-        // Parse as UTC
         var date = new Date(utcString);
         if (isNaN(date)) {
           console.warn('Invalid date:', utcString);
           return;
         }
 
-        // Format to local string; tweak options as you like
         var localString = date.toLocaleString([], {
           year:   'numeric',
           month:  '2-digit',
           day:    '2-digit'
         });
 
-        // Replace element’s text (or you could set a title, append, etc.)
         $el.text(localString);
       });
     });
