@@ -1,42 +1,55 @@
 {% extends "public/_base.html" %}
 
-{% block container %}
-<div class="position-absolute top-50 start-50 translate-middle">
-  <div class="container-md">
-    <form method="POST" action="{{ url_for('login.register') }}">
+{% block body %}
+<div class="auth-shell">
+  <section class="auth-story" aria-labelledby="register-story-title">
+    <div>
+      <p class="eyebrow">{{ gettext("Join the REDTAIL community") }}</p>
+      <h1 id="register-story-title">{{ gettext("Teach with real hardware, from anywhere.") }}</h1>
+      <p>{{ gettext("Academic accounts can be verified for access to instructor-only materials and laboratory solutions.") }}</p>
+    </div>
+    <p class="auth-note">{{ gettext("Open source · Research led · Classroom ready") }}</p>
+  </section>
+
+  <section class="auth-form-wrap" aria-labelledby="register-title">
+    <form class="auth-form" method="POST" action="{{ url_for('login.register') }}">
       {{ form.hidden_tag() }}
+      <p class="eyebrow text-danger">{{ gettext("Create your account") }}</p>
+      <h2 id="register-title">{{ gettext("Register") }}</h2>
+      <p>{{ gettext("Use your academic email if you plan to request instructor access.") }}</p>
 
       <div class="mb-3">
-          {{ form.login.label(class_="form-label") }}
-          {{ form.login(class_="form-control") }}
-          {% for error in form.login.errors %}
-              <p class="text-danger">{{ error }}</p>
-          {% endfor %}
+        {{ form.login.label(class_="form-label") }}
+        {{ form.login(class_="form-control", autocomplete='username') }}
+        {% for error in form.login.errors %}
+          <p class="text-danger small mt-2 mb-0">{{ error }}</p>
+        {% endfor %}
       </div>
       <div class="mb-3">
-          {{ form.name.label(class_="form-label") }}
-          {{ form.name(class_="form-control") }}
-          {% for error in form.name.errors %}
-              <p class="text-danger">{{ error }}</p>
-          {% endfor %}
+        {{ form.name.label(class_="form-label") }}
+        {{ form.name(class_="form-control", autocomplete='name') }}
+        {% for error in form.name.errors %}
+          <p class="text-danger small mt-2 mb-0">{{ error }}</p>
+        {% endfor %}
       </div>
       <div class="mb-3">
-          {{ form.password.label(class_="form-label") }}
-          {{ form.password(class_="form-control") }}
-          {% for error in form.password.errors %}
-              <p class="text-danger">{{ error }}</p>
-          {% endfor %}
+        {{ form.password.label(class_="form-label") }}
+        {{ form.password(class_="form-control", autocomplete='new-password') }}
+        {% for error in form.password.errors %}
+          <p class="text-danger small mt-2 mb-0">{{ error }}</p>
+        {% endfor %}
       </div>
-      <div class="mb-3">
-          {{ form.confirm_password.label(class_="form-label") }}
-          {{ form.confirm_password(class_="form-control") }}
-          {% for error in form.confirm_password.errors %}
-              <p class="text-danger">{{ error }}</p>
-          {% endfor %}
+      <div class="mb-4">
+        {{ form.confirm_password.label(class_="form-label") }}
+        {{ form.confirm_password(class_="form-control", autocomplete='new-password') }}
+        {% for error in form.confirm_password.errors %}
+          <p class="text-danger small mt-2 mb-0">{{ error }}</p>
+        {% endfor %}
       </div>
 
-      <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-  </form>
-  </div>
+      <button type="submit" class="btn btn-primary btn-lg">{{ form.submit.label.text }}</button>
+      <p class="auth-switch">{{ gettext("Already have an account?") }} <a href="{{ url_for('login.login') }}">{{ gettext("Log in") }}</a></p>
+    </form>
+  </section>
 </div>
 {% endblock %}

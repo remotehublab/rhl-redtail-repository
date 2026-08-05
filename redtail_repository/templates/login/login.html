@@ -1,37 +1,47 @@
 {% extends "public/_base.html" %}
 
 {% block body %}
-<div class="container">
-  <h1>{{ gettext("Log in") }}</h1>
+<div class="auth-shell">
+  <section class="auth-story" aria-labelledby="login-story-title">
+    <div>
+      <p class="eyebrow">{{ gettext("REDTAIL educator access") }}</p>
+      <h1 id="login-story-title">{{ gettext("Bring the whole laboratory closer.") }}</h1>
+      <p>{{ gettext("Sign in to access instructor materials and manage REDTAIL laboratory resources.") }}</p>
+    </div>
+    <p class="auth-note">{{ gettext("Simulation · Remote hardware · Evidence") }}</p>
+  </section>
 
-  <form method="POST" action="{{ request.full_path }}">
+  <section class="auth-form-wrap" aria-labelledby="login-title">
+    <form class="auth-form" method="POST" action="{{ request.full_path }}">
       {{ form.hidden_tag() }}
-      <div class="row mb-3">
-          {{ form.username.label(class_="col-sm-2 col-form-label") }}
-          <div class="col-sm-10">
-              {{ form.username(class_="form-control", autofocus='autofocus') }}
-              {% if form.username.errors %}
-                  {% for error in form.username.errors %}
-                      <p class="text-danger">{{ error }}</p>
-                  {% endfor %}
-              {% endif %}
-          </div>
-      </div>
-      <div class="row mb-3">
-          {{ form.password.label(class_="col-sm-2 col-form-label") }}
-          <div class="col-sm-10">
-              {{ form.password(class_="form-control") }}
-          </div>
-      </div>
-      <div class="row mb-3">
-          {{ form.remember_me.label(class_="col-sm-2 col-form-label") }}
-          <div class="col-sm-10">
-              {{ form.remember_me() }}
-          </div>
+      <p class="eyebrow text-danger">{{ gettext("Welcome back") }}</p>
+      <h2 id="login-title">{{ gettext("Log in") }}</h2>
+      <p>{{ gettext("Use the credentials associated with your REDTAIL account.") }}</p>
+
+      <div class="mb-3">
+        {{ form.username.label(class_="form-label") }}
+        {{ form.username(class_="form-control", autofocus='autofocus', autocomplete='username') }}
+        {% for error in form.username.errors %}
+          <p class="text-danger small mt-2 mb-0">{{ error }}</p>
+        {% endfor %}
       </div>
 
-      <button type="submit" class="btn btn-primary">{{ gettext("Log in") }}</button>
-  </form>
+      <div class="mb-3">
+        {{ form.password.label(class_="form-label") }}
+        {{ form.password(class_="form-control", autocomplete='current-password') }}
+        {% for error in form.password.errors %}
+          <p class="text-danger small mt-2 mb-0">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="form-check mb-4">
+        {{ form.remember_me(class_="form-check-input") }}
+        {{ form.remember_me.label(class_="form-check-label") }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg">{{ gettext("Log in") }}</button>
+      <p class="auth-switch">{{ gettext("New to REDTAIL?") }} <a href="{{ url_for('login.register') }}">{{ gettext("Create an account") }}</a></p>
+    </form>
+  </section>
 </div>
-
 {% endblock %}

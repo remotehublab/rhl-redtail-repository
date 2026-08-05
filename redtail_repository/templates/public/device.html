@@ -1,9 +1,9 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<div class="row">
+<div class="row g-5 detail-layout">
   <!-- Categories Section -->
-  <div class="col-md-2 mt-4">
+  <aside class="col-lg-3 col-xl-2 detail-sidebar">
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Device Categories") }}</div>
       <div class="card-body">
@@ -19,16 +19,17 @@
         </ul>
       </div>
     </div>
-  </div>
+  </aside>
 
   <!-- Main Content Section -->
-  <div class="col-md-10">
+  <article class="col-lg-9 col-xl-10 detail-content">
     <!-- Device Header -->
-    <div class="row mb-4 align-items-center">
+    <div class="row mb-5 align-items-center g-4 detail-header">
       <div class="col-md-3 text-center">
         <img src="{{ device.cover_image_url }}" alt="device img" class="img-fluid device-img">
       </div>
       <div class="col-md-9">
+        <p class="eyebrow text-danger mb-2">{{ gettext("Remote laboratory device") }}</p>
         <h1 class="display-4">{{ device.name }}</h1>
       </div>
     </div>
@@ -99,6 +100,6 @@
       </section>
       {% endif %}
     </div>
-  </div>
+  </article>
 </div>
 {% endblock %}

@@ -15,7 +15,7 @@ const publicPages = [
 ] as const;
 
 test.beforeEach(async ({ page }) => {
-  await page.route(/youtube\.com|youtu\.be/, (route) =>
+  await page.route(/youtube\.com|youtube-nocookie\.com|youtu\.be/, (route) =>
     route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html>' }),
   );
 });
@@ -30,7 +30,7 @@ for (const [name, url] of publicPages) {
 
     const response = await page.goto(url);
     expect(response?.status()).toBe(200);
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible();
     await expect(page.locator('footer')).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -86,7 +86,9 @@ test('admin can upload a simulation document in the browser', async ({ page }, t
   await expect(page.getByRole('status')).toContainText('Successfully updated');
 
   await page.goto('/simulations/test-simulation');
-  await expect(page.getByText(`Browser Guide ${testInfo.project.name}`)).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: `Browser Guide ${testInfo.project.name}`, exact: true }).first(),
+  ).toBeVisible();
 });
 
 test('mobile navigation opens and every key page avoids horizontal overflow', async ({ page }) => {
@@ -102,7 +104,20 @@ test('mobile navigation opens and every key page avoids horizontal overflow', as
 
   await page.goto('/');
   await page.getByRole('button', { name: 'Toggle navigation' }).click();
-  await expect(page.getByRole('link', { name: 'Simulations' })).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: 'Primary navigation' })
+      .getByRole('link', { name: 'Simulations', exact: true }),
+  ).toBeVisible();
+});
+
+test('home video facade loads the privacy-enhanced embed on demand', async ({ page }) => {
+  await page.goto('/');
+  const playButton = page.getByRole('button', { name: 'Play the REDTAIL introduction' });
+  await expect(playButton).toBeVisible();
+  await playButton.click();
+  await expect(
+    page.locator('iframe[src*="youtube-nocookie.com/embed/cfuF6VmhtMM"]'),
+  ).toBeVisible();
 });
 
 for (const [name, url] of publicPages) {

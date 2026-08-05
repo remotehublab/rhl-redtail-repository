@@ -1,9 +1,20 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<div class="row">
+<div class="row g-5 catalog-layout">
+  <div class="col-12 d-lg-none catalog-mobile-heading">
+    <p class="eyebrow text-danger mb-2">{{ gettext("Practice before the physical lab") }}</p>
+    <h1 class="page-title">{{ gettext("Simulations") }}</h1>
+    <p class="catalog-count">{{ simulations|length }} {{ gettext("result") if simulations|length == 1 else gettext("results") }}</p>
+  </div>
   <!-- Sidebar Section -->
-  <div class="col-md-2 mt-4">
+  <aside class="col-lg-3 col-xl-2 filter-sidebar">
+    <button class="btn filter-toggle d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#simulationFilters"
+      aria-expanded="false" aria-controls="simulationFilters">
+      <span>{{ gettext("Filters") }}</span>
+      <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+    </button>
+    <div class="collapse d-lg-block" id="simulationFilters">
     <!-- Categories Section -->
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Categories:") }}</div>
@@ -51,12 +62,15 @@
       </a>
     </div>
     {% endif %}
+    </div>
 
-  </div>
+  </aside>
 
   <!-- Main Content Section -->
-  <div class="col-md-9">
-    <h1 class="text-center m-4">{{ gettext("Simulations") }}</h1>
+  <section class="col-lg-9 col-xl-10 catalog-main">
+    <p class="eyebrow text-danger mb-2 d-none d-lg-block">{{ gettext("Practice before the physical lab") }}</p>
+    <h1 class="page-title d-none d-lg-block">{{ gettext("Simulations") }}</h1>
+    <p class="catalog-count d-none d-lg-block">{{ simulations|length }} {{ gettext("result") if simulations|length == 1 else gettext("results") }}</p>
 
     {# Current Filter Selections Section #}
     {% if selected_category or selected_device %}
@@ -85,32 +99,29 @@
     </div>
     {% endif %}
     {% if simulations %}
-    <div class="row row-cols-1 row-cols-md-4 g-2">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 row-cols-xxl-4 g-4 catalog-grid">
       {% for simulation in simulations %}
       <div class="col">
-        <div class="card overflow-hidden" style="width: 100%; border-width: 3px;">
-          <img src="{{ simulation.cover_image_url }}" class="card-img-top border-bottom" alt="{{ simulation.name }}">
+        <article class="card catalog-card">
+          <div class="catalog-media">
+            <img src="{{ simulation.cover_image_url }}" class="card-img-top" alt="{{ simulation.name }}">
+          </div>
           <div class="card-body">
-            <h5 class="card-title"
-              style="height: 2rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+            <h2 class="catalog-card-title">
               <a href="{{ url_for('.simulation', simulation_slug=simulation.slug ) }}"
                 class="stretched-link text-decoration-none">
                 {{ simulation.name }}
               </a>
-            </h5>
-
-            <hr class="my-2">
-
-            <p class="card-text"
-              style="height: 4.5rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+            </h2>
+            <p class="catalog-card-summary">
               {{ simulation.description }}
             </p>
           </div>
           <div class="card-footer">
-            <p class="card-text"><small class="text-body-secondary">{{ gettext("Last Updated") }}: <span
+            <p class="card-text mb-0"><small class="text-body-secondary">{{ gettext("Last Updated") }}: <span
                   data-date="{{ simulation.last_updated }}Z"></span></small></p>
           </div>
-        </div>
+        </article>
       </div>
       {% endfor %}
     </div>
@@ -119,6 +130,6 @@
       {{ gettext("No simulations found matching your current filters.") }}
     </div>
     {% endif %}
-  </div>
+  </section>
 </div>
 {% endblock %}

@@ -2,7 +2,7 @@
 
 {% block body %}
 {{ super() }}
-<div class="container-fluid">
+<div class="{% block page_container_class %}container-xl page-shell{% endblock %}">
   {% block container %}
   {% endblock %}
 </div>

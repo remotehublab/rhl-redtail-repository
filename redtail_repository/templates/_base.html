@@ -4,259 +4,129 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title or "REDTAIL" }}</title>
+  <meta name="theme-color" content="#15212d">
+  <meta name="description" content="REDTAIL connects simulations and digital twins with real remote laboratory hardware.">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/remote_hub_lab.png') }}">
+  <title>{{ title or "REDTAIL — Remote laboratories, made tangible" }}</title>
   {% assets 'bootstrap_css' %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
   {% endassets %}
   {% assets 'fontawesome_css' %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
   {% endassets %}
-
-    <style>
-        :root {
-
-          --primary-color: #7c3aed;
-          --primary-hover: #6d28d9;
-          --brand-grad-start: #FF2400;
-          --brand-grad-end: #ff7a59;
-
-          --nav-bg: rgba(255, 255, 255, 0.85);
-          --nav-link-text: #475569;
-          --nav-link-hover-text: #0f172a;
-          --nav-link-hover-bg: #f1f5f9;
-
-          --pill-bg: #f8fafc;
-          --pill-border: #e2e8f0;
-          --pill-text: #334155;
-        }
-
-        .markdown-block table {
-          border-collapse: collapse;
-          width: 100%;
-        }
-
-        .markdown-block table,
-        .markdown-block th,
-        .markdown-block td {
-          border: 1px solid black;
-          padding: 6px;
-          text-align: left;
-        }
-
-        .navbar-modern {
-          background: var(--nav-bg);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
-        }
-
-        .navbar-modern .nav-link {
-          font-weight: 500;
-          color: var(--nav-link-text) !important;
-          padding: 0.5rem 1rem !important;
-          margin: 0 0.25rem;
-          border-radius: 8px;
-          transition: all 0.2s ease-in-out;
-        }
-
-        .navbar-modern .nav-link:hover,
-        .navbar-modern .nav-link.active {
-          color: var(--nav-link-hover-text) !important;
-          background-color: var(--nav-link-hover-bg);
-        }
-
-        .brand-text {
-          font-weight: 700;
-          font-size: 1.25rem;
-          background: linear-gradient(90deg, var(--brand-grad-start), var(--brand-grad-end));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          letter-spacing: -0.5px;
-        }
-
-        .user-pill {
-          display: flex;
-          align-items: center;
-          background-color: var(--pill-bg);
-          border: 1px solid var(--pill-border);
-          border-radius: 9999px;
-          padding: 0.25rem 0.25rem 0.25rem 1rem;
-          gap: 0.75rem;
-        }
-
-        .user-name {
-          font-weight: 600;
-          color: var(--pill-text);
-          font-size: 0.95rem;
-        }
-
-        .btn-ghost {
-          color: var(--nav-link-text);
-          font-weight: 600;
-          transition: all 0.2s ease;
-        }
-
-        .btn-ghost:hover {
-          color: var(--nav-link-hover-text);
-          background-color: var(--nav-link-hover-bg);
-        }
-
-        .btn-brand-primary {
-          background-color: var(--primary-color);
-          color: white;
-          border: none;
-          font-weight: 600;
-          transition: background-color 0.2s ease;
-        }
-
-        .btn-brand-primary:hover,
-        .btn-brand-primary:focus {
-          background-color: var(--primary-hover);
-          color: white;
-        }
-
-        .bg-light a,
-        .footer a {
-          color: #0a58ca;
-        }
-    </style>
-
+  {% assets 'site_css' %}
+  <link href="{{ ASSET_URL }}" rel="stylesheet">
+  {% endassets %}
   {% block head %}{% endblock %}
 </head>
 
-<body class="d-flex flex-column h-100">
+{% set endpoint = request.endpoint or '' %}
+<body class="d-flex flex-column min-vh-100 page-{{ endpoint|replace('.', '-') }}">
+  <a class="skip-link" href="#main-content">{{ gettext("Skip to main content") }}</a>
 
-  <main class="flex-shrink-0">
-
-    <nav class="navbar navbar-expand-lg navbar-modern sticky-top">
-      <div class="container-fluid px-lg-4">
-
-        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-          <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="RemoteHubLab Logo" width="30" height="24">
-          <span class="brand-text">RedTail</span>
+  <header class="site-header sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-modern" aria-label="Primary navigation">
+      <div class="container-xl">
+        <a class="navbar-brand brand-lockup" href="{{ url_for('public.index') }}" aria-label="REDTAIL home">
+          <span class="brand-mark" aria-hidden="true">
+            <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="" width="34" height="27">
+          </span>
+          <span class="brand-wordmark">
+            <span class="brand-text">REDTAIL</span>
+            <span class="brand-kicker">REMOTE LABS</span>
+          </span>
         </a>
 
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNavigation"
+          aria-controls="primaryNavigation" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <div class="collapse navbar-collapse" id="primaryNavigation">
+          <ul class="navbar-nav mx-auto">
             <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'public.index' %}active{% endif %}" href="/">{{ gettext("Home") }}</a>
+              <a class="nav-link {% if endpoint == 'public.index' %}active{% endif %}"
+                {% if endpoint == 'public.index' %}aria-current="page"{% endif %}
+                href="{{ url_for('public.index') }}">{{ gettext("Home") }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if 'public.laboratory_exercise' in request.endpoint %}active{% endif %}" href="{{ url_for('public.laboratory_exercises') }}">{{ gettext("Laboratory Exercises") }}</a>
+              <a class="nav-link {% if 'public.laboratory_exercise' in endpoint %}active{% endif %}"
+                {% if 'public.laboratory_exercise' in endpoint %}aria-current="page"{% endif %}
+                href="{{ url_for('public.laboratory_exercises') }}">{{ gettext("Laboratory Exercises") }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if 'public.simulation' in request.endpoint %}active{% endif %}" href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
+              <a class="nav-link {% if 'public.simulation' in endpoint %}active{% endif %}"
+                {% if 'public.simulation' in endpoint %}aria-current="page"{% endif %}
+                href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if 'public.device' in request.endpoint %}active{% endif %}" href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
+              <a class="nav-link {% if 'public.device' in endpoint %}active{% endif %}"
+                {% if 'public.device' in endpoint %}aria-current="page"{% endif %}
+                href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if 'public.file_submission' in request.endpoint %}active{% endif %}" href="{{ url_for('public.file_submission') }}">{{ gettext("File Submission") }}</a>
+              <a class="nav-link {% if 'public.file_submission' in endpoint %}active{% endif %}"
+                {% if 'public.file_submission' in endpoint %}aria-current="page"{% endif %}
+                href="{{ url_for('public.file_submission') }}">{{ gettext("File Submission") }}</a>
             </li>
           </ul>
 
-          <div class="d-flex align-items-center gap-3">
+          <div class="nav-account">
             {% if current_user.is_authenticated %}
-              <div class="user-pill shadow-sm">
-                <span class="user-name">{{ current_user.name | e }}</span>
-                <a class="btn btn-sm btn-outline-danger rounded-pill px-3" href="{{ url_for('login.logout', url=request.full_path) }}">{{ gettext("Logout") }}</a>
-              </div>
+              <span class="user-name">{{ current_user.name | e }}</span>
+              <a class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                href="{{ url_for('login.logout', url=request.full_path) }}">{{ gettext("Logout") }}</a>
             {% else %}
-              <a class="btn btn-ghost rounded-pill px-3" href="{{ url_for('login.login', url=request.full_path) }}">
-                {{ gettext("Login") }}
+              <a class="btn btn-ghost" href="{{ url_for('login.login', url=request.full_path) }}">
+                {{ gettext("Log in") }}
               </a>
-              <a class="btn btn-brand-primary rounded-pill px-4" href="{{ url_for('login.register', url=request.full_path) }}">
+              <a class="btn btn-brand-primary rounded-pill px-4"
+                href="{{ url_for('login.register', url=request.full_path) }}">
                 {{ gettext("Register") }}
               </a>
             {% endif %}
           </div>
-
         </div>
       </div>
     </nav>
+  </header>
 
+  <main id="main-content" class="flex-grow-1">
+    {% block body %}{% endblock %}
+  </main>
 
-  {% block body %}
-  {% endblock %}
-    </main>
-
-
-
-<footer class="footer mt-auto py-3 bg-light">
-  <div class="container">
-        {# Don't translate this message #}
-        <span style="font-size: 75%" class="text-sm text-muted">This website was supported by the National Science Foundation's Division of Undergraduate Education under Grant #2336745. All the source code is open-source and can be found <a href="https://github.com/remotehublab/rhl-redtail-repository" target="_blank">in GitHub</a>. The content available in the website might be provided by third-party entities and/or developed outside the context of the REDTAIL project and grant.</span>
-  </div>
-</footer>
-
+  <footer class="site-footer mt-auto">
+    <div class="container-xl">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="footer-wordmark">REDTAIL</span>
+          <p>{{ gettext("Real hardware access for better remote laboratory learning.") }}</p>
+        </div>
+        <div class="footer-links" aria-label="Footer links">
+          <a href="{{ url_for('public.laboratory_exercises') }}">{{ gettext("Exercises") }}</a>
+          <a href="{{ url_for('public.simulations') }}">{{ gettext("Simulations") }}</a>
+          <a href="{{ url_for('public.devices') }}">{{ gettext("Devices") }}</a>
+          <a href="https://github.com/remotehublab/rhl-redtail-repository" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="footer-note">
+        <p>This website was supported by the National Science Foundation's Division of Undergraduate Education under Grant #2336745. Source code is available <a href="https://github.com/remotehublab/rhl-redtail-repository" target="_blank" rel="noopener noreferrer">on GitHub</a>. Some content may be provided by third parties or developed outside the REDTAIL project and grant.</p>
+      </div>
+    </div>
+  </footer>
 
   {% assets 'bootstrap_js' %}
   <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
-
   {% assets 'fontawesome_js' %}
   <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
-
   {% assets 'vendor_js' %}
   <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
-
+  {% assets 'site_js' %}
+  <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
   {% block tail %}{% endblock %}
-
-  <script>
-    $(function() {
-      $('[data-datetime]').each(function() {
-        var $el = $(this);
-        var utcString = $el.attr('data-datetime');
-        if (!utcString) return;
-
-        var date = new Date(utcString);
-        if (isNaN(date)) {
-          console.warn('Invalid date:', utcString);
-          return;
-        }
-
-        var localString = date.toLocaleString([], {
-          year:   'numeric',
-          month:  '2-digit',
-          day:    '2-digit',
-          hour:   '2-digit',
-          minute: '2-digit'
-        });
-
-        $el.text(localString);
-
-        $el.attr('data-local-datetime', date.toISOString());
-      });
-
-      $('[data-date]').each(function() {
-        var $el = $(this);
-        var utcString = $el.attr('data-date');
-        if (!utcString) return;
-
-        var date = new Date(utcString);
-        if (isNaN(date)) {
-          console.warn('Invalid date:', utcString);
-          return;
-        }
-
-        var localString = date.toLocaleString([], {
-          year:   'numeric',
-          month:  '2-digit',
-          day:    '2-digit'
-        });
-
-        $el.text(localString);
-      });
-    });
-  </script>
 </body>
-
 </html>

@@ -48,6 +48,9 @@ test('@visual mobile navigation open', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'visual-mobile');
   await page.goto('/');
   await page.getByRole('button', { name: 'Toggle navigation' }).click();
-  await expect(page.getByRole('link', { name: 'Simulations' })).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: 'Primary navigation' })
+      .getByRole('link', { name: 'Simulations', exact: true }),
+  ).toBeVisible();
   await expect(page).toHaveScreenshot('mobile-navigation-open.png', { fullPage: true });
 });

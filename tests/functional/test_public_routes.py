@@ -18,7 +18,7 @@ from redtail_repository import db
 def test_public_collection_pages_render(client, catalog, path):
     response = client.get(path)
     assert response.status_code == 200
-    assert b"RedTail" in response.data
+    assert b"REDTAIL" in response.data
 
 
 def test_author_pages_render_empty_populated_and_missing(client, catalog):

@@ -1,19 +1,6 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<style>
-  #carouselExample .carousel-control-prev,
-  #carouselExample .carousel-control-next {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  #carouselExample:hover .carousel-control-prev,
-  #carouselExample:hover .carousel-control-next {
-    opacity: 1;
-  }
-</style>
-
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="row mt-3">
@@ -29,8 +16,8 @@
   {% endif %}
 {% endwith %}
 
-<div class="row">
-  <div class="col-md-2 mt-4">
+<div class="row g-5 detail-layout">
+  <aside class="col-lg-3 col-xl-2 detail-sidebar">
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Categories:") }}</div>
       <div class="card-body">
@@ -94,15 +81,13 @@
         </ul>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <div class="col-md-8 mt-4">
-    <h1 class="text-center">
-      {{ gettext("Laboratory Exercise: %(laboratory_exercise_name)s", laboratory_exercise_name=laboratory_exercise.name)
-      }}
-    </h1>
-    <div class="text-center">
-      <h5 class="text-center text-muted mb-4">
+  <article class="col-lg-9 col-xl-8 detail-content">
+    <p class="eyebrow text-danger mb-2">{{ gettext("Laboratory exercise") }}</p>
+    <h1>{{ laboratory_exercise.name }}</h1>
+    <div>
+      <p class="text-muted mb-4">
         {{ gettext("By") }}:
         {% for author in authors %}
         {% if author.link %}
@@ -112,7 +97,7 @@
         {% endif %}
         {% if not loop.last %}, {% endif %}
         {% endfor %}
-      </h5>
+      </p>
     </div>
     <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-8 offset-md-2">
@@ -220,9 +205,9 @@
         </div>
       </div>
     </div>
-  </div>
+  </article>
 
-  <div class="col-md-2 mt-4">
+  <aside class="col-xl-2 detail-sidebar learning-goals-sidebar">
     <div class="card mb-4 h-50">
       <div class="card-header">{{ gettext("Learning Goals") }}</div>
       <div class="card-body">
@@ -231,6 +216,6 @@
         </div>
       </div>
     </div>
-  </div>
+  </aside>
 </div>
 {% endblock %}
