@@ -3,7 +3,7 @@
 {% block container %}
 <div class="row g-5 catalog-layout">
   <div class="col-12 d-lg-none catalog-mobile-heading">
-    <p class="eyebrow text-danger mb-2">{{ gettext("The physical side of the digital twin") }}</p>
+    <p class="eyebrow mb-2">{{ gettext("The physical side of the digital twin") }}</p>
     <h1 class="page-title">{{ gettext("Devices") }}</h1>
     <p class="catalog-count">{{ devices|length }} {{ gettext("result") if devices|length == 1 else gettext("results") }}</p>
   </div>
@@ -47,7 +47,7 @@
 
   <!-- Main Content Section -->
   <section class="col-lg-9 col-xl-10 catalog-main">
-    <p class="eyebrow text-danger mb-2 d-none d-lg-block">{{ gettext("The physical side of the digital twin") }}</p>
+    <p class="eyebrow mb-2 d-none d-lg-block">{{ gettext("The physical side of the digital twin") }}</p>
     <h1 class="page-title d-none d-lg-block">{{ gettext("Devices") }}</h1>
     <p class="catalog-count d-none d-lg-block">{{ devices|length }} {{ gettext("result") if devices|length == 1 else gettext("results") }}</p>
 
@@ -81,7 +81,7 @@
     {% endif %}
 
     {% if devices %}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 row-cols-xxl-4 g-4 catalog-grid">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-0 catalog-grid">
       {% for device in devices %}
       <div class="col">
         <article class="card catalog-card">

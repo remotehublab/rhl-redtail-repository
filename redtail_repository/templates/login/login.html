@@ -14,7 +14,7 @@
   <section class="auth-form-wrap" aria-labelledby="login-title">
     <form class="auth-form" method="POST" action="{{ request.full_path }}">
       {{ form.hidden_tag() }}
-      <p class="eyebrow text-danger">{{ gettext("Welcome back") }}</p>
+      <p class="eyebrow">{{ gettext("Welcome back") }}</p>
       <h2 id="login-title">{{ gettext("Log in") }}</h2>
       <p>{{ gettext("Use the credentials associated with your REDTAIL account.") }}</p>
 

@@ -3,7 +3,7 @@
 {% block container %}
 <div class="row g-5 catalog-layout">
   <div class="col-12 d-lg-none catalog-mobile-heading">
-    <p class="eyebrow text-danger mb-2">{{ gettext("Ready-to-teach resources") }}</p>
+    <p class="eyebrow mb-2">{{ gettext("Ready-to-teach resources") }}</p>
     <h1 class="page-title">{{ gettext("Laboratory Exercises") }}</h1>
     <p class="catalog-count">{{ laboratory_exercises|length }} {{ gettext("result") if laboratory_exercises|length == 1 else gettext("results") }}</p>
   </div>
@@ -103,7 +103,7 @@
 
   <!-- Main Content Section -->
   <section class="col-lg-9 col-xl-10 catalog-main">
-    <p class="eyebrow text-danger mb-2 d-none d-lg-block">{{ gettext("Ready-to-teach resources") }}</p>
+    <p class="eyebrow mb-2 d-none d-lg-block">{{ gettext("Ready-to-teach resources") }}</p>
     <h1 class="page-title d-none d-lg-block">{{ gettext("Laboratory Exercises") }}</h1>
     <p class="catalog-count d-none d-lg-block">{{ laboratory_exercises|length }} {{ gettext("result") if laboratory_exercises|length == 1 else gettext("results") }}</p>
 
@@ -147,7 +147,7 @@
     {% endif %}
 
     {% if laboratory_exercises %}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 row-cols-xxl-4 g-4 catalog-grid">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-0 catalog-grid">
       {% for laboratory_exercise in laboratory_exercises %}
       <div class="col">
         <article class="card catalog-card">

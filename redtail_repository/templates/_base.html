@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#15212d">
+  <meta name="theme-color" content="#4B2E83">
   <meta name="description" content="REDTAIL connects simulations and digital twins with real remote laboratory hardware.">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/remote_hub_lab.png') }}">
   <title>{{ title or "REDTAIL — Remote laboratories, made tangible" }}</title>
@@ -74,13 +74,13 @@
           <div class="nav-account">
             {% if current_user.is_authenticated %}
               <span class="user-name">{{ current_user.name | e }}</span>
-              <a class="btn btn-outline-danger btn-sm rounded-pill px-3"
+              <a class="btn btn-nav-outline btn-sm px-3"
                 href="{{ url_for('login.logout', url=request.full_path) }}">{{ gettext("Logout") }}</a>
             {% else %}
               <a class="btn btn-ghost" href="{{ url_for('login.login', url=request.full_path) }}">
                 {{ gettext("Log in") }}
               </a>
-              <a class="btn btn-brand-primary rounded-pill px-4"
+              <a class="btn btn-brand-primary px-4"
                 href="{{ url_for('login.register', url=request.full_path) }}">
                 {{ gettext("Register") }}
               </a>

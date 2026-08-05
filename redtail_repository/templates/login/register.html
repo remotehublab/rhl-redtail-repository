@@ -14,7 +14,7 @@
   <section class="auth-form-wrap" aria-labelledby="register-title">
     <form class="auth-form" method="POST" action="{{ url_for('login.register') }}">
       {{ form.hidden_tag() }}
-      <p class="eyebrow text-danger">{{ gettext("Create your account") }}</p>
+      <p class="eyebrow">{{ gettext("Create your account") }}</p>
       <h2 id="register-title">{{ gettext("Register") }}</h2>
       <p>{{ gettext("Use your academic email if you plan to request instructor access.") }}</p>
 
