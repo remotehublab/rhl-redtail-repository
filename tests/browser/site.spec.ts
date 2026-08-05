@@ -120,6 +120,46 @@ test('home video facade loads the privacy-enhanced embed on demand', async ({ pa
   ).toBeVisible();
 });
 
+const instructorMailto = 'mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry';
+
+test('homepage and footer expose the instructor contact path', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.locator('a[href*="rhlab.ece.uw.edu/join-us"]')).toHaveCount(0);
+
+  const contactLinks = page.getByRole('link', { name: 'Email the REDTAIL team', exact: true });
+  await expect(contactLinks).toHaveCount(2);
+  for (const link of await contactLinks.all()) {
+    await expect(link).toHaveAttribute('href', instructorMailto);
+    await expect(link).not.toHaveAttribute('target', '_blank');
+  }
+
+  await expect(
+    page.locator('footer').getByRole('link', { name: 'Contact', exact: true }),
+  ).toHaveAttribute('href', instructorMailto);
+
+  await expect(
+    page.getByRole('navigation', { name: 'On this page' })
+      .getByRole('link', { name: 'Work with us', exact: true }),
+  ).toHaveAttribute('href', '#support');
+
+  await expect(page.locator('#support')).toContainText(
+    'rhlab@uw.edu · Remote Hub Lab, University of Washington',
+  );
+
+  for (const name of [
+    'Explore laboratory exercises',
+    'Browse simulations',
+    'Create an instructor account',
+    'Explore the simulation library',
+    'View the source on GitHub',
+    'Browse current exercises',
+    'Register',
+  ]) {
+    await expect(page.getByRole('link', { name, exact: true }).first()).toBeVisible();
+  }
+});
+
 for (const [name, url] of publicPages) {
   test(`${name} has no WCAG A/AA accessibility violations`, async ({ page }) => {
     await page.goto(url);

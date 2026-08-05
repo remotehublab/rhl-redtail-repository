@@ -252,3 +252,42 @@ def test_markdown_routes_preserve_reader_error_responses(
         f"{catalog.simulation_device_doc.id}-board.md"
     ).status_code == 403
     assert client.get("/docs/markdown-viewer/blocked.md").status_code == 403
+
+
+INSTRUCTOR_MAILTO = "mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry"
+
+
+def test_home_page_exposes_instructor_contact_paths(client, catalog):
+    response = client.get("/")
+    assert response.status_code == 200
+    body = response.data.decode()
+
+    assert "https://rhlab.ece.uw.edu/join-us/" not in body
+    # instructor panel, closing CTA, and the sitewide footer link
+    assert body.count(f'href="{INSTRUCTOR_MAILTO}"') == 3
+    assert f'href="{INSTRUCTOR_MAILTO}" target' not in body
+    assert "rhlab@uw.edu · Remote Hub Lab, University of Washington" in body
+
+    for label in (
+        "Explore laboratory exercises",
+        "Browse simulations",
+        "Create an instructor account",
+        "Explore the simulation library",
+        "View the source on GitHub",
+        "Browse current exercises",
+        "Email the REDTAIL team",
+        "Work with us",
+        "Register",
+    ):
+        assert label in body
+
+    assert 'href="#support"' in body
+    assert "For instructors and collaborators" in body
+    assert "Bring remote hardware into your course." in body
+
+
+@pytest.mark.parametrize("path", ["/", "/simulations", "/devices", "/login"])
+def test_footer_contact_link_is_sitewide(client, catalog, path):
+    body = client.get(path).data.decode()
+    assert f'href="{INSTRUCTOR_MAILTO}"' in body
+    assert "https://rhlab.ece.uw.edu/join-us/" not in body

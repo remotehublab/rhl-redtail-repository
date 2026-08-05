@@ -1013,6 +1013,12 @@ hr {
   margin-bottom: 1.4rem;
 }
 
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.75rem;
+}
+
 /* Capability register */
 .capabilities-section {
   background: var(--rt-paper);
@@ -1162,6 +1168,14 @@ hr {
 
 .cta-actions .btn {
   padding: 0.85rem 1.6rem;
+}
+
+.home-cta p.cta-contact {
+  color: var(--rt-muted);
+  font-family: var(--rt-font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  margin: 1.75rem auto 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -2188,6 +2202,12 @@ hr {
   .audience-panel + .audience-panel {
     border-left: 0;
     border-top: 1px solid var(--rt-line);
+  }
+
+  .panel-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.9rem;
   }
 
   .capability-list article {
