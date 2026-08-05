@@ -106,6 +106,22 @@ def test_simulation_detail_and_markdown_routes(client, catalog):
     assert b"Device guide" in device_markdown.data
 
 
+def test_simulation_detail_hides_inactive_exercises_and_missing_documents(
+    client, catalog
+):
+    catalog.inactive_exercise.simulations.append(catalog.simulation)
+    catalog.simulation_doc.doc_url = "public/docs/missing-simulation.md"
+    catalog.simulation_device_doc.doc_url = "public/docs/missing-device.md"
+    db.session.commit()
+
+    detail = client.get("/simulations/test-simulation")
+
+    assert detail.status_code == 200
+    assert b"Inactive Exercise" not in detail.data
+    assert b"Simulation Guide" not in detail.data
+    assert b"Board Guide" not in detail.data
+
+
 @pytest.mark.parametrize(
     "path",
     [

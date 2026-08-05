@@ -1,4 +1,3 @@
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -16,6 +15,7 @@ def test_image_path_rewriting_and_base_urls():
     assert "![three](https://example.test/a.png)" in rewritten
 
     assert public.get_image_base_url("public/docs/guide.md") == "/public/docs/"
+    assert public.get_image_base_url("/uploads/guide.md") == "/uploads/"
     assert (
         public.get_image_base_url("https://docs.example.test/guides/guide.md")
         == "https://docs.example.test/guides/"
@@ -27,6 +27,10 @@ def test_get_md_validates_extensions_and_local_boundaries(app, tmp_path):
     valid = root / "guide.md"
     valid.write_text("# Guide", encoding="utf-8")
     assert public._get_md("guide.md") == "# Guide"
+    uploads = Path(app.config["UPLOAD_FOLDER"])
+    uploads.mkdir(parents=True, exist_ok=True)
+    (uploads / "uploaded.md").write_text("# Uploaded", encoding="utf-8")
+    assert public._get_md("/uploads/uploaded.md") == "# Uploaded"
     assert public._get_md("guide.txt") == ("Unsupported file type", 400)
 
     outside = tmp_path.parent / "outside.md"
@@ -34,8 +38,8 @@ def test_get_md_validates_extensions_and_local_boundaries(app, tmp_path):
     assert public._get_md(str(outside)) == ("Access denied", 403)
 
     missing, status = public._get_md("missing.md")
-    assert status == 500
-    assert "Could not open local file" in missing
+    assert status == 404
+    assert "Could not find local file" in missing
 
 
 def test_get_md_rejects_symlink_escape(app, tmp_path):
@@ -57,6 +61,37 @@ def test_get_md_denies_path_when_common_root_cannot_be_compared(app, monkeypatch
         lambda _paths: (_ for _ in ()).throw(ValueError("different drives")),
     )
     assert public._get_md("guide.md") == ("Access denied", 403)
+
+
+def test_document_source_availability_and_public_path_resolution(app):
+    public_doc = Path(app.config["PROJECT_ROOT"]) / "public" / "docs" / "guide.md"
+    public_doc.parent.mkdir(parents=True, exist_ok=True)
+    public_doc.write_text("# Public guide", encoding="utf-8")
+
+    assert public._resolve_local_document_path("/public/docs/guide.md") == str(
+        public_doc
+    )
+    assert public._document_source_available("/public/docs/guide.md")
+    assert not public._document_source_available("")
+    assert public._document_source_available("https://docs.example.test/guide.md")
+    assert not public._document_source_available("https://evil.test/guide.md")
+
+
+def test_document_source_availability_allows_remote_without_app_context():
+    assert public._document_source_available("https://remote.example.test/guide.md")
+
+
+def test_get_md_reports_unexpected_local_read_errors(app, monkeypatch):
+    guide = Path(app.config["PROJECT_ROOT"]) / "guide.md"
+    guide.write_text("# Guide", encoding="utf-8")
+
+    def denied_open(*_args, **_kwargs):
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(public, "open", denied_open, raising=False)
+    message, status = public._get_md("guide.md")
+    assert status == 500
+    assert "Could not open local file" in message
 
 
 @responses.activate
@@ -95,22 +130,37 @@ def test_get_html_converts_markdown_and_preserves_errors(app, monkeypatch):
 def test_get_word_converts_local_markdown_and_cleans_output(app, tmp_path, monkeypatch):
     markdown = Path(app.config["PROJECT_ROOT"]) / "guide.md"
     markdown.write_text("# Guide", encoding="utf-8")
-    output_path = Path(tempfile.gettempdir()) / "redtail-test.docx"
-    output_path.unlink(missing_ok=True)
-
     def convert_file(_source, _format, *, outputfile, extra_args):
         assert extra_args
+        assert Path(outputfile).name == "redtail-I_O-test.docx"
         Path(outputfile).write_bytes(b"docx-data")
 
     monkeypatch.setattr(public.pypandoc, "convert_file", convert_file)
     with app.test_request_context("/"):
-        response = public._get_word("guide.md", "redtail-test.docx")
+        response = public._get_word("guide.md", "redtail-I/O-test.docx")
         assert response.status_code == 200
         response.direct_passthrough = False
         assert response.get_data() == b"docx-data"
         assert "attachment" in response.headers["Content-Disposition"]
 
-    assert not output_path.exists()
+    assert "redtail-I_O-test.docx" in response.headers["Content-Disposition"]
+
+
+def test_get_word_adds_docx_extension_to_safe_download_name(app, monkeypatch):
+    markdown = Path(app.config["PROJECT_ROOT"]) / "guide.md"
+    markdown.write_text("# Guide", encoding="utf-8")
+
+    def convert_file(_source, _format, *, outputfile, extra_args):
+        assert extra_args
+        assert Path(outputfile).name == "download.docx"
+        Path(outputfile).write_bytes(b"docx-data")
+
+    monkeypatch.setattr(public.pypandoc, "convert_file", convert_file)
+    with app.test_request_context("/"):
+        response = public._get_word("guide.md", "download")
+        response.direct_passthrough = False
+        assert response.get_data() == b"docx-data"
+        assert "download.docx" in response.headers["Content-Disposition"]
 
 
 @responses.activate
@@ -160,3 +210,9 @@ def test_get_word_keeps_failed_or_absolute_remote_images(app, monkeypatch):
 def test_get_word_returns_get_md_error_without_conversion(app, monkeypatch):
     monkeypatch.setattr(public, "_get_md", lambda _path: ("bad", 400))
     assert public._get_word("bad.txt") == ("bad", 400)
+
+
+def test_get_word_rechecks_local_path_boundary_before_conversion(app, monkeypatch):
+    monkeypatch.setattr(public, "_get_md", lambda _path: "# Guide")
+    monkeypatch.setattr(public, "_resolve_local_document_path", lambda _path: None)
+    assert public._get_word("guide.md") == ("Access denied", 403)

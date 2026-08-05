@@ -535,7 +535,8 @@ def simulation(simulation_slug):
     }
 
     for document in simulation.device_documents:
-        device_documents_by_device_id.setdefault(document.device_id, []).append(document)
+        if _document_source_available(document.doc_url):
+            device_documents_by_device_id.setdefault(document.device_id, []).append(document)
 
     any_device_documents = len(device_documents_by_device_id) > 0
 
@@ -552,11 +553,17 @@ def simulation(simulation_slug):
         "public/simulation.html",
         any_device_documents=any_device_documents,
         simulation=simulation,
-        laboratory_exercises=simulation.laboratory_exercises,
+        laboratory_exercises=[
+            exercise for exercise in simulation.laboratory_exercises if exercise.active
+        ],
         devices=devices,
         devices_by_id=devices_by_id,
         categories=simulation.simulation_categories,
-        documents=simulation.simulation_documents
+        documents=[
+            document
+            for document in simulation.simulation_documents
+            if _document_source_available(document.doc_url)
+        ]
     )
 
 @public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>-<title>.md')
@@ -787,10 +794,11 @@ def _get_word(path: str, filename: str = 'document.docx'):
     parsed = urlparse(path)
     is_url = parsed.scheme in ('http', 'https')
 
+    input_temp_dir = None
     if is_url:
         base_url = path.rsplit('/', 1)[0] + '/'
-        temp_dir = tempfile.mkdtemp()
-        md_path = os.path.join(temp_dir, 'document.md')
+        input_temp_dir = tempfile.mkdtemp(prefix='redtail-markdown-')
+        md_path = os.path.join(input_temp_dir, 'document.md')
 
         # Download relative images
         def replace_image(match):
@@ -799,7 +807,7 @@ def _get_word(path: str, filename: str = 'document.docx'):
                 return match.group(0)  # leave as-is
             # Download image
             img_url = urljoin(base_url, img_path)
-            local_img_path = os.path.join(temp_dir, os.path.basename(img_path))
+            local_img_path = os.path.join(input_temp_dir, os.path.basename(img_path))
             try:
                 img_data = requests.get(img_url, timeout=5)
                 img_data.raise_for_status()
@@ -817,14 +825,20 @@ def _get_word(path: str, filename: str = 'document.docx'):
         with open(md_path, 'w', encoding='utf-8') as f:
             f.write(updated_md)
 
-        resource_path = temp_dir
+        resource_path = input_temp_dir
 
     else:
         # Local file: use its directory as base for image lookup
-        md_path = os.path.abspath(path)
+        md_path = _resolve_local_document_path(path)
+        if md_path is None:
+            return "Access denied", 403
         resource_path = os.path.dirname(md_path)
 
-    docx_path = os.path.join(tempfile.gettempdir(), filename)
+    safe_download_name = secure_filename(filename) or 'document.docx'
+    if not safe_download_name.lower().endswith('.docx'):
+        safe_download_name += '.docx'
+    output_temp_dir = tempfile.mkdtemp(prefix='redtail-docx-')
+    docx_path = os.path.join(output_temp_dir, safe_download_name)
 
     try:
         pypandoc.convert_file(
@@ -833,12 +847,61 @@ def _get_word(path: str, filename: str = 'document.docx'):
             outputfile=docx_path,
             extra_args=['--resource-path=.:{}'.format(resource_path)]
         )
-        return send_file(docx_path, as_attachment=True, download_name=filename)
+        return send_file(
+            docx_path,
+            as_attachment=True,
+            download_name=safe_download_name,
+        )
     finally:
-        if is_url:
-            shutil.rmtree(temp_dir, ignore_errors=True)
-        if os.path.exists(docx_path):
-            os.remove(docx_path)
+        if input_temp_dir:
+            shutil.rmtree(input_temp_dir, ignore_errors=True)
+        shutil.rmtree(output_temp_dir, ignore_errors=True)
+
+
+def _resolve_local_document_path(path: str):
+    project_root = os.path.realpath(
+        current_app.config['PROJECT_ROOT'] if has_app_context() else os.getcwd()
+    )
+
+    if path.startswith('/uploads/'):
+        allowed_root = os.path.realpath(
+            current_app.config['UPLOAD_FOLDER']
+            if has_app_context()
+            else os.path.join(project_root, 'redtail_repository', 'uploads')
+        )
+        abs_path = os.path.realpath(
+            os.path.join(allowed_root, path.removeprefix('/uploads/'))
+        )
+    elif path.startswith('/public/'):
+        allowed_root = project_root
+        abs_path = os.path.realpath(os.path.join(project_root, path.lstrip('/')))
+    else:
+        allowed_root = project_root
+        abs_path = os.path.realpath(
+            path if os.path.isabs(path) else os.path.join(project_root, path)
+        )
+
+    try:
+        within_allowed_root = (
+            os.path.commonpath((allowed_root, abs_path)) == allowed_root
+        )
+    except ValueError:
+        within_allowed_root = False
+    return abs_path if within_allowed_root else None
+
+
+def _document_source_available(path: str) -> bool:
+    if not path:
+        return False
+
+    parsed = urlparse(path)
+    if parsed.scheme in ('http', 'https'):
+        if not has_app_context():
+            return True
+        return parsed.netloc in current_app.config['KNOWN_DOMAINS']
+
+    abs_path = _resolve_local_document_path(path)
+    return abs_path is not None and os.path.isfile(abs_path)
 
 def _get_md(path: str):
     # Ensure it ends with .md
@@ -874,24 +937,15 @@ def _get_md(path: str):
 
     # Handle local file access
     try:
-        project_root = os.path.realpath(
-            current_app.config['PROJECT_ROOT']
-            if has_app_context()
-            else os.getcwd()
-        )
-        abs_path = os.path.realpath(
-            path if os.path.isabs(path) else os.path.join(project_root, path)
-        )
-        try:
-            within_project = os.path.commonpath(
-                (project_root, abs_path)) == project_root
-        except ValueError:
-            within_project = False
-        if not within_project:
+        abs_path = _resolve_local_document_path(path)
+        if abs_path is None:
             return "Access denied", 403
 
         with open(abs_path, 'r', encoding='utf-8') as f:
             return f.read()
+    except FileNotFoundError:
+        logger.warning("Could not find local file %s", path)
+        return f"Could not find local file {path}", 404
     except Exception as err:
         logger.warning(f"Could not open local file {path}: {err}", exc_info=True)
         traceback.print_exc()
@@ -912,7 +966,8 @@ def get_image_base_url(path):
         base_path = os.path.dirname(parsed.path) + '/'
         return urlunparse((parsed.scheme, parsed.netloc, base_path, '', '', ''))
     else:
-        return '/' + os.path.dirname(path).replace('\\', '/') + '/'
+        directory = os.path.dirname(path).replace('\\', '/').strip('/')
+        return f'/{directory}/' if directory else '/'
 
 def _get_html(path: str):
     response = _get_md(path)
