@@ -33,7 +33,7 @@ class TestingConfig(Config):
     TESTING = True
     SECRET_KEY = 'test-secret-key'
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'sqlite://'
-    ASSETS_DEBUG = True
+    ASSETS_DEBUG = os.environ.get('REDTAIL_ASSETS_DEBUG', 'true').lower() == 'true'
     WTF_CSRF_ENABLED = False
     SERVE_PUBLIC_FILES = True
 

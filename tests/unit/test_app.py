@@ -1,7 +1,10 @@
 from types import SimpleNamespace
 
+from flask_assets import Environment
+
 import redtail_repository
 from redtail_repository import create_app, get_locale
+from redtail_repository.bundles import register_bundles
 
 
 def test_create_app_applies_overrides_before_extensions(tmp_path):
@@ -30,6 +33,17 @@ def test_create_app_works_without_overrides():
     app = create_app("testing")
     assert app.testing
     assert app.config["SQLALCHEMY_DATABASE_URI"] == "sqlite://"
+
+
+def test_fontawesome_bundle_rewrites_webfont_urls_for_production():
+    assets = Environment()
+    register_bundles(assets)
+
+    bundle = assets["fontawesome_css"]
+    assert [asset_filter.name for asset_filter in bundle.filters] == [
+        "cssrewrite",
+        "cssmin",
+    ]
 
 
 def test_locale_defaults_to_english_outside_request(app):

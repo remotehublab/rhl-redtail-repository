@@ -27,7 +27,7 @@ def register_bundles(assets: Environment):
 
     fontawesome_css = Bundle(
             'node_modules/@fortawesome/fontawesome-free/css/all.min.css',
-            filters=CSS_FILTER,
+            filters='cssrewrite,' + CSS_FILTER,
             output="gen/fontawesome/css/all.%(version)s.min.css")
 
     fontawesome_js = Bundle(

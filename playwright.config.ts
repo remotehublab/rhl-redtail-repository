@@ -30,8 +30,14 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: `"${python}" -m tests.browser_server`,
+    command: `"${python}" -m flask assets build && "${python}" -m tests.browser_server`,
     cwd: repositoryRoot,
+    env: {
+      ...process.env,
+      FLASK_APP: 'autoapp',
+      FLASK_CONFIG: 'testing',
+      REDTAIL_ASSETS_DEBUG: 'false',
+    },
     url: 'http://127.0.0.1:5010',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
