@@ -1,0 +1,10 @@
+{% extends "public/_base.html" %}
+
+{% block container %}
+<main class="container py-4">
+  <h1>{{ author.name }}</h1>
+  {% if author.link %}
+  <p><a href="{{ author.link }}" rel="noopener noreferrer">{{ gettext("Author profile") }}</a></p>
+  {% endif %}
+</main>
+{% endblock %}

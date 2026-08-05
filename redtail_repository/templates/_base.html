@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="{{ language }}" class="h-100">
+<html lang="{{ locale or 'en' }}" class="h-100">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title }}</title>
+  <title>{{ title or "REDTAIL" }}</title>
   {% assets 'bootstrap_css' %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
   {% endassets %}
@@ -15,8 +15,8 @@
     <style>
         :root {
 
-          --primary-color: #8b5cf6;
-          --primary-hover: #7c3aed;
+          --primary-color: #7c3aed;
+          --primary-hover: #6d28d9;
           --brand-grad-start: #FF2400;
           --brand-grad-end: #ff7a59;
 
@@ -115,6 +115,11 @@
         .btn-brand-primary:focus {
           background-color: var(--primary-hover);
           color: white;
+        }
+
+        .bg-light a,
+        .footer a {
+          color: #0a58ca;
         }
     </style>
 

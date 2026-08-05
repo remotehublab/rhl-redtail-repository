@@ -1,13 +1,14 @@
 from collections import OrderedDict
-from typing import Dict
+from typing import Any, Dict, Mapping, Optional
 
-from flask import Flask, session, request, has_request_context
-
-from flask_babel import Babel
+from flask import Flask, has_request_context, request, session
 from flask_assets import Environment
+from flask_babel import Babel
 from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from config import configurations
 
 try:
     from flask_debugtoolbar import DebugToolbarExtension
@@ -16,7 +17,6 @@ except ImportError:
 
 babel = Babel()
 db = SQLAlchemy()
-environment = Environment()
 migrate = Migrate()
 login_manager = LoginManager()
 
@@ -25,16 +25,24 @@ if DebugToolbarExtension is not None:
 else:
     toolbar = None
 
+def create_app(
+    config_name: str = 'default',
+    config_overrides: Optional[Mapping[str, Any]] = None,
+) -> Flask:
+    global SUPPORTED_LANGUAGES, SUPPORTED_TRANSLATIONS
 
-from config import configurations
-
-def create_app(config_name: str = 'default') -> Flask:
     app = Flask(__name__)
     app.config.from_object(configurations[config_name])
+    if config_overrides:
+        app.config.from_mapping(config_overrides)
+
+    SUPPORTED_LANGUAGES = None
+    SUPPORTED_TRANSLATIONS = None
 
     # Initialize extensions
     db.init_app(app)
-    environment.init_app(app)
+    assets_environment = Environment()
+    assets_environment.init_app(app)
     babel.init_app(app, locale_selector=get_locale)
     migrate.init_app(app, db)
     if toolbar is not None:
@@ -42,18 +50,18 @@ def create_app(config_name: str = 'default') -> Flask:
     login_manager.init_app(app)
     login_manager.login_view = 'login.login'
 
-    from .views.admin import admin
-    admin.init_app(app)
+    from .views.admin import init_admin
+    init_admin(app)
 
     import redtail_repository.models # noqa
 
     # Register bundles
     from .bundles import register_bundles
-    register_bundles(environment)
+    register_bundles(assets_environment)
 
     # Register blueprint
-    from .views.public import public_blueprint
     from .views.login import login_blueprint
+    from .views.public import public_blueprint
 
     app.register_blueprint(public_blueprint, url_prefix='/')
     app.register_blueprint(login_blueprint, url_prefix='/')
@@ -67,8 +75,8 @@ def create_app(config_name: str = 'default') -> Flask:
             for language in sorted(translations, key=lambda x: x.language):
                 try:
                     display_name = language.get_display_name(language).title()
-                except:
-                    display_name = language
+                except Exception:
+                    display_name = language.language
                 SUPPORTED_LANGUAGES[language.language] = display_name
 
         return SUPPORTED_LANGUAGES
@@ -123,6 +131,7 @@ def get_locale():
     if locale is None:
         locale = 'en'
 
-    session['locale'] = locale
+    if has_request_context():
+        session['locale'] = locale
 
     return locale

@@ -87,6 +87,17 @@
           {% endfor %}
         </div>
       </section>
+
+      {% if documents %}
+      <section class="mb-5">
+        <h2 class="border-bottom pb-2">{{ gettext("Documentation") }}</h2>
+        <ul>
+          {% for document in documents %}
+          <li><a href="{{ document.doc_url }}">{{ document.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
     </div>
   </div>
 </div>

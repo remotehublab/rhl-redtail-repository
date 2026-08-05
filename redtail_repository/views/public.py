@@ -3,21 +3,28 @@ import os
 import re
 import shutil
 import tempfile
-import time
 import traceback
 from functools import wraps
 from urllib.parse import urljoin, urlparse, urlunparse
-
-logger = logging.getLogger(__name__)
+from uuid import uuid4
 
 import pypandoc
 import requests
 from flask import (
-    Blueprint, abort, current_app, flash, make_response, redirect,
-    render_template, request, send_file, send_from_directory, url_for
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    has_app_context,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    send_from_directory,
+    url_for,
 )
 from flask_babel import gettext
-from flask_login import current_user, login_required
+from flask_login import current_user
 from markdown import markdown
 from slugify import slugify
 from sqlalchemy.orm import joinedload
@@ -37,15 +44,9 @@ from redtail_repository.models import (
     SimulationCategory,
     SimulationDeviceDocument,
     SimulationDoc,
-    User
 )
 
-from redtail_repository import db
-from redtail_repository.models import (
-    LaboratoryExercise, LaboratoryExerciseCategory, LaboratoryExerciseLevel,
-    Simulation, SimulationDoc, SimulationDeviceDocument, Device, SimulationCategory, User, Author,
-    DeviceCategory, DeviceFramework
-)
+logger = logging.getLogger(__name__)
 
 public_blueprint = Blueprint('public', __name__)
 
@@ -80,7 +81,7 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             flash(gettext("Please log in to access this page."), "warning")
-            return redirect(url_for('login.login', next=request.url))
+            return redirect(url_for('login.login', next=request.full_path))
 
         if current_user.role != 'admin':
             flash(gettext("You must be an admin to view this page."), "danger")
@@ -101,7 +102,7 @@ def file_submission():
 
     if request.method == 'POST':
         uploaded_file = request.files.get('file')
-        title = request.form.get('title')
+        title = (request.form.get('title') or '').strip()
         description = request.form.get('description')
         target_type = request.form.get('target_type')
         is_solution = request.form.get('is_solution') == 'on'
@@ -111,89 +112,130 @@ def file_submission():
         if not title:
             return render_template("public/file_submission.html", error=gettext("A Document Title is required."), **locals())
 
-        # Save the primary document
-        safe_filename = secure_filename(uploaded_file.filename)
-        unique_filename = f"{int(time.time())}_{safe_filename}"
-        upload_folder = os.path.join(current_app.root_path, 'uploads')
-        os.makedirs(upload_folder, exist_ok=True)
-        save_path = os.path.join(upload_folder, unique_filename)
-        uploaded_file.save(save_path)
-        doc_url = f"/uploads/{unique_filename}"
+        simulation_target = None
+        exercise = None
+        exercise_mode = request.form.get('exercise_mode')
+        new_name = (request.form.get('new_exercise_name') or '').strip()
 
-        try:
-            if target_type == 'simulation':
-                sim_id = request.form.get('simulation_id')
-                if not sim_id:
-                     return render_template("public/file_submission.html", error=gettext("Please select a simulation."), **locals())
-
-                new_doc = SimulationDoc(simulation_id=int(sim_id), title=title, description=description, doc_url=doc_url)
-                db.session.add(new_doc)
-
+        if target_type == 'simulation':
+            sim_id = request.form.get('simulation_id', type=int)
+            simulation_target = db.session.get(Simulation, sim_id) if sim_id else None
+            if simulation_target is None:
+                return render_template("public/file_submission.html", error=gettext("Please select a simulation."), **locals())
+        elif target_type == 'exercise':
+            if exercise_mode == 'new':
+                if not new_name:
+                    return render_template("public/file_submission.html", error=gettext("An exercise name is required."), **locals())
+                if LaboratoryExercise.query.filter_by(slug=slugify(new_name)).first():
+                    return render_template("public/file_submission.html", error=gettext("An exercise with that name already exists."), **locals())
             else:
-                exercise_mode = request.form.get('exercise_mode')
-                lab_exercise_id = None
+                lab_exercise_id = request.form.get('laboratory_exercise_id', type=int)
+                exercise = db.session.get(LaboratoryExercise, lab_exercise_id) if lab_exercise_id else None
+                if exercise is None:
+                    return render_template("public/file_submission.html", error=gettext("Select an exercise."), **locals())
+        else:
+            return render_template("public/file_submission.html", error=gettext("Select a valid document target."), **locals())
 
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_folder, exist_ok=True)
+        saved_paths = []
+        old_upload_to_remove = None
+        try:
+            safe_filename = secure_filename(uploaded_file.filename)
+            unique_filename = f"{uuid4().hex}_{safe_filename}"
+            save_path = os.path.join(upload_folder, unique_filename)
+            uploaded_file.save(save_path)
+            saved_paths.append(save_path)
+            doc_url = f"/uploads/{unique_filename}"
+
+            if simulation_target is not None:
+                new_doc = SimulationDoc(
+                    simulation_id=simulation_target.id,
+                    title=title,
+                    description=description,
+                    doc_url=doc_url,
+                )
+                db.session.add(new_doc)
+            else:
                 if exercise_mode == 'new':
-                    new_name = request.form.get('new_exercise_name')
                     slug = slugify(new_name)
-
                     cover_image_url = ""
                     cover_file = request.files.get('new_exercise_cover')
                     if cover_file and cover_file.filename != '':
                         safe_cover = secure_filename(cover_file.filename)
-                        cover_filename = f"cover_{int(time.time())}_{safe_cover}"
+                        cover_filename = f"cover_{uuid4().hex}_{safe_cover}"
                         cover_path = os.path.join(upload_folder, cover_filename)
                         cover_file.save(cover_path)
+                        saved_paths.append(cover_path)
                         cover_image_url = f"/uploads/{cover_filename}"
 
-                    new_exercise = LaboratoryExercise(
+                    exercise = LaboratoryExercise(
                         name=new_name, slug=slug,
                         short_description=request.form.get('new_exercise_desc', ''),
                         long_description=request.form.get('new_exercise_long_desc', ''),
                         learning_goals=request.form.get('new_exercise_goals', ''),
                         cover_image_url=cover_image_url, active=True
                     )
-                    db.session.add(new_exercise)
+                    db.session.add(exercise)
+                    exercise.authors = Author.query.filter(
+                        Author.id.in_(request.form.getlist('author_ids'))).all()
+                    exercise.laboratory_exercise_categories = LaboratoryExerciseCategory.query.filter(
+                        LaboratoryExerciseCategory.id.in_(request.form.getlist('category_ids'))).all()
+                    exercise.levels = LaboratoryExerciseLevel.query.filter(
+                        LaboratoryExerciseLevel.id.in_(request.form.getlist('level_ids'))).all()
+                    exercise.device_frameworks = DeviceFramework.query.filter(
+                        DeviceFramework.id.in_(request.form.getlist('framework_ids'))).all()
+                    exercise.simulations = Simulation.query.filter(
+                        Simulation.id.in_(request.form.getlist('simulation_ids'))).all()
                     db.session.flush()
-                    lab_exercise_id = new_exercise.id
                 else:
-                    # UPDATED: Handle Existing Exercise Updates
-                    lab_exercise_id = request.form.get('laboratory_exercise_id')
-                    if not lab_exercise_id:
-                        return render_template("public/file_submission.html", error=gettext("Select an exercise."), **locals())
-
-                    exercise = db.session.get(LaboratoryExercise, int(lab_exercise_id))
-
-                    # Replace Cover Image if a new one is provided
-                    cover_file = request.files.get('new_exercise_cover')
+                    cover_file = (
+                        request.files.get('update_exercise_cover')
+                        or request.files.get('new_exercise_cover')
+                    )
                     if cover_file and cover_file.filename != '':
                         safe_cover = secure_filename(cover_file.filename)
-                        cover_filename = f"cover_{int(time.time())}_{safe_cover}"
+                        cover_filename = f"cover_{uuid4().hex}_{safe_cover}"
                         cover_path = os.path.join(upload_folder, cover_filename)
                         cover_file.save(cover_path)
+                        saved_paths.append(cover_path)
                         exercise.cover_image_url = f"/uploads/{cover_filename}"
 
-                replace_doc_id = request.form.get('replace_doc_id')
+                replace_doc_id = request.form.get('replace_doc_id', type=int)
                 if replace_doc_id:
                     existing_doc = db.session.get(LaboratoryExerciseDoc, int(replace_doc_id))
-                    if existing_doc:
-                        existing_doc.title = title
-                        existing_doc.description = description
-                        existing_doc.doc_url = doc_url
-                        existing_doc.is_solution = is_solution
+                    if existing_doc is None or existing_doc.laboratory_exercise_id != exercise.id:
+                        raise ValueError(gettext("The selected document does not belong to this exercise."))
+                    if existing_doc.doc_url and existing_doc.doc_url.startswith('/uploads/'):
+                        old_upload_to_remove = os.path.join(
+                            upload_folder, existing_doc.doc_url.removeprefix('/uploads/'))
+                    existing_doc.title = title
+                    existing_doc.description = description
+                    existing_doc.doc_url = doc_url
+                    existing_doc.is_solution = is_solution
                 else:
                     new_doc = LaboratoryExerciseDoc(
-                        laboratory_exercise_id=int(lab_exercise_id),
+                        laboratory_exercise_id=exercise.id,
                         title=title, description=description,
                         doc_url=doc_url, is_solution=is_solution
                     )
                     db.session.add(new_doc)
 
             db.session.commit()
+            if old_upload_to_remove and os.path.exists(old_upload_to_remove):
+                try:
+                    os.remove(old_upload_to_remove)
+                except OSError:
+                    logger.warning("Could not remove replaced upload %s", old_upload_to_remove, exc_info=True)
             return render_template("public/file_submission.html", success=gettext("Successfully updated!"), **locals())
 
         except Exception as e:
             db.session.rollback()
+            for saved_path in saved_paths:
+                try:
+                    os.remove(saved_path)
+                except FileNotFoundError:
+                    pass
             return render_template("public/file_submission.html", error=str(e), **locals())
 
     return render_template("public/file_submission.html", **locals())
@@ -202,33 +244,35 @@ def file_submission():
 @admin_required
 def replace_document(doc_type, doc_id):
     if doc_type == 'exercise':
-        doc = LaboratoryExerciseDoc.query.get_or_404(doc_id)
-        redirect_url = url_for('.laboratory_exercise', slug=doc.laboratory_exercise.slug)
+        doc = db.get_or_404(LaboratoryExerciseDoc, doc_id)
+        redirect_url = url_for(
+            '.laboratory_exercise',
+            laboratory_exercise_slug=doc.laboratory_exercise.slug,
+        )
     elif doc_type == 'simulation':
-        doc = SimulationDoc.query.get_or_404(doc_id)
-        redirect_url = url_for('.simulation', slug=doc.simulation.slug)
+        doc = db.get_or_404(SimulationDoc, doc_id)
+        redirect_url = url_for(
+            '.simulation', simulation_slug=doc.simulation.slug)
     else:
         abort(400)
 
     new_file = request.files.get('new_file')
     new_title = request.form.get('new_title')
+    old_upload_to_remove = None
+    new_upload = None
 
     if new_file and new_file.filename != '':
         if doc.doc_url and doc.doc_url.startswith('/uploads/'):
             old_filename = doc.doc_url.replace('/uploads/', '')
-            old_filepath = os.path.join(current_app.root_path, 'uploads', old_filename)
-            if os.path.exists(old_filepath):
-                try:
-                    os.remove(old_filepath)
-                except Exception as e:
-                    logger.error(f"Failed to delete old file {old_filepath}: {e}")
+            old_upload_to_remove = os.path.join(
+                current_app.config['UPLOAD_FOLDER'], old_filename)
 
         safe_filename = secure_filename(new_file.filename)
-        unique_filename = f"{int(time.time())}_{safe_filename}"
-        upload_folder = os.path.join(current_app.root_path, 'uploads')
+        unique_filename = f"{uuid4().hex}_{safe_filename}"
+        upload_folder = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
-        save_path = os.path.join(upload_folder, unique_filename)
-        new_file.save(save_path)
+        new_upload = os.path.join(upload_folder, unique_filename)
+        new_file.save(new_upload)
 
         doc.doc_url = f"/uploads/{unique_filename}"
 
@@ -237,9 +281,23 @@ def replace_document(doc_type, doc_id):
 
     try:
         db.session.commit()
+        if old_upload_to_remove and os.path.exists(old_upload_to_remove):
+            try:
+                os.remove(old_upload_to_remove)
+            except OSError:
+                logger.warning(
+                    "Could not remove replaced upload %s",
+                    old_upload_to_remove,
+                    exc_info=True,
+                )
         flash(gettext("Document updated successfully!"), "success")
     except Exception as e:
         db.session.rollback()
+        if new_upload:
+            try:
+                os.remove(new_upload)
+            except FileNotFoundError:
+                pass
         logger.error(f"Error replacing document: {e}")
         flash(gettext("An error occurred while updating the document."), "danger")
 
@@ -247,7 +305,7 @@ def replace_document(doc_type, doc_id):
 
 @public_blueprint.route('/uploads/<path:filename>')
 def serve_uploads(filename):
-    upload_folder = os.path.join(current_app.root_path, 'uploads')
+    upload_folder = current_app.config['UPLOAD_FOLDER']
     return send_from_directory(upload_folder, filename)
 
 
@@ -291,18 +349,24 @@ def laboratory_exercises():
         if category:
             laboratory_exercises_query = laboratory_exercises_query.filter(
                 LaboratoryExercise.laboratory_exercise_categories.contains(category))
+        else:
+            category_slug = None
 
     if level_slug:
         level = LaboratoryExerciseLevel.query.filter_by(slug=level_slug).first()
         if level:
             laboratory_exercises_query = laboratory_exercises_query.filter(
                 LaboratoryExercise.levels.contains(level))
+        else:
+            level_slug = None
 
     if framework_slug:
         framework = DeviceFramework.query.filter_by(slug=framework_slug).first()
         if framework:
             laboratory_exercises_query = laboratory_exercises_query.join(
                 LaboratoryExercise.device_frameworks).filter(DeviceFramework.id == framework.id)
+        else:
+            framework_slug = None
 
     laboratory_exercises = laboratory_exercises_query.all()
 
@@ -403,6 +467,9 @@ def simulations():
         joinedload(Simulation.device_frameworks)
     )
 
+    if device_id and device_id not in devices_by_id:
+        device_id = None
+
     if device_id:
         simulations_query = simulations_query.join(Simulation.device_frameworks).join(DeviceFramework.device).filter(
             Device.id == device_id)
@@ -413,6 +480,8 @@ def simulations():
         if category:
             simulations_query = simulations_query.join(
                 Simulation.simulation_categories).filter(SimulationCategory.id == category.id)
+        else:
+            category_slug = None
 
     if framework_slug:
         framework = DeviceFramework.query.filter_by(
@@ -420,6 +489,8 @@ def simulations():
         if framework:
             simulations_query = simulations_query.join(
                 Simulation.device_frameworks).filter(DeviceFramework.id == framework.id)
+        else:
+            framework_slug = None
 
     simulations = simulations_query.all()
 
@@ -522,8 +593,6 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
     for document in simulation.device_documents:
         device_documents_by_device_id.setdefault(document.device_id, []).append(document)
 
-    any_device_documents = len(device_documents_by_device_id) > 0
-
     devices = [
         {
             "device": devices_by_id[device_id],
@@ -593,8 +662,6 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
     for document in simulation.device_documents:
         device_documents_by_device_id.setdefault(document.device_id, []).append(document)
 
-    any_device_documents = len(device_documents_by_device_id) > 0
-
     devices = [
         {
             "device": devices_by_id[device_id],
@@ -651,11 +718,13 @@ def devices():
     )
 
     if device_category_id:
-        category = DeviceCategory.query.get(device_category_id)
+        category = db.session.get(DeviceCategory, device_category_id)
         if category:
             devices_query = devices_query.join(Device.device_categories).filter(
                 DeviceCategory.id == category.id
             )
+        else:
+            device_category_id = None
 
     if framework_slug:
         framework = DeviceFramework.query.filter_by(
@@ -663,11 +732,10 @@ def devices():
         if framework:
             devices_query = devices_query.join(Device.device_frameworks).filter(
                 DeviceFramework.id == framework.id)
+        else:
+            framework_slug = None
 
     devices = list(devices_query.all())
-
-    for device in devices:
-        print([cat.name for cat in device.device_categories])
 
     return render_template(
         'public/devices.html',
@@ -780,13 +848,23 @@ def _get_md(path: str):
     # Handle known domains for URLs
     parsed = urlparse(path)
     if parsed.scheme in ('http', 'https'):
-        known_domains = [d.strip() for d in (os.environ.get('KNOWN_DOMAINS') or "redtail.rhlab.ece.uw.edu").split(',')]
+        if has_app_context():
+            known_domains = current_app.config['KNOWN_DOMAINS']
+        else:
+            known_domains = tuple(
+                d.strip()
+                for d in (
+                    os.environ.get('KNOWN_DOMAINS')
+                    or "redtail.rhlab.ece.uw.edu"
+                ).split(',')
+                if d.strip()
+            )
         domain = parsed.netloc
         if domain not in known_domains:
             return "Domain not allowed", 403
 
         try:
-            req = requests.get(path)
+            req = requests.get(path, timeout=5)
             req.raise_for_status()
             return req.text
         except Exception as err:
@@ -796,9 +874,20 @@ def _get_md(path: str):
 
     # Handle local file access
     try:
-        abs_path = os.path.abspath(path)
-        cwd = os.path.abspath(os.getcwd())
-        if not abs_path.startswith(cwd + os.sep):
+        project_root = os.path.realpath(
+            current_app.config['PROJECT_ROOT']
+            if has_app_context()
+            else os.getcwd()
+        )
+        abs_path = os.path.realpath(
+            path if os.path.isabs(path) else os.path.join(project_root, path)
+        )
+        try:
+            within_project = os.path.commonpath(
+                (project_root, abs_path)) == project_root
+        except ValueError:
+            within_project = False
+        if not within_project:
             return "Access denied", 403
 
         with open(abs_path, 'r', encoding='utf-8') as f:
@@ -835,8 +924,7 @@ def _get_html(path: str):
 
 @public_blueprint.route('/public/<path:filename>')
 def serve_public(filename: str):
-    if current_app.debug or app.env == 'development':
-        public_dir = os.path.join(os.path.abspath('.'), 'public')
-        return send_from_directory(public_dir, filename)
+    if current_app.debug or current_app.config['SERVE_PUBLIC_FILES']:
+        return send_from_directory(current_app.config['PUBLIC_FOLDER'], filename)
 
     return "/public only works in development", 404

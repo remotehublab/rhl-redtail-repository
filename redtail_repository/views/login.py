@@ -1,16 +1,27 @@
 from typing import Optional
-from flask import Blueprint, flash, render_template, request, redirect, url_for
+from urllib.parse import urlsplit
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_babel import lazy_gettext
 from flask_login import login_user, logout_user
-from flask_babel import lazy_gettext
 from flask_wtf import FlaskForm
+from wtforms import BooleanField, PasswordField, StringField, SubmitField
+from wtforms.validators import DataRequired, EqualTo, Length
 
-from wtforms import PasswordField, BooleanField, StringField, SubmitField
-from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
-
-from flask_babel import lazy_gettext
-
-from redtail_repository import login_manager, db
+from redtail_repository import db, login_manager
 from redtail_repository.models import User
+
+
+def is_safe_local_redirect(target: Optional[str]) -> bool:
+    if not target:
+        return False
+    parsed = urlsplit(target)
+    return (
+        not parsed.scheme
+        and not parsed.netloc
+        and target.startswith('/')
+        and not target.startswith('//')
+    )
 
 @login_manager.user_loader
 def user_loader(user_id: str):
@@ -33,11 +44,11 @@ def login():
         if user is not None and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             next = request.args.get('next')
-            if next and next.startswith('/'):
+            if is_safe_local_redirect(next):
                 return redirect(next)
 
             next_url = request.args.get('url')
-            if next_url and next_url.startswith('/'):
+            if is_safe_local_redirect(next_url):
                 return redirect(next_url)
 
             return redirect(url_for('public.index'))
@@ -53,7 +64,7 @@ def logout():
     logout_user()
 
     url = request.args.get('url')
-    if url and url.startswith('/'):
+    if is_safe_local_redirect(url):
         return redirect(url)
 
     return redirect(url_for('public.index'))
@@ -73,7 +84,8 @@ class RegistrationForm(FlaskForm):
         existing_user = User.query.filter_by(login=self.login.data).first()
 
         if existing_user:
-            raise ValidationError(lazy_gettext('Username is already taken.'))
+            self.login.errors.append(lazy_gettext('Username is already taken.'))
+            return False
         return True
 
 @login_blueprint.route('/register', methods=['GET', 'POST'])

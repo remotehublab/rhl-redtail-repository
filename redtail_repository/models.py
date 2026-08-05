@@ -1,14 +1,12 @@
+from datetime import datetime
 from typing import List, Optional
 
-from slugify import slugify
-
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from slugify import slugify
 from sqlalchemy import Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-from datetime import datetime
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from redtail_repository import db
 

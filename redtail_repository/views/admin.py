@@ -1,24 +1,31 @@
-import os.path
 from flask_admin import Admin
+from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.model.form import InlineFormAdmin
-from flask_admin.contrib.fileadmin import FileAdmin
 from flask_login import current_user
-
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
 from ..models import (
-    Author, User, LaboratoryExercise, LaboratoryExerciseImage, LaboratoryExerciseDoc,
-    Simulation, Device, LaboratoryExerciseCategory, LaboratoryExerciseLevel,
-    DeviceCategory, SimulationCategory, DeviceDoc, SimulationDoc,
-    DeviceFramework, SimulationDeviceDocument, SimulationImage,
-    device_simulation_association, author_laboratory_exercise_association,
-    laboratory_exercise_simulation_association, laboratory_exercise_device_framework_association,
-    device_category_association, simulation_category_association, 
-    laboratory_exercise_level_association, simulation_framework_association,
-    db
+    Author,
+    Device,
+    DeviceCategory,
+    DeviceDoc,
+    DeviceFramework,
+    LaboratoryExercise,
+    LaboratoryExerciseCategory,
+    LaboratoryExerciseDoc,
+    LaboratoryExerciseImage,
+    LaboratoryExerciseLevel,
+    Simulation,
+    SimulationCategory,
+    SimulationDeviceDocument,
+    SimulationDoc,
+    SimulationImage,
+    User,
+    db,
 )
+
 
 class AuthedModelMixIn:
     def is_accessible(self):
@@ -211,17 +218,6 @@ class SimulationDocModelView(AuthedModelMixIn, ModelView):
         super().__init__(SimulationDoc, db.session, *args, **kwargs)
 
 
-class SimulationCategoryModelView(AuthedModelMixIn, ModelView):
-    column_list = [
-        'id', 'name', 'slug', 'last_updated', 'simulations'
-    ]
-    form_columns = [
-        'id', 'name', 'slug', 'last_updated'
-    ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(SimulationCategory, db.session, *args, **kwargs)
-
 class DeviceModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'slug', 'name', 'description',
@@ -298,46 +294,46 @@ class DeviceCategoryModelView(AuthedModelMixIn, ModelView):
 class FileBrowser(AuthedModelMixIn, FileAdmin):
     pass
 
-# compute the absolute paths to your two folders
-public_path  = os.path.join(os.path.abspath('.'), 'public')
-private_path = os.path.join(os.path.abspath('.'), 'private')
+def init_admin(app):
+    """Create an app-local admin instance with app-local file roots."""
+    admin = Admin(name='Admin', template_mode='bootstrap3')
+    admin.add_view(AuthorModelView(name="Author", category="User"))
+    admin.add_view(ConnectedAuthorModelView(name="Connected Authors", category="User", endpoint="connected_authors"))
+    admin.add_view(UserModelView(name="User", category="User"))
 
-admin = Admin(name='Admin', template_mode='bootstrap3')
-admin.add_view(AuthorModelView(name="Author", category="User"))
-admin.add_view(ConnectedAuthorModelView(name="Connected Authors", category="User", endpoint="connected_authors"))
-admin.add_view(UserModelView(name="User", category="User"))
+    admin.add_view(LaboratoryExerciseModelView(name="Laboratory Exercise", category="Laboratory Exercise"))
+    admin.add_view(LaboratoryExerciseImagesModelView(name="Laboratory Exercise Image", category="Laboratory Exercise"))
+    admin.add_view(LaboratoryExerciseDocsModelView(name="Laboratory Exercise Document", category="Laboratory Exercise"))
 
-admin.add_view(LaboratoryExerciseModelView(name="Laboratory Exercise", category="Laboratory Exercise"))
-admin.add_view(LaboratoryExerciseImagesModelView(name="Laboratory Exercise Image", category="Laboratory Exercise"))
-admin.add_view(LaboratoryExerciseDocsModelView(name="Laboratory Exercise Document", category="Laboratory Exercise"))
+    admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
+    admin.add_view(SimulationDocModelView(name="Simulation Document", category="Simulation"))
+    admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
+    admin.add_view(SimulationDeviceDocumentModelView(name="Simulation Device Document", category="Simulation"))
 
-admin.add_view(SimulationModelView(name="Simulation", category="Simulation"))
-admin.add_view(SimulationDocModelView(name="Simulation Document", category="Simulation"))
-admin.add_view(SimulationCategoryModelView(name="Simulation Category", category="Category"))
-admin.add_view(SimulationDeviceDocumentModelView(name="Simulation Device Document", category="Simulation"))
+    admin.add_view(DeviceModelView(name="Device", category="Device"))
+    admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
 
-admin.add_view(DeviceModelView(name="Device", category="Device"))
-admin.add_view(DeviceDocModelView(name="Device Document", category="Device"))
+    admin.add_view(LaboratoryExerciseCategoryModelView(name="Laboratory Exercise Category", category="Category"))
+    admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))
+    admin.add_view(LaboratoryExerciseLevelModelView(name="Laboratory Exercise Level", category="Category"))
 
-admin.add_view(LaboratoryExerciseCategoryModelView(name="Laboratory Exercise Category", category="Category"))
-admin.add_view(DeviceCategoryModelView(name="Device Category", category="Category"))
-admin.add_view(LaboratoryExerciseLevelModelView(name="Laboratory Exercise Level", category="Category"))
-
-admin.add_view(
-    FileBrowser(
-        public_path,
-        '/public/',
-        name='Public Files',
-        endpoint="files/public",
-        category='Files'
+    admin.add_view(
+        FileBrowser(
+            app.config['PUBLIC_FOLDER'],
+            '/public/',
+            name='Public Files',
+            endpoint="files/public",
+            category='Files'
+        )
     )
-)
-admin.add_view(
-    FileBrowser(
-        private_path,
-        '/private/',
-        name='Private Files',
-        endpoint="files/private",
-        category='Files'
+    admin.add_view(
+        FileBrowser(
+            app.config['PRIVATE_FOLDER'],
+            '/private/',
+            name='Private Files',
+            endpoint="files/private",
+            category='Files'
+        )
     )
-)
+    admin.init_app(app)
+    return admin
