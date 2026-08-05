@@ -65,6 +65,7 @@ export default defineConfig({
       grep: /@visual/,
       use: {
         ...devices['iPhone 13'],
+        defaultBrowserType: 'chromium',
       },
     },
   ],
