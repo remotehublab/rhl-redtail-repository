@@ -249,6 +249,98 @@ def test_admin_and_error_responses_are_excluded_from_search(
     assert missing.headers["X-Robots-Tag"] == "noindex, noarchive"
 
 
+@pytest.mark.parametrize("path", ["/lessons", "/laboratory_exercise"])
+def test_legacy_exercise_collections_redirect_permanently(client, catalog, path):
+    response = client.get(path)
+
+    assert response.status_code == 301
+    assert response.headers["Location"] == "/laboratory-exercises"
+
+
+def test_legacy_author_and_same_slug_exercise_redirect_permanently(client, catalog):
+    author = client.get(f"/author/{catalog.author.id}")
+    exercise = client.get("/lessons/test-exercise")
+
+    assert author.status_code == 301
+    assert author.headers["Location"] == f"/authors/{catalog.author.id}"
+    assert exercise.status_code == 301
+    assert exercise.headers["Location"] == "/laboratory-exercises/test-exercise"
+
+
+def test_verified_renamed_exercise_and_device_slugs_redirect(client, catalog):
+    catalog.exercise.slug = "stm32-parking-lot-intermediate-level-keil-studio"
+    catalog.device.slug = "stm32-nucleo-wb55rg"
+    db.session.commit()
+
+    exercise = client.get(
+        "/laboratory-exercises/parking-lot-stm32-nucleo-wb55rg-stm32cubemx"
+    )
+    lesson = client.get(
+        "/lessons/parking-lot-stm32-nucleo-wb55rg-stm32cubemx"
+    )
+    device = client.get("/devices/stm32-wb55rg")
+
+    expected_exercise = (
+        "/laboratory-exercises/stm32-parking-lot-intermediate-level-keil-studio"
+    )
+    assert exercise.status_code == 301
+    assert exercise.headers["Location"] == expected_exercise
+    assert lesson.status_code == 301
+    assert lesson.headers["Location"] == expected_exercise
+    assert device.status_code == 301
+    assert device.headers["Location"] == "/devices/stm32-nucleo-wb55rg"
+
+
+def test_legacy_document_urls_redirect_to_stable_slugged_urls(client, catalog):
+    simulation_doc = client.get(
+        f"/simulations/test-simulation/docs/{catalog.simulation_doc.id}.md"
+    )
+    simulation_word = client.get(
+        f"/simulations/test-simulation/docs/{catalog.simulation_doc.id}.docx"
+    )
+    device_doc = client.get(
+        "/simulations/test-simulation/devices/test-board/docs/"
+        f"{catalog.simulation_device_doc.id}.md"
+    )
+    device_word = client.get(
+        "/simulations/test-simulation/devices/test-board/docs/"
+        f"{catalog.simulation_device_doc.id}.docx"
+    )
+
+    expected_simulation = (
+        "/simulations/test-simulation/docs/"
+        f"{catalog.simulation_doc.id}-simulation-guide"
+    )
+    expected_device = (
+        "/simulations/test-simulation/devices/test-board/docs/"
+        f"{catalog.simulation_device_doc.id}-board-guide"
+    )
+    assert simulation_doc.status_code == 301
+    assert simulation_doc.headers["Location"] == f"{expected_simulation}.md"
+    assert simulation_word.status_code == 301
+    assert simulation_word.headers["Location"] == f"{expected_simulation}.docx"
+    assert device_doc.status_code == 301
+    assert device_doc.headers["Location"] == f"{expected_device}.md"
+    assert device_word.status_code == 301
+    assert device_word.headers["Location"] == f"{expected_device}.docx"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/author/99999",
+        "/lessons/unknown-exercise",
+        "/simulations/test-simulation/docs/99999.md",
+        "/simulations/test-simulation/devices/test-board/docs/99999.md",
+    ],
+)
+def test_unknown_legacy_urls_remain_not_found(client, catalog, path):
+    response = client.get(path)
+
+    assert response.status_code == 404
+    assert response.headers["X-Robots-Tag"] == "noindex, noarchive"
+
+
 def test_author_pages_render_empty_populated_and_missing(client, catalog):
     listing = client.get("/authors")
     assert b"Example Author" in listing.data

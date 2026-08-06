@@ -52,10 +52,51 @@ logger = logging.getLogger(__name__)
 
 public_blueprint = Blueprint('public', __name__)
 
+LEGACY_EXERCISE_SLUGS = {
+    "parking-lot-stm32-nucleo-wb55rg-stm32cubemx": (
+        "stm32-parking-lot-intermediate-level-keil-studio"
+    ),
+}
+
+LEGACY_DEVICE_SLUGS = {
+    "stm32-wb55rg": "stm32-nucleo-wb55rg",
+}
+
 
 @public_blueprint.route('/')
 def index():
     return render_template('public/index.html', **page_metadata())
+
+
+@public_blueprint.route('/author/<int:author_id>')
+def legacy_author(author_id):
+    if db.session.get(Author, author_id) is None:
+        abort(404)
+    return redirect(url_for('public.view_author', author_id=author_id), code=301)
+
+
+@public_blueprint.route('/lessons')
+@public_blueprint.route('/laboratory_exercise')
+def legacy_exercise_collection():
+    return redirect(url_for('public.laboratory_exercises'), code=301)
+
+
+@public_blueprint.route('/lessons/<lesson_slug>')
+def legacy_exercise(lesson_slug):
+    current_slug = LEGACY_EXERCISE_SLUGS.get(lesson_slug, lesson_slug)
+    exercise = db.session.query(LaboratoryExercise).filter_by(
+        slug=current_slug,
+        active=True,
+    ).first()
+    if exercise is None:
+        abort(404)
+    return redirect(
+        url_for(
+            'public.laboratory_exercise',
+            laboratory_exercise_slug=exercise.slug,
+        ),
+        code=301,
+    )
 
 
 def _sitemap_lastmod(record):
@@ -540,6 +581,20 @@ def laboratory_exercise(laboratory_exercise_slug):
     ).first()
 
     if not laboratory_exercise:
+        current_slug = LEGACY_EXERCISE_SLUGS.get(laboratory_exercise_slug)
+        if current_slug:
+            current_exercise = db.session.query(LaboratoryExercise).filter_by(
+                slug=current_slug,
+                active=True,
+            ).first()
+            if current_exercise:
+                return redirect(
+                    url_for(
+                        'public.laboratory_exercise',
+                        laboratory_exercise_slug=current_exercise.slug,
+                    ),
+                    code=301,
+                )
         return render_template("public/error.html", message=gettext("Laboratory Exercise not found")), 404
 
     devices_by_id = {device.id: device for device in Device.query.all()}
@@ -793,6 +848,45 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
     )
 
 
+def _legacy_simulation_document_redirect(simulation_slug, doc_id, endpoint):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
+    if simulation is None:
+        abort(404)
+    document = db.session.query(SimulationDoc).filter_by(
+        id=doc_id,
+        simulation_id=simulation.id,
+    ).first()
+    if document is None:
+        abort(404)
+    return redirect(
+        url_for(
+            endpoint,
+            simulation_slug=simulation.slug,
+            doc_id=document.id,
+            title=document.slugified_title,
+        ),
+        code=301,
+    )
+
+
+@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>.md')
+def legacy_simulation_doc_md(simulation_slug, doc_id):
+    return _legacy_simulation_document_redirect(
+        simulation_slug,
+        doc_id,
+        'public.simulation_doc_md',
+    )
+
+
+@public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>.docx')
+def legacy_simulation_doc_word(simulation_slug, doc_id):
+    return _legacy_simulation_document_redirect(
+        simulation_slug,
+        doc_id,
+        'public.simulation_doc_word',
+    )
+
+
 @public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>-<title>.docx')
 def simulation_doc_word(simulation_slug, doc_id: int, title):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
@@ -879,6 +973,59 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
                 name=slugify(doc.name or 'documentation'),
             ),
         ),
+    )
+
+
+def _legacy_simulation_device_document_redirect(
+    simulation_slug,
+    device_slug,
+    doc_id,
+    endpoint,
+):
+    simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
+    device = db.session.query(Device).filter_by(slug=device_slug).first()
+    if simulation is None or device is None:
+        abort(404)
+    document = db.session.query(SimulationDeviceDocument).filter_by(
+        id=doc_id,
+        simulation_id=simulation.id,
+        device_id=device.id,
+    ).first()
+    if document is None:
+        abort(404)
+    return redirect(
+        url_for(
+            endpoint,
+            simulation_slug=simulation.slug,
+            device_slug=device.slug,
+            doc_id=document.id,
+            name=document.slugified_name,
+        ),
+        code=301,
+    )
+
+
+@public_blueprint.route(
+    '/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>.md'
+)
+def legacy_simulation_device_doc_md(simulation_slug, device_slug, doc_id):
+    return _legacy_simulation_device_document_redirect(
+        simulation_slug,
+        device_slug,
+        doc_id,
+        'public.simulation_device_doc_md',
+    )
+
+
+@public_blueprint.route(
+    '/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>.docx'
+)
+def legacy_simulation_device_doc_word(simulation_slug, device_slug, doc_id):
+    return _legacy_simulation_device_document_redirect(
+        simulation_slug,
+        device_slug,
+        doc_id,
+        'public.simulation_device_doc_word',
     )
 
 @public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>-<name>.docx')
@@ -968,6 +1115,16 @@ def device(device_slug):
     ).first()
 
     if not device:
+        current_slug = LEGACY_DEVICE_SLUGS.get(device_slug)
+        if current_slug:
+            current_device = db.session.query(Device).filter_by(
+                slug=current_slug
+            ).first()
+            if current_device:
+                return redirect(
+                    url_for('public.device', device_slug=current_device.slug),
+                    code=301,
+                )
         return render_template("public/error.html", message=gettext("Device not found")), 404
 
     return render_template(
