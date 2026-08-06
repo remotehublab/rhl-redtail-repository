@@ -1,11 +1,13 @@
 import json
 import re
 import struct
+from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
 
 from redtail_repository import db
+from redtail_repository.models import SimulationDeviceDocument, SimulationDoc
 
 
 def _assert_metadata(response, *, title, description, canonical):
@@ -175,6 +177,22 @@ def test_robots_points_to_sitemap_without_blocking_noindex_pages(client):
 
 
 def test_sitemap_lists_only_canonical_indexable_catalog_urls(client, catalog):
+    docs_root = Path(client.application.config["PUBLIC_FOLDER"]) / "docs"
+    (docs_root / "word-only.docx").write_bytes(b"docx")
+    simulation_docx = SimulationDoc(
+        simulation=catalog.simulation,
+        title="Word Only",
+        doc_url="public/docs/word-only.docx",
+    )
+    device_docx = SimulationDeviceDocument(
+        simulation=catalog.simulation,
+        device=catalog.device,
+        name="Word Mapping",
+        doc_url="public/docs/word-only.docx",
+    )
+    db.session.add_all((simulation_docx, device_docx))
+    db.session.commit()
+
     response = client.get("/sitemap.xml")
 
     assert response.status_code == 200
@@ -204,6 +222,8 @@ def test_sitemap_lists_only_canonical_indexable_catalog_urls(client, catalog):
     assert not any("/login" in location for location in locations)
     assert not any("/register" in location for location in locations)
     assert not any("inactive-exercise" in location for location in locations)
+    assert not any(f"docs/{simulation_docx.id}-word-only.md" in location for location in locations)
+    assert not any(f"docs/{device_docx.id}-word-mapping.md" in location for location in locations)
 
     lastmods = {
         element.text

@@ -186,7 +186,7 @@ def sitemap_xml():
         add('public.simulation', simulation_slug=simulation.slug, lastmod=lastmod)
 
         for document in simulation.simulation_documents:
-            if _document_source_available(document.doc_url):
+            if _markdown_document_source_available(document.doc_url):
                 add(
                     'public.simulation_doc_md',
                     simulation_slug=simulation.slug,
@@ -196,7 +196,7 @@ def sitemap_xml():
                 )
 
         for document in simulation.device_documents:
-            if _document_source_available(document.doc_url):
+            if _markdown_document_source_available(document.doc_url):
                 add(
                     'public.simulation_device_doc_md',
                     simulation_slug=simulation.slug,
@@ -1443,6 +1443,15 @@ def _document_source_available(path: str) -> bool:
 
     abs_path = _resolve_local_document_path(path)
     return abs_path is not None and os.path.isfile(abs_path)
+
+
+def _markdown_document_source_available(path: str) -> bool:
+    return bool(
+        path
+        and urlparse(path).path.lower().endswith('.md')
+        and _document_source_available(path)
+    )
+
 
 def _get_md(path: str):
     # Ensure it ends with .md
