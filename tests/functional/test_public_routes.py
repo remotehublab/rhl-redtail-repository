@@ -309,3 +309,13 @@ def test_footer_contact_link_is_sitewide(client, catalog, path):
     body = client.get(path).data.decode()
     assert f'href="{INSTRUCTOR_MAILTO}"' in body
     assert "https://rhlab.ece.uw.edu/join-us/" not in body
+    assert (
+        "href='https://rhlab.ece.uw.edu/' target='_blank' rel='noopener noreferrer'"
+        in body
+    )
+    assert (
+        "href='https://labsland.com/' target='_blank' rel='noopener noreferrer'"
+        in body
+    )
+    assert "Developed by" in body
+    assert "RHLab at the University of Washington" in body

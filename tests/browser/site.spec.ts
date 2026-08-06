@@ -138,6 +138,16 @@ test('homepage and footer expose the instructor contact path', async ({ page }) 
     page.locator('footer').getByRole('link', { name: 'Contact', exact: true }),
   ).toHaveAttribute('href', instructorMailto);
 
+  for (const [name, href] of [
+    ['RHLab at the University of Washington', 'https://rhlab.ece.uw.edu/'],
+    ['LabsLand', 'https://labsland.com/'],
+  ] as const) {
+    const partnerLink = page.locator('footer').getByRole('link', { name, exact: true });
+    await expect(partnerLink).toHaveAttribute('href', href);
+    await expect(partnerLink).toHaveAttribute('target', '_blank');
+    await expect(partnerLink).toHaveAttribute('rel', 'noopener noreferrer');
+  }
+
   await expect(
     page.getByRole('navigation', { name: 'On this page' })
       .getByRole('link', { name: 'Work with us', exact: true }),

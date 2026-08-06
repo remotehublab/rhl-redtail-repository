@@ -1211,6 +1211,30 @@ hr {
   max-width: 24rem;
 }
 
+.footer-brand .footer-partners {
+  color: #b9b0cc;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  margin-top: 1rem;
+  max-width: 32rem;
+}
+
+.footer-partners a {
+  color: var(--rt-gold-light);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: rgba(183, 165, 122, 0.65);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.footer-partners a:hover,
+.footer-partners a:focus {
+  color: var(--rt-white);
+  text-decoration-color: var(--rt-gold);
+}
+
 .footer-links {
   display: flex;
   flex-wrap: wrap;

@@ -1,5 +1,7 @@
 # RHL-Redtail-Repository
 
+REDTAIL is an open-source repository of simulations, digital twins, and teaching materials for remote laboratory learning, developed by [RHLab at the University of Washington](https://rhlab.ece.uw.edu/) with [LabsLand](https://labsland.com/).
+
 ## Software Setup
 - Install MySQL: [Download Link](https://www.mysql.com/downloads/)
   - The enterprise edition is free
@@ -156,4 +158,3 @@ FLASK_APP=autoapp FLASK_CONFIG=testing flask db upgrade head
 GitHub Actions runs Python 3.10 compatibility, Python 3.12 coverage, MySQL 8
 migrations/integration, cross-browser flows, WCAG A/AA scans, and desktop/mobile
 visual regression as separate required-check candidates.
-
