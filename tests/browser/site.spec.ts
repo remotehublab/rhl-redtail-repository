@@ -163,11 +163,18 @@ for (const [name, url] of [
         naturalRatio: element.naturalWidth / element.naturalHeight,
         renderedRatio: bounds.width / bounds.height,
         renderedWidth: bounds.width,
+        widthAttribute: element.getAttribute('width'),
+        heightAttribute: element.getAttribute('height'),
+        objectFit: getComputedStyle(element).objectFit,
       };
     });
 
     expect(dimensions.renderedWidth).toBeLessThanOrEqual(200);
-    expect(dimensions.renderedRatio).toBeCloseTo(dimensions.naturalRatio, 2);
+    expect(dimensions.naturalRatio).toBeGreaterThan(0);
+    expect(dimensions.renderedRatio).toBeCloseTo(1, 2);
+    expect(dimensions.widthAttribute).toBe('200');
+    expect(dimensions.heightAttribute).toBe('200');
+    expect(dimensions.objectFit).toBe('contain');
     expect(errors).toEqual([]);
   });
 }
