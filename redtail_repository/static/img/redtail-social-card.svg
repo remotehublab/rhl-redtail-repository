@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">REDTAIL remote laboratory learning</title>
+  <desc id="description">A University of Washington purple and gold REDTAIL social sharing card connecting a digital simulation to real hardware.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b1b4d"/>
+      <stop offset="1" stop-color="#4b2e83"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#f5e9c7" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="8" fill="#b7a57a"/>
+
+  <g transform="translate(72 70)">
+    <text fill="#f5e9c7" font-family="Georgia, serif" font-size="64" font-weight="700" letter-spacing="7">REDTAIL</text>
+    <text y="54" fill="#d9d1e8" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">REMOTE EDUCATION · REAL HARDWARE</text>
+
+    <line x1="0" y1="108" x2="84" y2="108" stroke="#b7a57a" stroke-width="3"/>
+    <text y="174" fill="#ffffff" font-family="Georgia, serif" font-size="48" font-weight="700">Simulation to</text>
+    <text y="231" fill="#ffffff" font-family="Georgia, serif" font-size="48" font-weight="700">real hardware.</text>
+    <text y="285" fill="#d9d1e8" font-family="Arial, sans-serif" font-size="23">Open simulations, digital twins, and teaching materials</text>
+    <text y="319" fill="#d9d1e8" font-family="Arial, sans-serif" font-size="23">for remote laboratory learning.</text>
+
+    <text y="433" fill="#f5e9c7" font-family="Arial, sans-serif" font-size="18" font-weight="700">RHLAB · UNIVERSITY OF WASHINGTON · LABSLAND</text>
+  </g>
+
+  <g transform="translate(785 92)" fill="none">
+    <circle cx="150" cy="210" r="178" stroke="#b7a57a" stroke-opacity="0.35" stroke-width="2" stroke-dasharray="9 10"/>
+    <circle cx="150" cy="210" r="129" stroke="#f5e9c7" stroke-opacity="0.18" stroke-width="1"/>
+
+    <rect x="34" y="145" width="232" height="146" rx="20" fill="#2b1b4d" stroke="#f5e9c7" stroke-width="3"/>
+    <rect x="65" y="174" width="94" height="88" rx="8" stroke="#b7a57a" stroke-width="2"/>
+    <path d="M88 218h48M112 194v48" stroke="#f5e9c7" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="211" cy="205" r="12" fill="#b7a57a" stroke="none"/>
+    <circle cx="235" cy="237" r="12" fill="#f5e9c7" stroke="none"/>
+
+    <path d="M150 115V74H300V127" stroke="#b7a57a" stroke-width="3"/>
+    <path d="M150 291v55H0v-53" stroke="#b7a57a" stroke-width="3"/>
+    <circle cx="300" cy="127" r="9" fill="#f5e9c7" stroke="none"/>
+    <circle cx="0" cy="293" r="9" fill="#f5e9c7" stroke="none"/>
+
+    <rect x="271" y="128" width="90" height="82" rx="8" fill="#4b2e83" stroke="#f5e9c7" stroke-width="2"/>
+    <path d="M286 151h60M286 168h42M286 185h52" stroke="#b7a57a" stroke-width="4"/>
+
+    <rect x="-53" y="250" width="112" height="90" rx="8" fill="#4b2e83" stroke="#f5e9c7" stroke-width="2"/>
+    <path d="M-31 277h68M-31 296h68M-31 315h42" stroke="#b7a57a" stroke-width="4"/>
+
+    <text x="150" y="397" text-anchor="middle" fill="#f5e9c7" stroke="none" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="3">CONNECTED LAB</text>
+  </g>
+</svg>

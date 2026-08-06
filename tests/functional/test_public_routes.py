@@ -1,3 +1,6 @@
+import json
+import re
+import struct
 from xml.etree import ElementTree
 
 import pytest
@@ -10,6 +13,16 @@ def _assert_metadata(response, *, title, description, canonical):
     assert f"<title>{title}</title>" in html
     assert f'<meta name="description" content="{description}">' in html
     assert f'<link rel="canonical" href="{canonical}">' in html
+
+
+def _structured_data(response):
+    match = re.search(
+        r'<script type="application/ld\+json">(.*?)</script>',
+        response.get_data(as_text=True),
+        flags=re.DOTALL,
+    )
+    assert match is not None
+    return json.loads(match.group(1))
 
 
 @pytest.mark.parametrize(
@@ -339,6 +352,93 @@ def test_unknown_legacy_urls_remain_not_found(client, catalog, path):
 
     assert response.status_code == 404
     assert response.headers["X-Robots-Tag"] == "noindex, noarchive"
+
+
+def test_homepage_social_metadata_and_organization_schema(client, catalog):
+    response = client.get("/")
+    html = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert '<meta property="og:site_name" content="REDTAIL">' in html
+    assert '<meta property="og:type" content="website">' in html
+    assert (
+        '<meta property="og:image" content="https://redtail.example.test/static/img/'
+        'redtail-social-card.png">'
+    ) in html
+    assert '<meta name="twitter:card" content="summary_large_image">' in html
+
+    graph = _structured_data(response)["@graph"]
+    assert {node["@type"] for node in graph} == {
+        "ResearchOrganization",
+        "WebSite",
+    }
+    organization = next(
+        node for node in graph if node["@type"] == "ResearchOrganization"
+    )
+    assert organization["name"] == "Remote Hub Lab"
+    assert organization["parentOrganization"]["name"] == "University of Washington"
+    assert organization["logo"] == (
+        "https://redtail.example.test/static/img/remote_hub_lab.png"
+    )
+
+
+def test_detail_social_image_breadcrumbs_and_learning_resource_schema(client, catalog):
+    response = client.get("/laboratory-exercises/test-exercise")
+    html = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert '<meta property="og:type" content="article">' in html
+    assert (
+        '<meta property="og:image" content="https://redtail.example.test/static/img/'
+        'NES.png">'
+    ) in html
+    assert (
+        '<meta property="og:image:alt" content="Test Exercise laboratory exercise">'
+    ) in html
+
+    graph = _structured_data(response)["@graph"]
+    breadcrumb = next(node for node in graph if node["@type"] == "BreadcrumbList")
+    resource = next(node for node in graph if node["@type"] == "LearningResource")
+
+    assert [item["name"] for item in breadcrumb["itemListElement"]] == [
+        "Home",
+        "Laboratory Exercises",
+        "Test Exercise",
+    ]
+    assert resource["learningResourceType"] == "Laboratory exercise"
+    assert resource["educationalLevel"] == ["Introductory"]
+    assert resource["teaches"] == "Learn deterministic testing."
+    assert resource["author"][0]["name"] == "Example Author"
+    assert all(node.get("@type") != "Course" for node in graph)
+
+
+def test_author_and_simulation_structured_data_match_page_entities(client, catalog):
+    author = client.get(f"/authors/{catalog.author.id}")
+    simulation = client.get("/simulations/test-simulation")
+
+    author_graph = _structured_data(author)["@graph"]
+    person = next(node for node in author_graph if node["@type"] == "Person")
+    assert person["name"] == "Example Author"
+    assert person["sameAs"] == "https://example.test/author"
+
+    simulation_graph = _structured_data(simulation)["@graph"]
+    resource = next(
+        node for node in simulation_graph if node["@type"] == "LearningResource"
+    )
+    assert resource["learningResourceType"] == "Simulation"
+    assert resource["url"] == (
+        "https://redtail.example.test/simulations/test-simulation"
+    )
+
+
+def test_social_card_is_a_1200_by_630_png(client):
+    response = client.get("/static/img/redtail-social-card.png")
+
+    assert response.status_code == 200
+    assert response.content_type == "image/png"
+    assert response.data.startswith(b"\x89PNG\r\n\x1a\n")
+    width, height = struct.unpack(">II", response.data[16:24])
+    assert (width, height) == (1200, 630)
 
 
 def test_author_pages_render_empty_populated_and_missing(client, catalog):

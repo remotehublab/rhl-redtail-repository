@@ -46,7 +46,15 @@ from redtail_repository.models import (
     SimulationDeviceDocument,
     SimulationDoc,
 )
-from redtail_repository.seo import absolute_public_url, page_metadata
+from redtail_repository.seo import (
+    absolute_public_url,
+    breadcrumb_schema,
+    learning_resource_schema,
+    page_metadata,
+    research_organization_schema,
+    schema_graph,
+    website_schema,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +73,15 @@ LEGACY_DEVICE_SLUGS = {
 
 @public_blueprint.route('/')
 def index():
-    return render_template('public/index.html', **page_metadata())
+    return render_template(
+        'public/index.html',
+        **page_metadata(
+            structured_data=schema_graph(
+                research_organization_schema(),
+                website_schema(),
+            )
+        ),
+    )
 
 
 @public_blueprint.route('/author/<int:author_id>')
@@ -229,6 +245,23 @@ def view_author(author_id):
             description=(
                 f"Explore REDTAIL laboratory exercises and simulations contributed by "
                 f"{author.name}."
+            ),
+            social_type="profile",
+            structured_data=schema_graph(
+                breadcrumb_schema(
+                    (
+                        ("Home", url_for('public.index')),
+                        ("Authors", url_for('public.authors')),
+                        (author.name, url_for('public.view_author', author_id=author.id)),
+                    )
+                ),
+                {
+                    "@type": "Person",
+                    "@id": f"{absolute_public_url(request.path)}#person",
+                    "name": author.name,
+                    "url": absolute_public_url(request.path),
+                    **({"sameAs": author.link} if author.link else {}),
+                },
             ),
         ),
     )
@@ -635,6 +668,41 @@ def laboratory_exercise(laboratory_exercise_slug):
         **page_metadata(
             title=f"{laboratory_exercise.name} | REDTAIL Laboratory Exercise",
             description=laboratory_exercise.short_description,
+            image_url=laboratory_exercise.cover_image_url,
+            image_alt=f"{laboratory_exercise.name} laboratory exercise",
+            social_type="article",
+            structured_data=schema_graph(
+                breadcrumb_schema(
+                    (
+                        ("Home", url_for('public.index')),
+                        (
+                            "Laboratory Exercises",
+                            url_for('public.laboratory_exercises'),
+                        ),
+                        (
+                            laboratory_exercise.name,
+                            url_for(
+                                'public.laboratory_exercise',
+                                laboratory_exercise_slug=laboratory_exercise.slug,
+                            ),
+                        ),
+                    )
+                ),
+                learning_resource_schema(
+                    name=laboratory_exercise.name,
+                    description=laboratory_exercise.short_description,
+                    path=url_for(
+                        'public.laboratory_exercise',
+                        laboratory_exercise_slug=laboratory_exercise.slug,
+                    ),
+                    image_url=laboratory_exercise.cover_image_url,
+                    resource_type="Laboratory exercise",
+                    authors=laboratory_exercise.authors,
+                    date_modified=laboratory_exercise.last_updated,
+                    educational_levels=(level.name for level in laboratory_exercise.levels),
+                    teaches=laboratory_exercise.learning_goals,
+                ),
+            ),
         ),
     )
 
@@ -778,6 +846,36 @@ def simulation(simulation_slug):
         **page_metadata(
             title=f"{simulation.name} | Remote Laboratory Simulation | REDTAIL",
             description=simulation.description,
+            image_url=simulation.cover_image_url,
+            image_alt=f"{simulation.name} remote laboratory simulation",
+            social_type="article",
+            structured_data=schema_graph(
+                breadcrumb_schema(
+                    (
+                        ("Home", url_for('public.index')),
+                        ("Simulations", url_for('public.simulations')),
+                        (
+                            simulation.name,
+                            url_for(
+                                'public.simulation',
+                                simulation_slug=simulation.slug,
+                            ),
+                        ),
+                    )
+                ),
+                learning_resource_schema(
+                    name=simulation.name,
+                    description=simulation.description,
+                    path=url_for(
+                        'public.simulation',
+                        simulation_slug=simulation.slug,
+                    ),
+                    image_url=simulation.cover_image_url,
+                    resource_type="Simulation",
+                    authors=simulation.authors,
+                    date_modified=simulation.last_updated,
+                ),
+            ),
         ),
     )
 
@@ -843,6 +941,33 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
                 simulation_slug=simulation.slug,
                 doc_id=doc.id,
                 title=slugify(doc.title or 'documentation'),
+            ),
+            image_url=simulation.cover_image_url,
+            image_alt=f"{simulation.name} simulation documentation",
+            social_type="article",
+            structured_data=schema_graph(
+                breadcrumb_schema(
+                    (
+                        ("Home", url_for('public.index')),
+                        ("Simulations", url_for('public.simulations')),
+                        (
+                            simulation.name,
+                            url_for(
+                                'public.simulation',
+                                simulation_slug=simulation.slug,
+                            ),
+                        ),
+                        (
+                            doc.title,
+                            url_for(
+                                'public.simulation_doc_md',
+                                simulation_slug=simulation.slug,
+                                doc_id=doc.id,
+                                title=slugify(doc.title or 'documentation'),
+                            ),
+                        ),
+                    )
+                )
             ),
         ),
     )
@@ -971,6 +1096,34 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
                 device_slug=device.slug,
                 doc_id=doc.id,
                 name=slugify(doc.name or 'documentation'),
+            ),
+            image_url=simulation.cover_image_url,
+            image_alt=f"{simulation.name} simulation documentation for {device.name}",
+            social_type="article",
+            structured_data=schema_graph(
+                breadcrumb_schema(
+                    (
+                        ("Home", url_for('public.index')),
+                        ("Simulations", url_for('public.simulations')),
+                        (
+                            simulation.name,
+                            url_for(
+                                'public.simulation',
+                                simulation_slug=simulation.slug,
+                            ),
+                        ),
+                        (
+                            doc.name,
+                            url_for(
+                                'public.simulation_device_doc_md',
+                                simulation_slug=simulation.slug,
+                                device_slug=device.slug,
+                                doc_id=doc.id,
+                                name=slugify(doc.name or 'documentation'),
+                            ),
+                        ),
+                    )
+                )
             ),
         ),
     )
@@ -1137,6 +1290,21 @@ def device(device_slug):
         **page_metadata(
             title=f"{device.name} Remote Laboratory Device | REDTAIL",
             description=device.description,
+            image_url=device.cover_image_url,
+            image_alt=f"{device.name} remote laboratory device",
+            social_type="article",
+            structured_data=schema_graph(
+                breadcrumb_schema(
+                    (
+                        ("Home", url_for('public.index')),
+                        ("Devices", url_for('public.devices')),
+                        (
+                            device.name,
+                            url_for('public.device', device_slug=device.slug),
+                        ),
+                    )
+                )
+            ),
         ),
     )
 
