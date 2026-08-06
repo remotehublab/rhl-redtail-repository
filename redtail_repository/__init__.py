@@ -66,6 +66,15 @@ def create_app(
     app.register_blueprint(public_blueprint, url_prefix='/')
     app.register_blueprint(login_blueprint, url_prefix='/')
 
+    from .seo import robots_directive
+
+    @app.after_request
+    def apply_search_indexing_policy(response):
+        directive = robots_directive(response.status_code)
+        if directive:
+            response.headers.setdefault("X-Robots-Tag", directive)
+        return response
+
     def _list_languages() -> Dict[str, str]:
         global SUPPORTED_LANGUAGES                                                  
         if SUPPORTED_LANGUAGES is None:
@@ -82,8 +91,12 @@ def create_app(
         return SUPPORTED_LANGUAGES
         
     @app.context_processor
-    def inject_vars():  
-        return dict(list_languages=_list_languages, locale=get_locale())
+    def inject_vars():
+        return dict(
+            list_languages=_list_languages,
+            locale=get_locale(),
+            seo_robots=robots_directive(),
+        )
 
     return app
 

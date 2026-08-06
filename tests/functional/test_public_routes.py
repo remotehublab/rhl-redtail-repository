@@ -199,6 +199,56 @@ def test_sitemap_lists_only_canonical_indexable_catalog_urls(client, catalog):
     assert "2024-01-15" in lastmods
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/laboratory-exercises?category=fundamentals",
+        "/simulations?category=digital-twin",
+        "/devices?framework=native",
+        "/login",
+        "/register",
+        "/docs/markdown-viewer/public/docs/simulation.md",
+    ],
+)
+def test_filtered_and_account_pages_are_noindex_follow(client, catalog, path):
+    response = client.get(path)
+
+    assert response.status_code == 200
+    assert response.headers["X-Robots-Tag"] == "noindex, follow"
+    assert b'<meta name="robots" content="noindex, follow">' in response.data
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/",
+        "/laboratory-exercises",
+        "/simulations",
+        "/devices",
+        "/simulations/test-simulation",
+    ],
+)
+def test_primary_public_pages_remain_indexable(client, catalog, path):
+    response = client.get(path)
+
+    assert response.status_code == 200
+    assert "X-Robots-Tag" not in response.headers
+    assert b'<meta name="robots"' not in response.data
+
+
+def test_admin_and_error_responses_are_excluded_from_search(
+    client, catalog, login_as
+):
+    login_as("admin-user")
+    admin = client.get("/admin/")
+    assert admin.status_code == 200
+    assert admin.headers["X-Robots-Tag"] == "noindex, nofollow"
+
+    missing = client.get("/missing-page")
+    assert missing.status_code == 404
+    assert missing.headers["X-Robots-Tag"] == "noindex, noarchive"
+
+
 def test_author_pages_render_empty_populated_and_missing(client, catalog):
     listing = client.get("/authors")
     assert b"Example Author" in listing.data
