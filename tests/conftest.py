@@ -21,6 +21,7 @@ def app(tmp_path: Path):
             "PRIVATE_FOLDER": str(private_folder),
             "UPLOAD_FOLDER": str(upload_folder),
             "KNOWN_DOMAINS": ("docs.example.test",),
+            "PUBLIC_BASE_URL": "https://redtail.example.test",
         },
     )
 

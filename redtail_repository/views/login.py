@@ -10,6 +10,7 @@ from wtforms.validators import DataRequired, EqualTo, Length
 
 from redtail_repository import db, login_manager
 from redtail_repository.models import User
+from redtail_repository.seo import page_metadata
 
 
 def is_safe_local_redirect(target: Optional[str]) -> bool:
@@ -56,7 +57,14 @@ def login():
         form.username.errors.append(lazy_gettext('Invalid username or password'))
         form.password.errors.append(lazy_gettext('Invalid username or password'))
 
-    return render_template('login/login.html', form=form)
+    return render_template(
+        'login/login.html',
+        form=form,
+        **page_metadata(
+            title="Log in | REDTAIL",
+            description="Log in to access the REDTAIL features available to your account.",
+        ),
+    )
 
 # Check state once logged in and allow for a logout button
 @login_blueprint.route('/logout')
@@ -108,4 +116,11 @@ def register():
 
         return redirect(url_for('public.index'))
 
-    return render_template('login/register.html', form=form)
+    return render_template(
+        'login/register.html',
+        form=form,
+        **page_metadata(
+            title="Register | REDTAIL",
+            description="Create a REDTAIL account to access remote laboratory resources.",
+        ),
+    )

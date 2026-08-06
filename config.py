@@ -16,6 +16,10 @@ class Config:
         for domain in (os.environ.get('KNOWN_DOMAINS') or 'redtail.rhlab.ece.uw.edu').split(',')
         if domain.strip()
     )
+    PUBLIC_BASE_URL = (
+        os.environ.get('REDTAIL_PUBLIC_BASE_URL')
+        or 'https://redtail.rhlab.ece.uw.edu'
+    ).rstrip('/')
     SERVE_PUBLIC_FILES = False
 
 class DevelopmentConfig(Config):

@@ -2,12 +2,15 @@
 <html lang="{{ locale or 'en' }}" class="h-100">
 
 <head>
+  {% set page_title = seo_title or title or "REDTAIL | Remote Laboratory Simulations and Teaching Materials" %}
+  {% set page_description = seo_description or "Explore REDTAIL simulations, digital twins, and teaching materials connected to real remote laboratory hardware." %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#4B2E83">
-  <meta name="description" content="REDTAIL connects simulations and digital twins with real remote laboratory hardware.">
+  <meta name="description" content="{{ page_description }}">
+  <link rel="canonical" href="{{ canonical_url }}">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/remote_hub_lab.png') }}">
-  <title>{{ title or "REDTAIL — Remote laboratories, made tangible" }}</title>
+  <title>{{ page_title }}</title>
   {% assets 'bootstrap_css' %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
   {% endassets %}

@@ -45,6 +45,7 @@ from redtail_repository.models import (
     SimulationDeviceDocument,
     SimulationDoc,
 )
+from redtail_repository.seo import page_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ public_blueprint = Blueprint('public', __name__)
 
 @public_blueprint.route('/')
 def index():
-    return render_template('public/index.html')
+    return render_template('public/index.html', **page_metadata())
 
 # This should be at app level, and if the template makes calls like url_for('.lessons') it will fail. Let's talk about this in the next meeting
 # @public_blueprint.app_errorhandler(404)
@@ -69,12 +70,32 @@ def view_author(author_id):
     if not author:
         return render_template("public/error.html", message=gettext("Author not found")), 404
 
-    return render_template("public/author.html", author=author)
+    return render_template(
+        "public/author.html",
+        author=author,
+        **page_metadata(
+            title=f"{author.name} | REDTAIL Author",
+            description=(
+                f"Explore REDTAIL laboratory exercises and simulations contributed by "
+                f"{author.name}."
+            ),
+        ),
+    )
 
 @public_blueprint.route('/authors')
 def authors():
     all_authors = db.session.query(Author).all()
-    return render_template('public/authors.html', authors=all_authors)
+    return render_template(
+        'public/authors.html',
+        authors=all_authors,
+        **page_metadata(
+            title="Authors and Contributors | REDTAIL",
+            description=(
+                "Meet the researchers and contributors creating REDTAIL remote laboratory "
+                "simulations and teaching materials."
+            ),
+        ),
+    )
 
 def admin_required(f):
     @wraps(f)
@@ -93,6 +114,11 @@ def admin_required(f):
 @public_blueprint.route('/file_submission', methods=['GET', 'POST'])
 @admin_required
 def file_submission():
+    seo_title = "Submit Teaching Materials | REDTAIL"
+    seo_description = (
+        "Submit and manage REDTAIL remote laboratory teaching materials."
+    )
+    canonical_url = page_metadata()["canonical_url"]
     exercises = db.session.query(LaboratoryExercise).filter_by(active=True).all()
     simulations = db.session.query(Simulation).all()
     authors = db.session.query(Author).all()
@@ -380,7 +406,15 @@ def laboratory_exercises():
         all_frameworks=all_frameworks,
         selected_category=category_slug,
         selected_level=level_slug,
-        selected_framework=framework_slug
+        selected_framework=framework_slug,
+        **page_metadata(
+            title="Remote Laboratory Exercises | REDTAIL",
+            description=(
+                "Browse classroom-ready remote laboratory exercises, lessons, and teaching "
+                "materials connected to real hardware."
+            ),
+            canonical_path=url_for('public.laboratory_exercises'),
+        ),
     )
 
 @public_blueprint.route('/laboratory-exercises/<laboratory_exercise_slug>')
@@ -433,6 +467,10 @@ def laboratory_exercise(laboratory_exercise_slug):
         devices=devices,
         learning_goals=laboratory_exercise.learning_goals,
         levels=laboratory_exercise.levels,
+        **page_metadata(
+            title=f"{laboratory_exercise.name} | REDTAIL Laboratory Exercise",
+            description=laboratory_exercise.short_description,
+        ),
     )
 
 @public_blueprint.route('/simulations')
@@ -504,7 +542,15 @@ def simulations():
         all_frameworks=all_frameworks,
         selected_device=device_id,
         selected_category=category_slug,
-        selected_framework=framework_slug
+        selected_framework=framework_slug,
+        **page_metadata(
+            title="Remote Laboratory Simulations and Digital Twins | REDTAIL",
+            description=(
+                "Explore REDTAIL simulations and digital twins connected to remotely "
+                "accessible laboratory hardware."
+            ),
+            canonical_path=url_for('public.simulations'),
+        ),
     )
 
 @public_blueprint.route('/simulations/<simulation_slug>')
@@ -563,7 +609,11 @@ def simulation(simulation_slug):
             document
             for document in simulation.simulation_documents
             if _document_source_available(document.doc_url)
-        ]
+        ],
+        **page_metadata(
+            title=f"{simulation.name} | Remote Laboratory Simulation | REDTAIL",
+            description=simulation.description,
+        ),
     )
 
 @public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>-<title>.md')
@@ -613,8 +663,24 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
     if not isinstance(response, str):
         return response
 
-    return render_template("public/simulation_md.html", simulation=simulation, doc=doc, html_content=response,
-        categories=simulation.simulation_categories, devices=devices)
+    return render_template(
+        "public/simulation_md.html",
+        simulation=simulation,
+        doc=doc,
+        html_content=response,
+        categories=simulation.simulation_categories,
+        devices=devices,
+        **page_metadata(
+            title=f"{doc.title} — {simulation.name} | REDTAIL",
+            description=doc.description or f"Documentation for the {simulation.name} simulation.",
+            canonical_path=url_for(
+                'public.simulation_doc_md',
+                simulation_slug=simulation.slug,
+                doc_id=doc.id,
+                title=slugify(doc.title or 'documentation'),
+            ),
+        ),
+    )
 
 
 @public_blueprint.route('/simulations/<simulation_slug>/docs/<int:doc_id>-<title>.docx')
@@ -682,8 +748,28 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
     if not isinstance(response, str):
         return response
 
-    return render_template("public/simulation_device_md.html", simulation=simulation, device=device, doc=doc, html_content=response,
-            categories=simulation.simulation_categories, devices=devices)
+    return render_template(
+        "public/simulation_device_md.html",
+        simulation=simulation,
+        device=device,
+        doc=doc,
+        html_content=response,
+        categories=simulation.simulation_categories,
+        devices=devices,
+        **page_metadata(
+            title=f"{doc.name} — {simulation.name} | REDTAIL",
+            description=(
+                f"{device.name} mapping and documentation for the {simulation.name} simulation."
+            ),
+            canonical_path=url_for(
+                'public.simulation_device_doc_md',
+                simulation_slug=simulation.slug,
+                device_slug=device.slug,
+                doc_id=doc.id,
+                name=slugify(doc.name or 'documentation'),
+            ),
+        ),
+    )
 
 @public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>-<name>.docx')
 def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: int, name):
@@ -750,7 +836,15 @@ def devices():
         all_device_categories=all_device_categories,
         all_frameworks=all_frameworks,
         selected_device_category=device_category_id,
-        selected_framework=framework_slug
+        selected_framework=framework_slug,
+        **page_metadata(
+            title="Remote Laboratory Hardware and Devices | REDTAIL",
+            description=(
+                "Browse real laboratory hardware supported by REDTAIL simulations and "
+                "teaching materials."
+            ),
+            canonical_path=url_for('public.devices'),
+        ),
     )
 
 
@@ -772,7 +866,11 @@ def device(device_slug):
         documents=device.device_documents,
         simulations=device.simulations,
         categories=device.device_categories,
-        frameworks=device.device_frameworks
+        frameworks=device.device_frameworks,
+        **page_metadata(
+            title=f"{device.name} Remote Laboratory Device | REDTAIL",
+            description=device.description,
+        ),
     )
 
 @public_blueprint.route('/docs/markdown-viewer/<path:path>')
@@ -780,7 +878,15 @@ def md_viewer(path):
     response = _get_html(path)
     if not isinstance(response, str):
         return response
-    return render_template("public/markdown-viewer.html", html_content=response, path=path)
+    return render_template(
+        "public/markdown-viewer.html",
+        html_content=response,
+        path=path,
+        **page_metadata(
+            title="REDTAIL Documentation",
+            description="View REDTAIL remote laboratory documentation.",
+        ),
+    )
 
 @public_blueprint.route('/docs/word-converter/<path:path>')
 def word_converter(path):

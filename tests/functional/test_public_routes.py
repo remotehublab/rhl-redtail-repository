@@ -3,6 +3,13 @@ import pytest
 from redtail_repository import db
 
 
+def _assert_metadata(response, *, title, description, canonical):
+    html = response.get_data(as_text=True)
+    assert f"<title>{title}</title>" in html
+    assert f'<meta name="description" content="{description}">' in html
+    assert f'<link rel="canonical" href="{canonical}">' in html
+
+
 @pytest.mark.parametrize(
     "path",
     [
@@ -19,6 +26,123 @@ def test_public_collection_pages_render(client, catalog, path):
     response = client.get(path)
     assert response.status_code == 200
     assert b"REDTAIL" in response.data
+
+
+@pytest.mark.parametrize(
+    ("path", "title", "description", "canonical"),
+    [
+        (
+            "/",
+            "REDTAIL | Remote Laboratory Simulations and Teaching Materials",
+            "Explore REDTAIL simulations, digital twins, and teaching materials connected "
+            "to real remote laboratory hardware.",
+            "https://redtail.example.test/",
+        ),
+        (
+            "/laboratory-exercises?category=fundamentals",
+            "Remote Laboratory Exercises | REDTAIL",
+            "Browse classroom-ready remote laboratory exercises, lessons, and teaching "
+            "materials connected to real hardware.",
+            "https://redtail.example.test/laboratory-exercises",
+        ),
+        (
+            "/simulations?category=digital-twin",
+            "Remote Laboratory Simulations and Digital Twins | REDTAIL",
+            "Explore REDTAIL simulations and digital twins connected to remotely accessible "
+            "laboratory hardware.",
+            "https://redtail.example.test/simulations",
+        ),
+        (
+            "/devices?framework=native",
+            "Remote Laboratory Hardware and Devices | REDTAIL",
+            "Browse real laboratory hardware supported by REDTAIL simulations and teaching "
+            "materials.",
+            "https://redtail.example.test/devices",
+        ),
+        (
+            "/login?next=/devices",
+            "Log in | REDTAIL",
+            "Log in to access the REDTAIL features available to your account.",
+            "https://redtail.example.test/login",
+        ),
+        (
+            "/register",
+            "Register | REDTAIL",
+            "Create a REDTAIL account to access remote laboratory resources.",
+            "https://redtail.example.test/register",
+        ),
+    ],
+)
+def test_page_specific_collection_and_account_metadata(
+    client, catalog, path, title, description, canonical
+):
+    response = client.get(path)
+    assert response.status_code == 200
+    _assert_metadata(
+        response,
+        title=title,
+        description=description,
+        canonical=canonical,
+    )
+
+
+@pytest.mark.parametrize(
+    ("path", "title", "description", "canonical"),
+    [
+        (
+            "/laboratory-exercises/test-exercise",
+            "Test Exercise | REDTAIL Laboratory Exercise",
+            "A deterministic laboratory exercise.",
+            "https://redtail.example.test/laboratory-exercises/test-exercise",
+        ),
+        (
+            "/simulations/test-simulation",
+            "Test Simulation | Remote Laboratory Simulation | REDTAIL",
+            "A deterministic simulation.",
+            "https://redtail.example.test/simulations/test-simulation",
+        ),
+        (
+            "/devices/test-board",
+            "Test Board Remote Laboratory Device | REDTAIL",
+            "A deterministic test device.",
+            "https://redtail.example.test/devices/test-board",
+        ),
+        (
+            "/authors/1",
+            "Example Author | REDTAIL Author",
+            "Explore REDTAIL laboratory exercises and simulations contributed by Example Author.",
+            "https://redtail.example.test/authors/1",
+        ),
+    ],
+)
+def test_page_specific_detail_metadata(
+    client, catalog, path, title, description, canonical
+):
+    response = client.get(path)
+    assert response.status_code == 200
+    _assert_metadata(
+        response,
+        title=title,
+        description=description,
+        canonical=canonical,
+    )
+
+
+def test_document_canonical_uses_stable_title_slug(client, catalog):
+    response = client.get(
+        f"/simulations/test-simulation/docs/{catalog.simulation_doc.id}-arbitrary.md"
+    )
+
+    assert response.status_code == 200
+    _assert_metadata(
+        response,
+        title="Simulation Guide — Test Simulation | REDTAIL",
+        description="Simulation documentation",
+        canonical=(
+            "https://redtail.example.test/simulations/test-simulation/docs/"
+            f"{catalog.simulation_doc.id}-simulation-guide.md"
+        ),
+    )
 
 
 def test_author_pages_render_empty_populated_and_missing(client, catalog):
