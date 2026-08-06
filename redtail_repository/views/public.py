@@ -17,6 +17,7 @@ from flask import (
     current_app,
     flash,
     has_app_context,
+    make_response,
     redirect,
     render_template,
     request,
@@ -515,22 +516,10 @@ def replace_document(doc_type, doc_id):
 
 @public_blueprint.route('/uploads/<path:filename>')
 def serve_uploads(filename):
-    normalized_url = f"/uploads/{filename.lstrip('/')}"
-    solution = (
-        db.session.query(LaboratoryExerciseDoc.id)
-        .filter(
-            LaboratoryExerciseDoc.is_solution.is_(True),
-            LaboratoryExerciseDoc.doc_url.in_(
-                (normalized_url, normalized_url.removeprefix('/'))
-            ),
-        )
-        .first()
-    )
-    can_access_solutions = current_user.is_authenticated and (
-        getattr(current_user, 'verified', False)
-        or getattr(current_user, 'role', None) == 'admin'
-    )
-    if solution is not None and not can_access_solutions:
+    if (
+        _is_solution_document_path(f"/uploads/{filename}")
+        and not _current_user_can_access_solutions()
+    ):
         abort(404)
 
     upload_folder = current_app.config['UPLOAD_FOLDER']
@@ -1331,22 +1320,43 @@ def device(device_slug):
 
 @public_blueprint.route('/docs/markdown-viewer/<path:path>')
 def md_viewer(path):
+    is_solution = _is_solution_document_path(path)
+    if is_solution and not _current_user_can_access_solutions():
+        abort(404)
+
     response = _get_html(path)
     if not isinstance(response, str):
         return response
-    return render_template(
-        "public/markdown-viewer.html",
-        html_content=response,
-        path=path,
-        **page_metadata(
-            title="REDTAIL Documentation",
-            description="View REDTAIL remote laboratory documentation.",
-        ),
+    metadata = page_metadata(
+        title="REDTAIL Documentation",
+        description="View REDTAIL remote laboratory documentation.",
     )
+    if is_solution:
+        metadata["seo_robots"] = "noindex, nofollow"
+    rendered = make_response(
+        render_template(
+            "public/markdown-viewer.html",
+            html_content=response,
+            path=path,
+            **metadata,
+        )
+    )
+    if is_solution:
+        rendered.headers["Cache-Control"] = "private, no-store"
+        rendered.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return rendered
 
 @public_blueprint.route('/docs/word-converter/<path:path>')
 def word_converter(path):
-    return _get_word(path)
+    is_solution = _is_solution_document_path(path)
+    if is_solution and not _current_user_can_access_solutions():
+        abort(404)
+
+    response = _get_word(path)
+    if is_solution and isinstance(response, Response):
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 def _get_word(path: str, filename: str = 'document.docx'):
     response = _get_md(path)
@@ -1450,6 +1460,71 @@ def _resolve_local_document_path(path: str):
     except ValueError:
         within_allowed_root = False
     return abs_path if within_allowed_root else None
+
+
+def _resolved_upload_reference(path: str):
+    if not path:
+        return None
+
+    upload_root = os.path.realpath(current_app.config['UPLOAD_FOLDER'])
+    parsed = urlparse(path)
+    reference = parsed.path if parsed.scheme in ('http', 'https') else path
+    normalized_reference = reference.replace('\\', '/')
+
+    if normalized_reference.startswith('/uploads/'):
+        relative_path = normalized_reference.removeprefix('/uploads/')
+        resolved_path = os.path.realpath(os.path.join(upload_root, relative_path))
+    elif normalized_reference.startswith('uploads/'):
+        relative_path = normalized_reference.removeprefix('uploads/')
+        resolved_path = os.path.realpath(os.path.join(upload_root, relative_path))
+    else:
+        resolved_path = _resolve_local_document_path(reference)
+        if resolved_path is None:
+            return None
+
+    try:
+        within_upload_root = (
+            os.path.commonpath((upload_root, resolved_path)) == upload_root
+        )
+    except ValueError:
+        within_upload_root = False
+    return resolved_path if within_upload_root else None
+
+
+def _document_reference_key(path: str):
+    upload_path = _resolved_upload_reference(path)
+    if upload_path is not None:
+        return "local", upload_path
+
+    parsed = urlparse(path)
+    if parsed.scheme in ('http', 'https'):
+        return "remote", parsed._replace(fragment='').geturl()
+
+    local_path = _resolve_local_document_path(path)
+    return ("local", local_path) if local_path is not None else None
+
+
+def _is_solution_document_path(path: str) -> bool:
+    requested_reference = _document_reference_key(path)
+    if requested_reference is None:
+        return False
+
+    solution_urls = (
+        db.session.query(LaboratoryExerciseDoc.doc_url)
+        .filter(LaboratoryExerciseDoc.is_solution.is_(True))
+        .all()
+    )
+    return any(
+        _document_reference_key(doc_url) == requested_reference
+        for doc_url, in solution_urls
+    )
+
+
+def _current_user_can_access_solutions() -> bool:
+    return current_user.is_authenticated and (
+        getattr(current_user, 'verified', False)
+        or getattr(current_user, 'role', None) == 'admin'
+    )
 
 
 def _document_source_available(path: str) -> bool:

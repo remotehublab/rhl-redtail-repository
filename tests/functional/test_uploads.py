@@ -2,6 +2,7 @@ import io
 from pathlib import Path
 
 import pytest
+from flask import Response
 
 from redtail_repository import db
 from redtail_repository.models import (
@@ -9,6 +10,7 @@ from redtail_repository.models import (
     LaboratoryExerciseDoc,
     SimulationDoc,
 )
+from redtail_repository.views import public as public_views
 
 
 def upload(name: str = "guide.md", contents: bytes = b"# Uploaded guide"):
@@ -144,22 +146,55 @@ def test_admin_can_add_document_and_cover_to_existing_exercise(
 
 
 def test_uploaded_solutions_require_verified_access(
-    client, app, catalog, login_as
+    client, app, catalog, login_as, monkeypatch
 ):
     upload_root = Path(app.config["UPLOAD_FOLDER"])
+    private_root = Path(app.config["PRIVATE_FOLDER"])
     (upload_root / "public-guide.md").write_text("public", encoding="utf-8")
     (upload_root / "instructor-solution.md").write_text("solution", encoding="utf-8")
+    (private_root / "private-solution.md").write_text(
+        "private solution", encoding="utf-8"
+    )
     catalog.exercise_doc.doc_url = "/uploads/public-guide.md"
-    catalog.solution_doc.doc_url = "/uploads/instructor-solution.md"
+    catalog.solution_doc.doc_url = (
+        "https://redtail.example.test/uploads/instructor-solution.md"
+    )
+    private_solution = LaboratoryExerciseDoc(
+        laboratory_exercise=catalog.exercise,
+        title="Private Solution",
+        doc_url="private/private-solution.md",
+        is_solution=True,
+    )
+    db.session.add(private_solution)
     db.session.commit()
 
     public = client.get("/uploads/public-guide.md")
     anonymous_solution = client.get("/uploads/instructor-solution.md")
+    anonymous_viewer = client.get(
+        "/docs/markdown-viewer/uploads/instructor-solution.md"
+    )
+    anonymous_converter = client.get(
+        "/docs/word-converter/uploads/instructor-solution.md"
+    )
+    anonymous_private_viewer = client.get(
+        "/docs/markdown-viewer/private/private-solution.md"
+    )
 
     assert public.status_code == 200
     assert public.get_data(as_text=True) == "public"
     assert public.headers["Cache-Control"] == "private, no-store"
     assert anonymous_solution.status_code == 404
+    assert anonymous_viewer.status_code == 404
+    assert anonymous_converter.status_code == 404
+    assert anonymous_private_viewer.status_code == 404
+    assert public_views._is_solution_document_path(
+        "/uploads/nested/../instructor-solution.md"
+    )
+    assert public_views._is_solution_document_path(
+        str(upload_root / "instructor-solution.md")
+    )
+    assert public_views._is_solution_document_path("private/private-solution.md")
+    assert not public_views._is_solution_document_path("public/docs/exercise.md")
 
     login_as("student-user")
     unverified_solution = client.get("/uploads/instructor-solution.md")
@@ -172,6 +207,45 @@ def test_uploaded_solutions_require_verified_access(
     assert verified_solution.get_data(as_text=True) == "solution"
     assert verified_solution.headers["Cache-Control"] == "private, no-store"
     assert verified_solution.headers["X-Robots-Tag"] == "noindex, nofollow"
+
+    verified_viewer = client.get(
+        "/docs/markdown-viewer/uploads/instructor-solution.md"
+    )
+    assert verified_viewer.status_code == 200
+    assert b"solution" in verified_viewer.data
+    assert verified_viewer.headers["Cache-Control"] == "private, no-store"
+    assert verified_viewer.headers["X-Robots-Tag"] == "noindex, nofollow"
+    assert b'<meta name="robots" content="noindex, nofollow">' in verified_viewer.data
+
+    verified_private_viewer = client.get(
+        "/docs/markdown-viewer/private/private-solution.md"
+    )
+    assert verified_private_viewer.status_code == 200
+    assert b"private solution" in verified_private_viewer.data
+    assert verified_private_viewer.headers["Cache-Control"] == "private, no-store"
+
+    def converted_word(_path):
+        return Response(
+            b"docx",
+            content_type=(
+                "application/vnd.openxmlformats-officedocument."
+                "wordprocessingml.document"
+            ),
+        )
+
+    monkeypatch.setattr(public_views, "_get_word", converted_word)
+    verified_converter = client.get(
+        "/docs/word-converter/uploads/instructor-solution.md"
+    )
+    assert verified_converter.status_code == 200
+    assert verified_converter.headers["Cache-Control"] == "private, no-store"
+    assert verified_converter.headers["X-Robots-Tag"] == "noindex, nofollow"
+
+    client.get("/logout")
+    catalog.admin.verified = False
+    db.session.commit()
+    login_as("admin-user")
+    assert client.get("/uploads/instructor-solution.md").status_code == 200
 
 
 def test_admin_can_create_a_fully_related_exercise(client, app, catalog, login_as):

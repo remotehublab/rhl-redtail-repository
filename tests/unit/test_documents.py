@@ -77,6 +77,26 @@ def test_document_source_availability_and_public_path_resolution(app):
     assert not public._document_source_available("https://evil.test/guide.md")
 
 
+def test_upload_reference_resolution_is_normalized_and_bounded(app, monkeypatch):
+    upload = Path(app.config["UPLOAD_FOLDER"]) / "solution.md"
+    upload.write_text("solution", encoding="utf-8")
+
+    assert public._resolved_upload_reference("/uploads/solution.md") == str(upload)
+    assert public._resolved_upload_reference("uploads/solution.md") == str(upload)
+    assert public._resolved_upload_reference(
+        "https://redtail.example.test/uploads/solution.md"
+    ) == str(upload)
+    assert public._resolved_upload_reference(str(upload)) == str(upload)
+    assert public._resolved_upload_reference("") is None
+
+    monkeypatch.setattr(
+        public.os.path,
+        "commonpath",
+        lambda _paths: (_ for _ in ()).throw(ValueError("different drives")),
+    )
+    assert public._resolved_upload_reference("/uploads/solution.md") is None
+
+
 def test_document_source_availability_allows_remote_without_app_context():
     assert public._document_source_available("https://remote.example.test/guide.md")
 
