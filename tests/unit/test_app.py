@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+from flask import Response
 from flask_assets import Environment
 
 import redtail_repository
@@ -35,15 +36,42 @@ def test_create_app_works_without_overrides():
     assert app.config["SQLALCHEMY_DATABASE_URI"] == "sqlite://"
 
 
-def test_fontawesome_bundle_rewrites_webfont_urls_for_production():
+def test_only_required_frontend_bundles_are_registered():
     assets = Environment()
     register_bundles(assets)
 
-    bundle = assets["fontawesome_css"]
-    assert [asset_filter.name for asset_filter in bundle.filters] == [
-        "cssrewrite",
-        "cssmin",
-    ]
+    assert "bootstrap_css" in assets
+    assert "bootstrap_js" in assets
+    assert "site_css" in assets
+    assert "site_js" in assets
+    assert "fontawesome_css" not in assets
+    assert "fontawesome_js" not in assets
+    assert "vendor_js" not in assets
+
+
+def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
+    apply_policy = next(
+        function
+        for function in app.after_request_funcs[None]
+        if function.__name__ == "apply_response_policies"
+    )
+
+    with app.test_request_context("/static/gen/site.12345678.min.css"):
+        generated = apply_policy(Response("css"))
+    with app.test_request_context("/static/img/NES.png"):
+        static_image = apply_policy(Response("image"))
+    with app.test_request_context("/public/images/example.png"):
+        public_image = apply_policy(Response("image"))
+
+    assert generated.headers["Cache-Control"] == (
+        "public, max-age=31536000, immutable"
+    )
+    assert static_image.headers["Cache-Control"] == (
+        "public, max-age=604800, stale-while-revalidate=86400"
+    )
+    assert public_image.headers["Cache-Control"] == (
+        "public, max-age=3600, stale-while-revalidate=86400"
+    )
 
 
 def test_locale_defaults_to_english_outside_request(app):

@@ -1,4 +1,5 @@
 {% extends "public/_base.html" %}
+{% from "_icons.html" import icon %}
 
 {% block page_container_class %}container-fluid p-0{% endblock %}
 
@@ -12,7 +13,7 @@
       <div class="hero-actions">
         <a class="btn btn-light btn-lg" href="{{ url_for('public.laboratory_exercises') }}">
           {{ gettext("Explore laboratory exercises") }}
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          {{ icon('arrow-right') }}
         </a>
         <a class="btn btn-hero-secondary btn-lg" href="{{ url_for('public.simulations') }}">
           {{ gettext("Browse simulations") }}
@@ -27,7 +28,8 @@
       <div class="device-stage">
         <span class="stage-label">{{ gettext("DIGITAL TWIN") }}</span>
         <span class="stage-scale" aria-hidden="true"></span>
-        <img src="{{ url_for('static', filename='img/NES.png') }}" alt="Remote laboratory controller">
+        <img src="{{ url_for('static', filename='img/NES.png') }}" alt="Remote laboratory controller"
+          width="810" height="456" fetchpriority="high">
         <div class="stage-status">
           <span class="status-light" aria-hidden="true"></span>
           <span>{{ gettext("Connected to physical hardware") }}</span>
@@ -59,9 +61,10 @@
       <div class="video-frame">
         <button class="video-facade" type="button" data-youtube-id="cfuF6VmhtMM"
           data-youtube-title="What is REDTAIL?" aria-label="{{ gettext('Play the REDTAIL introduction') }}">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" alt="">
+          <img src="{{ url_for('static', filename='img/NES.png') }}" alt="" width="810" height="456"
+            loading="lazy" decoding="async">
           <span class="video-facade-overlay">
-            <span class="play-icon"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+            <span class="play-icon">{{ icon('play') }}</span>
             <span>{{ gettext("Watch the introduction") }}</span>
           </span>
         </button>
@@ -110,21 +113,21 @@
     </div>
     <div class="capability-list">
       <article>
-        <span class="capability-icon"><i class="fa-solid fa-microchip" aria-hidden="true"></i></span>
+        <span class="capability-icon">{{ icon('microchip') }}</span>
         <div>
           <h3>{{ gettext("Remotely accessible hardware") }}</h3>
           <p>{{ gettext("Each simulation identifies compatible physical devices and the framework used to connect to them.") }}</p>
         </div>
       </article>
       <article id="canonical">
-        <span class="capability-icon"><i class="fa-solid fa-flask-vial" aria-hidden="true"></i></span>
+        <span class="capability-icon">{{ icon('flask') }}</span>
         <div>
           <h3>{{ gettext("Canonical laboratory assignments") }}</h3>
           <p>{{ gettext("Reference exercises demonstrate practical ways to combine simulation, remote hardware, and analysis.") }}</p>
         </div>
       </article>
       <article id="github">
-        <span class="capability-icon"><i class="fa-brands fa-github" aria-hidden="true"></i></span>
+        <span class="capability-icon">{{ icon('github') }}</span>
         <div>
           <h3>{{ gettext("Open by design") }}</h3>
           <p>{{ gettext("The REDTAIL source code is public, inspectable, and ready for the remote-lab community to build on.") }}</p>
@@ -146,9 +149,10 @@
       <div class="video-frame video-frame-dark">
         <button class="video-facade" type="button" data-youtube-id="9_RL6gZpP1I"
           data-youtube-title="REDTAIL demonstration" aria-label="{{ gettext('Play the REDTAIL demonstration') }}">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" alt="">
+          <img src="{{ url_for('static', filename='img/NES.png') }}" alt="" width="810" height="456"
+            loading="lazy" decoding="async">
           <span class="video-facade-overlay">
-            <span class="play-icon"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+            <span class="play-icon">{{ icon('play') }}</span>
             <span>{{ gettext("Watch the demonstration") }}</span>
           </span>
         </button>

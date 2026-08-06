@@ -120,6 +120,28 @@ test('home video facade loads the privacy-enhanced embed on demand', async ({ pa
   ).toBeVisible();
 });
 
+test('pages ship lightweight inline icons and dimensioned images', async ({ page }) => {
+  for (const [, url] of publicPages) {
+    await page.goto(url);
+    await expect(page.locator('link[href*="fontawesome"]')).toHaveCount(0);
+    await expect(page.locator('script[src*="fontawesome"], script[src*="vendor"]')).toHaveCount(0);
+
+    const imagesWithoutDimensions = await page.locator('img').evaluateAll((images) =>
+      images
+        .filter((image) => !image.hasAttribute('width') || !image.hasAttribute('height'))
+        .map((image) => image.getAttribute('src')),
+    );
+    expect(imagesWithoutDimensions).toEqual([]);
+  }
+
+  await page.goto('/');
+  await expect(page.locator('svg.rt-icon')).toHaveCount(6);
+  const frontendResources = await page.evaluate(() =>
+    performance.getEntriesByType('resource').map((entry) => entry.name),
+  );
+  expect(frontendResources.some((url) => /fontawesome|jquery|vendor\./i.test(url))).toBe(false);
+});
+
 const instructorMailto = 'mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry';
 
 test('homepage and footer expose the instructor contact path', async ({ page }) => {

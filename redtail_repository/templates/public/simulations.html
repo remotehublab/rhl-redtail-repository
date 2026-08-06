@@ -1,4 +1,5 @@
 {% extends "public/_base.html" %}
+{% from "_icons.html" import icon %}
 
 {% block container %}
 <div class="row g-5 catalog-layout">
@@ -12,7 +13,7 @@
     <button class="btn filter-toggle d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#simulationFilters"
       aria-expanded="false" aria-controls="simulationFilters">
       <span>{{ gettext("Filters") }}</span>
-      <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+      {{ icon('sliders') }}
     </button>
     <div class="collapse d-lg-block" id="simulationFilters">
     <!-- Categories Section -->
@@ -104,7 +105,8 @@
       <div class="col">
         <article class="card catalog-card">
           <div class="catalog-media">
-            <img src="{{ simulation.cover_image_url }}" class="card-img-top" alt="{{ simulation.name }}">
+            <img src="{{ simulation.cover_image_url }}" class="card-img-top" alt="{{ simulation.name }}"
+              width="640" height="480" loading="{{ 'eager' if loop.index <= 3 else 'lazy' }}" decoding="async">
           </div>
           <div class="card-body">
             <h2 class="catalog-card-title">

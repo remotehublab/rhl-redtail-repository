@@ -25,26 +25,6 @@ def register_bundles(assets: Environment):
     assets.register('bootstrap_js', bootstrap_js)
 
 
-    fontawesome_css = Bundle(
-            'node_modules/@fortawesome/fontawesome-free/css/all.min.css',
-            filters='cssrewrite,' + CSS_FILTER,
-            output="gen/fontawesome/css/all.%(version)s.min.css")
-
-    fontawesome_js = Bundle(
-            'node_modules/@fortawesome/fontawesome-free/js/all.min.js',
-            filters=JS_FILTER,
-            output="gen/fontawesome/js/all.%(version)s.min.js")
-
-    assets.register('fontawesome_css', fontawesome_css)
-    assets.register('fontawesome_js', fontawesome_js)
-
-    vendor_js = Bundle(
-            "node_modules/jquery/dist/jquery.min.js",
-            filters=JS_FILTER,
-            output="gen/vendor.%(version)s.min.js")
-
-    assets.register('vendor_js', vendor_js)
-
     site_css = Bundle(
             'css/redtail.css',
             filters=CSS_FILTER,

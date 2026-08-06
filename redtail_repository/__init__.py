@@ -69,10 +69,26 @@ def create_app(
     from .seo import robots_directive
 
     @app.after_request
-    def apply_search_indexing_policy(response):
+    def apply_response_policies(response):
         directive = robots_directive(response.status_code)
         if directive:
             response.headers.setdefault("X-Robots-Tag", directive)
+
+        if response.status_code < 400:
+            endpoint = request.endpoint or ""
+            filename = (request.view_args or {}).get("filename", "")
+            if endpoint == "static" and filename.startswith("gen/"):
+                response.headers["Cache-Control"] = (
+                    "public, max-age=31536000, immutable"
+                )
+            elif endpoint == "static":
+                response.headers["Cache-Control"] = (
+                    "public, max-age=604800, stale-while-revalidate=86400"
+                )
+            elif endpoint in {"public.serve_public", "public.serve_uploads"}:
+                response.headers["Cache-Control"] = (
+                    "public, max-age=3600, stale-while-revalidate=86400"
+                )
         return response
 
     def _list_languages() -> Dict[str, str]:

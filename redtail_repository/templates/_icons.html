@@ -1,0 +1,21 @@
+{% macro icon(name, class_name='') -%}
+<svg class="rt-icon {{ class_name }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  {% if name == 'arrow-right' %}
+  <path d="M5 12h13M13 7l5 5-5 5"/>
+  {% elif name == 'play' %}
+  <path class="rt-icon-fill" d="M8 5.5v13l10-6.5z"/>
+  {% elif name == 'microchip' %}
+  <rect x="6.5" y="6.5" width="11" height="11" rx="1"/>
+  <path d="M9 9h6v6H9zM9 2.5v4M15 2.5v4M9 17.5v4M15 17.5v4M2.5 9h4M2.5 15h4M17.5 9h4M17.5 15h4"/>
+  {% elif name == 'flask' %}
+  <path d="M9 3h6M10 3v6.2L5.4 17a2.5 2.5 0 0 0 2.2 3.7h8.8a2.5 2.5 0 0 0 2.2-3.7L14 9.2V3M7.8 15h8.4"/>
+  {% elif name == 'github' %}
+  <path class="rt-icon-fill" d="M12 .8a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.2.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.6 1.3 3.3 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.7 11.7 0 0 1 6.2 0c2.4-1.6 3.4-1.2 3.4-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.2c0 .4.2.7.8.6A11.5 11.5 0 0 0 12 .8z"/>
+  {% elif name == 'sliders' %}
+  <path d="M4 6h7M15 6h5M4 12h3M11 12h9M4 18h9M17 18h3"/>
+  <circle cx="13" cy="6" r="2"/>
+  <circle cx="9" cy="12" r="2"/>
+  <circle cx="15" cy="18" r="2"/>
+  {% endif %}
+</svg>
+{%- endmacro %}

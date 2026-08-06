@@ -43,7 +43,7 @@
     <div class="row align-items-center g-4 mb-4 detail-header">
       <div class="col-sm-4">
         <img src="{{ simulation.cover_image_url }}" class="detail-cover"
-          alt="{{ simulation.name }}">
+          alt="{{ simulation.name }}" width="640" height="480" fetchpriority="high">
       </div>
       <div class="col-sm-8">
         <p class="eyebrow mb-2">{{ gettext("Simulation") }}</p>
@@ -114,7 +114,8 @@
                 {% for image in simulation.simulation_images %}
                 <div class="carousel-item {% if loop.first %}active{% endif %}">
                   <img src="{{ image.image_url }}" class="d-block w-100"
-                    alt="{{ image.alt|default('Simulation image ' + loop.index|string) }}">
+                    alt="{{ image.alt|default('Simulation image ' + loop.index|string) }}"
+                    width="1200" height="675" loading="lazy" decoding="async">
                   {% if image.caption %}
                   <div class="carousel-caption d-none d-md-block">
                     <p>{{ image.caption }}</p>

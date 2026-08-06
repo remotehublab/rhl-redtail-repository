@@ -32,9 +32,6 @@
   {% assets 'bootstrap_css' %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
   {% endassets %}
-  {% assets 'fontawesome_css' %}
-  <link href="{{ ASSET_URL }}" rel="stylesheet">
-  {% endassets %}
   {% assets 'site_css' %}
   <link href="{{ ASSET_URL }}" rel="stylesheet">
   {% endassets %}
@@ -50,7 +47,7 @@
       <div class="container-xl">
         <a class="navbar-brand brand-lockup" href="{{ url_for('public.index') }}" aria-label="REDTAIL home">
           <span class="brand-mark" aria-hidden="true">
-            <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="" width="34" height="27">
+            <img src="{{ url_for('static', filename='img/remote_hub_lab.png') }}" alt="" width="200" height="200">
           </span>
           <span class="brand-wordmark">
             <span class="brand-text">REDTAIL</span>
@@ -139,12 +136,6 @@
   </footer>
 
   {% assets 'bootstrap_js' %}
-  <script src="{{ ASSET_URL }}"></script>
-  {% endassets %}
-  {% assets 'fontawesome_js' %}
-  <script src="{{ ASSET_URL }}"></script>
-  {% endassets %}
-  {% assets 'vendor_js' %}
   <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
   {% assets 'site_js' %}

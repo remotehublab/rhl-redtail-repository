@@ -26,7 +26,8 @@
     <!-- Device Header -->
     <div class="row mb-5 align-items-center g-4 detail-header">
       <div class="col-md-3 text-center">
-        <img src="{{ device.cover_image_url }}" alt="device img" class="img-fluid device-img">
+        <img src="{{ device.cover_image_url }}" alt="{{ device.name }} remote laboratory device"
+          class="img-fluid device-img" width="640" height="480" fetchpriority="high">
       </div>
       <div class="col-md-9">
         <p class="eyebrow mb-2">{{ gettext("Remote laboratory device") }}</p>
