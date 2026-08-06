@@ -88,6 +88,11 @@ def test_upload_reference_resolution_is_normalized_and_bounded(app, monkeypatch)
     ) == str(upload)
     assert public._resolved_upload_reference(str(upload)) == str(upload)
     assert public._resolved_upload_reference("") is None
+    assert public._resolved_upload_reference("/outside-redtail/guide.md") is None
+    assert public._document_reference_key(
+        "https://docs.example.test/guide.md#section"
+    ) == ("remote", "https://docs.example.test/guide.md")
+    assert not public._is_solution_document_path("/outside-redtail/guide.md")
 
     monkeypatch.setattr(
         public.os.path,
