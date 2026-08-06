@@ -1,3 +1,5 @@
+from xml.etree import ElementTree
+
 import pytest
 
 from redtail_repository import db
@@ -143,6 +145,58 @@ def test_document_canonical_uses_stable_title_slug(client, catalog):
             f"{catalog.simulation_doc.id}-simulation-guide.md"
         ),
     )
+
+
+def test_robots_points_to_sitemap_without_blocking_noindex_pages(client):
+    response = client.get("/robots.txt")
+
+    assert response.status_code == 200
+    assert response.content_type == "text/plain; charset=utf-8"
+    assert response.headers["Cache-Control"] == "public, max-age=3600"
+    assert response.get_data(as_text=True) == (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Sitemap: https://redtail.example.test/sitemap.xml\n"
+    )
+    assert "Disallow: /login" not in response.get_data(as_text=True)
+
+
+def test_sitemap_lists_only_canonical_indexable_catalog_urls(client, catalog):
+    response = client.get("/sitemap.xml")
+
+    assert response.status_code == 200
+    assert response.content_type == "application/xml; charset=utf-8"
+    assert response.headers["Cache-Control"] == "public, max-age=3600"
+
+    root = ElementTree.fromstring(response.data)
+    namespace = {"sitemap": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    locations = {
+        element.text for element in root.findall("sitemap:url/sitemap:loc", namespace)
+    }
+
+    assert "https://redtail.example.test/" in locations
+    assert "https://redtail.example.test/authors/1" in locations
+    assert "https://redtail.example.test/laboratory-exercises/test-exercise" in locations
+    assert "https://redtail.example.test/simulations/test-simulation" in locations
+    assert "https://redtail.example.test/devices/test-board" in locations
+    assert (
+        "https://redtail.example.test/simulations/test-simulation/docs/"
+        f"{catalog.simulation_doc.id}-simulation-guide.md"
+    ) in locations
+    assert (
+        "https://redtail.example.test/simulations/test-simulation/devices/test-board/"
+        f"docs/{catalog.simulation_device_doc.id}-board-guide.md"
+    ) in locations
+    assert not any("?" in location for location in locations)
+    assert not any("/login" in location for location in locations)
+    assert not any("/register" in location for location in locations)
+    assert not any("inactive-exercise" in location for location in locations)
+
+    lastmods = {
+        element.text
+        for element in root.findall("sitemap:url/sitemap:lastmod", namespace)
+    }
+    assert "2024-01-15" in lastmods
 
 
 def test_author_pages_render_empty_populated_and_missing(client, catalog):

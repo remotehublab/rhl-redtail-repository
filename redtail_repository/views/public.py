@@ -12,6 +12,7 @@ import pypandoc
 import requests
 from flask import (
     Blueprint,
+    Response,
     abort,
     current_app,
     flash,
@@ -45,7 +46,7 @@ from redtail_repository.models import (
     SimulationDeviceDocument,
     SimulationDoc,
 )
-from redtail_repository.seo import page_metadata
+from redtail_repository.seo import absolute_public_url, page_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,115 @@ public_blueprint = Blueprint('public', __name__)
 @public_blueprint.route('/')
 def index():
     return render_template('public/index.html', **page_metadata())
+
+
+def _sitemap_lastmod(record):
+    last_updated = getattr(record, "last_updated", None)
+    return last_updated.date().isoformat() if last_updated else None
+
+
+@public_blueprint.route('/robots.txt')
+def robots_txt():
+    body = "\n".join(
+        (
+            "User-agent: *",
+            "Allow: /",
+            f"Sitemap: {absolute_public_url('/sitemap.xml')}",
+            "",
+        )
+    )
+    return Response(
+        body,
+        content_type="text/plain; charset=utf-8",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
+@public_blueprint.route('/sitemap.xml')
+def sitemap_xml():
+    entries_by_url = {}
+
+    def add(endpoint, *, lastmod=None, **values):
+        location = absolute_public_url(url_for(endpoint, **values))
+        entries_by_url[location] = {"loc": location, "lastmod": lastmod}
+
+    add('public.index')
+    add('public.authors')
+    add('public.laboratory_exercises')
+    add('public.simulations')
+    add('public.devices')
+
+    authors = db.session.query(Author).order_by(Author.id).all()
+    exercises = (
+        db.session.query(LaboratoryExercise)
+        .filter_by(active=True)
+        .order_by(LaboratoryExercise.slug)
+        .all()
+    )
+    simulations = (
+        db.session.query(Simulation)
+        .options(
+            joinedload(Simulation.simulation_documents),
+            joinedload(Simulation.device_documents).joinedload(
+                SimulationDeviceDocument.device
+            ),
+        )
+        .order_by(Simulation.slug)
+        .all()
+    )
+    devices = db.session.query(Device).order_by(Device.slug).all()
+
+    for author in authors:
+        add('public.view_author', author_id=author.id)
+
+    for exercise in exercises:
+        add(
+            'public.laboratory_exercise',
+            laboratory_exercise_slug=exercise.slug,
+            lastmod=_sitemap_lastmod(exercise),
+        )
+
+    for simulation in simulations:
+        lastmod = _sitemap_lastmod(simulation)
+        add('public.simulation', simulation_slug=simulation.slug, lastmod=lastmod)
+
+        for document in simulation.simulation_documents:
+            if _document_source_available(document.doc_url):
+                add(
+                    'public.simulation_doc_md',
+                    simulation_slug=simulation.slug,
+                    doc_id=document.id,
+                    title=slugify(document.title or 'documentation'),
+                    lastmod=_sitemap_lastmod(document),
+                )
+
+        for document in simulation.device_documents:
+            if _document_source_available(document.doc_url):
+                add(
+                    'public.simulation_device_doc_md',
+                    simulation_slug=simulation.slug,
+                    device_slug=document.device.slug,
+                    doc_id=document.id,
+                    name=slugify(document.name or 'documentation'),
+                    lastmod=lastmod,
+                )
+
+    for device in devices:
+        add(
+            'public.device',
+            device_slug=device.slug,
+            lastmod=_sitemap_lastmod(device),
+        )
+
+    body = render_template(
+        'public/sitemap.xml',
+        entries=entries_by_url.values(),
+    )
+    return Response(
+        body,
+        content_type="application/xml; charset=utf-8",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
 
 # This should be at app level, and if the template makes calls like url_for('.lessons') it will fail. Let's talk about this in the next meeting
 # @public_blueprint.app_errorhandler(404)
