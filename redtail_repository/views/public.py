@@ -616,6 +616,7 @@ def laboratory_exercises():
                 "materials connected to real hardware."
             ),
             canonical_path=url_for('public.laboratory_exercises'),
+            include_canonical=not request.args,
         ),
     )
 
@@ -801,6 +802,7 @@ def simulations():
                 "accessible laboratory hardware."
             ),
             canonical_path=url_for('public.simulations'),
+            include_canonical=not request.args,
         ),
     )
 
@@ -1272,6 +1274,7 @@ def devices():
                 "teaching materials."
             ),
             canonical_path=url_for('public.devices'),
+            include_canonical=not request.args,
         ),
     )
 

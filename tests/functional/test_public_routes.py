@@ -14,7 +14,10 @@ def _assert_metadata(response, *, title, description, canonical):
     html = response.get_data(as_text=True)
     assert f"<title>{title}</title>" in html
     assert f'<meta name="description" content="{description}">' in html
-    assert f'<link rel="canonical" href="{canonical}">' in html
+    if canonical is None:
+        assert '<link rel="canonical"' not in html
+    else:
+        assert f'<link rel="canonical" href="{canonical}">' in html
 
 
 def _structured_data(response):
@@ -60,21 +63,21 @@ def test_public_collection_pages_render(client, catalog, path):
             "Remote Laboratory Exercises | REDTAIL",
             "Browse classroom-ready remote laboratory exercises, lessons, and teaching "
             "materials connected to real hardware.",
-            "https://redtail.example.test/laboratory-exercises",
+            None,
         ),
         (
             "/simulations?category=digital-twin",
             "Remote Laboratory Simulations and Digital Twins | REDTAIL",
             "Explore REDTAIL simulations and digital twins connected to remotely accessible "
             "laboratory hardware.",
-            "https://redtail.example.test/simulations",
+            None,
         ),
         (
             "/devices?framework=native",
             "Remote Laboratory Hardware and Devices | REDTAIL",
             "Browse real laboratory hardware supported by REDTAIL simulations and teaching "
             "materials.",
-            "https://redtail.example.test/devices",
+            None,
         ),
         (
             "/login?next=/devices",
@@ -249,6 +252,9 @@ def test_filtered_and_account_pages_are_noindex_follow(client, catalog, path):
     assert response.status_code == 200
     assert response.headers["X-Robots-Tag"] == "noindex, follow"
     assert b'<meta name="robots" content="noindex, follow">' in response.data
+    if "?" in path:
+        assert b'<link rel="canonical"' not in response.data
+        assert b'<meta property="og:url"' not in response.data
 
 
 @pytest.mark.parametrize(
@@ -280,6 +286,9 @@ def test_admin_and_error_responses_are_excluded_from_search(
     missing = client.get("/missing-page")
     assert missing.status_code == 404
     assert missing.headers["X-Robots-Tag"] == "noindex, noarchive"
+    assert b'<link rel="canonical" href="">' not in missing.data
+    assert b'<meta property="og:url" content="">' not in missing.data
+    assert b'<meta property="og:image" content="">' not in missing.data
 
 
 @pytest.mark.parametrize("path", ["/lessons", "/laboratory_exercise"])
@@ -389,6 +398,8 @@ def test_homepage_social_metadata_and_organization_schema(client, catalog):
         'redtail-social-card.png">'
     ) in html
     assert '<meta name="twitter:card" content="summary_large_image">' in html
+    assert '<meta property="og:image:width" content="1200">' in html
+    assert '<meta property="og:image:height" content="630">' in html
 
     graph = _structured_data(response)["@graph"]
     assert {node["@type"] for node in graph} == {
@@ -418,6 +429,8 @@ def test_detail_social_image_breadcrumbs_and_learning_resource_schema(client, ca
     assert (
         '<meta property="og:image:alt" content="Test Exercise laboratory exercise">'
     ) in html
+    assert '<meta property="og:image:width"' not in html
+    assert '<meta property="og:image:height"' not in html
 
     graph = _structured_data(response)["@graph"]
     breadcrumb = next(node for node in graph if node["@type"] == "BreadcrumbList")

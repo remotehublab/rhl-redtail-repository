@@ -9,21 +9,27 @@
   <meta name="theme-color" content="#4B2E83">
   <meta name="description" content="{{ page_description }}">
   {% if seo_robots %}<meta name="robots" content="{{ seo_robots }}">{% endif %}
-  <link rel="canonical" href="{{ canonical_url }}">
+  {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
   <meta property="og:site_name" content="REDTAIL">
   <meta property="og:type" content="{{ seo_social_type or 'website' }}">
   <meta property="og:title" content="{{ page_title }}">
   <meta property="og:description" content="{{ page_description }}">
-  <meta property="og:url" content="{{ canonical_url }}">
+  {% if canonical_url %}<meta property="og:url" content="{{ canonical_url }}">{% endif %}
+  {% if seo_image_url %}
   <meta property="og:image" content="{{ seo_image_url }}">
   <meta property="og:image:alt" content="{{ seo_image_alt }}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  {% if seo_image_width and seo_image_height %}
+  <meta property="og:image:width" content="{{ seo_image_width }}">
+  <meta property="og:image:height" content="{{ seo_image_height }}">
+  {% endif %}
   <meta name="twitter:card" content="summary_large_image">
+  {% endif %}
   <meta name="twitter:title" content="{{ page_title }}">
   <meta name="twitter:description" content="{{ page_description }}">
+  {% if seo_image_url %}
   <meta name="twitter:image" content="{{ seo_image_url }}">
   <meta name="twitter:image:alt" content="{{ seo_image_alt }}">
+  {% endif %}
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/remote_hub_lab.png') }}">
   <title>{{ page_title }}</title>
   {% if seo_structured_data %}

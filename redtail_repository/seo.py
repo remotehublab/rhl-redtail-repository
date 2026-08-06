@@ -77,17 +77,26 @@ def page_metadata(
     image_alt: Optional[str] = None,
     social_type: str = "website",
     structured_data: Optional[dict] = None,
+    include_canonical: bool = True,
 ) -> Dict[str, object]:
+    normalized_image_url = public_asset_url(image_url)
+    uses_default_social_card = (
+        urlsplit(normalized_image_url).path == "/static/img/redtail-social-card.png"
+    )
     return {
         "seo_title": re.sub(r"\s+", " ", title).strip() or DEFAULT_TITLE,
         "seo_description": _plain_text(description, DEFAULT_DESCRIPTION),
-        "canonical_url": absolute_public_url(canonical_path),
-        "seo_image_url": public_asset_url(image_url),
+        "canonical_url": (
+            absolute_public_url(canonical_path) if include_canonical else None
+        ),
+        "seo_image_url": normalized_image_url,
         "seo_image_alt": _plain_text(
             image_alt,
             "REDTAIL remote laboratory simulations and teaching materials",
             limit=120,
         ),
+        "seo_image_width": 1200 if uses_default_social_card else None,
+        "seo_image_height": 630 if uses_default_social_card else None,
         "seo_social_type": social_type,
         "seo_structured_data": structured_data,
     }
