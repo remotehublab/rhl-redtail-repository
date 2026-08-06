@@ -142,6 +142,36 @@ test('pages ship lightweight inline icons and dimensioned images', async ({ page
   expect(frontendResources.some((url) => /fontawesome|jquery|vendor\./i.test(url))).toBe(false);
 });
 
+for (const [name, url] of [
+  ['simulation documentation', '/simulations/test-simulation/docs/1-simulation-guide.md'],
+  ['device documentation', '/simulations/test-simulation/devices/test-board/docs/1-board-guide.md'],
+] as const) {
+  test(`${name} preserves the simulation cover aspect ratio`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(message.text());
+    });
+    page.on('pageerror', (error) => errors.push(error.message));
+
+    const response = await page.goto(url);
+    expect(response?.status()).toBe(200);
+
+    const dimensions = await page.locator('img.documentation-cover').evaluate((image) => {
+      const element = image as HTMLImageElement;
+      const bounds = element.getBoundingClientRect();
+      return {
+        naturalRatio: element.naturalWidth / element.naturalHeight,
+        renderedRatio: bounds.width / bounds.height,
+        renderedWidth: bounds.width,
+      };
+    });
+
+    expect(dimensions.renderedWidth).toBeLessThanOrEqual(200);
+    expect(dimensions.renderedRatio).toBeCloseTo(dimensions.naturalRatio, 2);
+    expect(errors).toEqual([]);
+  });
+}
+
 const instructorMailto = 'mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry';
 
 test('homepage and footer expose the instructor contact path', async ({ page }) => {

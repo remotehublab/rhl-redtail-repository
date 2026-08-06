@@ -131,6 +131,12 @@ img {
   max-width: 100%;
 }
 
+.documentation-cover {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+
 .rt-icon {
   fill: none;
   flex: 0 0 auto;

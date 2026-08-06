@@ -38,7 +38,7 @@ def seed_catalog():
     docs_root = public_root / "docs"
     docs_root.mkdir(parents=True, exist_ok=True)
     (docs_root / "simulation.md").write_text(
-        "# Simulation guide\n\n![Local](images/example.png)", encoding="utf-8"
+        "# Simulation guide\n\n![Local](/static/img/NES.png)", encoding="utf-8"
     )
     (docs_root / "device.md").write_text("# Device guide", encoding="utf-8")
     (docs_root / "exercise.md").write_text("# Exercise guide", encoding="utf-8")

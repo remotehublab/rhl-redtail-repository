@@ -12,6 +12,8 @@ const pages = [
   ['exercise-detail', '/laboratory-exercises/test-exercise'],
   ['simulation-catalog', '/simulations'],
   ['simulation-detail', '/simulations/test-simulation'],
+  ['simulation-documentation', '/simulations/test-simulation/docs/1-simulation-guide.md'],
+  ['device-documentation', '/simulations/test-simulation/devices/test-board/docs/1-board-guide.md'],
   ['device-catalog', '/devices'],
   ['device-detail', '/devices/test-board'],
   ['login', '/login'],
