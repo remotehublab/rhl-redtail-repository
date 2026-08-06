@@ -158,3 +158,24 @@ FLASK_APP=autoapp FLASK_CONFIG=testing flask db upgrade head
 GitHub Actions runs Python 3.10 compatibility, Python 3.12 coverage, MySQL 8
 migrations/integration, cross-browser flows, WCAG A/AA scans, and desktop/mobile
 visual regression as separate required-check candidates.
+
+## Production response policies
+
+Production Apache serves `/static/` and `/public/` directly instead of proxying
+those paths to Flask. The REDTAIL TLS virtual host must therefore include the
+tracked response-policy file:
+
+```apache
+Include /home/redtail/rhl-redtail-repository/ops/apache/redtail-response-policies.conf
+```
+
+After changing the virtual host, validate the configuration before reloading:
+
+```bash
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+
+Verify the deployed headers on a generated asset, a regular static asset, and a
+raw file under `/public/`. The raw file must include `X-Robots-Tag: noindex,
+nofollow`; uploaded files remain proxied to Flask and use `private, no-store`.
