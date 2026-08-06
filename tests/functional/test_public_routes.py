@@ -193,7 +193,12 @@ def test_sitemap_lists_only_canonical_indexable_catalog_urls(client, catalog):
         name="Word Mapping",
         doc_url="public/docs/word-only.docx",
     )
-    db.session.add_all((simulation_docx, device_docx))
+    query_string_doc = SimulationDoc(
+        simulation=catalog.simulation,
+        title="Versioned Markdown",
+        doc_url="https://docs.example.test/guide.md?download=1",
+    )
+    db.session.add_all((simulation_docx, device_docx, query_string_doc))
     db.session.commit()
 
     response = client.get("/sitemap.xml")
@@ -227,6 +232,10 @@ def test_sitemap_lists_only_canonical_indexable_catalog_urls(client, catalog):
     assert not any("inactive-exercise" in location for location in locations)
     assert not any(f"docs/{simulation_docx.id}-word-only.md" in location for location in locations)
     assert not any(f"docs/{device_docx.id}-word-mapping.md" in location for location in locations)
+    assert not any(
+        f"docs/{query_string_doc.id}-versioned-markdown.md" in location
+        for location in locations
+    )
 
     lastmods = {
         element.text

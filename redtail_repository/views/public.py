@@ -1469,7 +1469,7 @@ def _document_source_available(path: str) -> bool:
 def _markdown_document_source_available(path: str) -> bool:
     return bool(
         path
-        and urlparse(path).path.lower().endswith('.md')
+        and path.lower().endswith('.md')
         and _document_source_available(path)
     )
 
