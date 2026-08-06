@@ -112,12 +112,48 @@ test('mobile navigation opens and every key page avoids horizontal overflow', as
 
 test('home video facade loads the privacy-enhanced embed on demand', async ({ page }) => {
   await page.goto('/');
-  const playButton = page.getByRole('button', { name: 'Play the REDTAIL introduction' });
+  const playButton = page.getByRole('button', { name: 'Watch the introduction' });
   await expect(playButton).toBeVisible();
+  await expect(playButton).toHaveCount(1);
+  await expect(playButton.locator('img')).toHaveAttribute(
+    'src',
+    /redtail-introduction-poster\.jpg$/,
+  );
+  await expect(
+    page.getByRole('link', { name: 'Explore the Parking Lot simulation' }),
+  ).toBeVisible();
+
+  const demonstrationButton = page.getByRole('button', {
+    name: 'Watch the demonstration',
+  });
+  await expect(demonstrationButton.locator('img')).toHaveAttribute(
+    'src',
+    /redtail-parking-lot-demo-poster\.jpg$/,
+  );
+
   await playButton.click();
   await expect(
     page.locator('iframe[src*="youtube-nocookie.com/embed/cfuF6VmhtMM"]'),
   ).toBeVisible();
+});
+
+test('home introduction stays widescreen across responsive breakpoints', async ({ page }) => {
+  await page.goto('/');
+
+  for (const width of [390, 767, 768, 991, 992, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const dimensions = await page.locator('.hero-video-stage .video-facade').evaluate((facade) => {
+      const bounds = facade.getBoundingClientRect();
+      return {
+        clientWidth: document.documentElement.clientWidth,
+        ratio: bounds.width / bounds.height,
+        scrollWidth: document.documentElement.scrollWidth,
+      };
+    });
+
+    expect(dimensions.ratio).toBeCloseTo(16 / 9, 2);
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+  }
 });
 
 test('pages ship lightweight inline icons and dimensioned images', async ({ page }) => {

@@ -1,4 +1,17 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+async function loadLazyImages(page: Page) {
+  const lazyImages = page.locator('img[loading="lazy"]');
+  for (let index = 0; index < await lazyImages.count(); index += 1) {
+    const image = lazyImages.nth(index);
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate(
+      (element) => element.complete && element.naturalWidth > 0,
+    )).toBe(true);
+  }
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.route(/youtube\.com|youtu\.be/, (route) =>
@@ -23,6 +36,11 @@ const pages = [
 for (const [name, url] of pages) {
   test(`@visual ${name}`, async ({ page }) => {
     await page.goto(url);
+
+    if (name === 'home') {
+      await loadLazyImages(page);
+    }
+
     await expect(page).toHaveScreenshot(`${name}.png`, {
       fullPage: true,
     });
@@ -55,5 +73,6 @@ test('@visual mobile navigation open', async ({ page }, testInfo) => {
     page.getByRole('navigation', { name: 'Primary navigation' })
       .getByRole('link', { name: 'Simulations', exact: true }),
   ).toBeVisible();
+  await loadLazyImages(page);
   await expect(page).toHaveScreenshot('mobile-navigation-open.png', { fullPage: true });
 });

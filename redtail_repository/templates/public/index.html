@@ -22,17 +22,24 @@
       <p class="hero-proof">{{ gettext("Open source · Built at the University of Washington · Supported by the NSF") }}</p>
     </div>
 
-    <div class="hero-visual" aria-label="A connected remote laboratory device represented by a digital twin">
+    <div class="hero-visual">
       <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
       <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
-      <div class="device-stage">
-        <span class="stage-label">{{ gettext("DIGITAL TWIN") }}</span>
+      <div class="device-stage hero-video-stage">
+        <span class="stage-label">{{ gettext("REDTAIL / INTRODUCTION") }}</span>
         <span class="stage-scale" aria-hidden="true"></span>
-        <img src="{{ url_for('static', filename='img/NES.png') }}" alt="Remote laboratory controller"
-          width="810" height="456" fetchpriority="high">
+        <button class="video-facade hero-video-facade" type="button" data-youtube-id="cfuF6VmhtMM"
+          data-youtube-title="What is REDTAIL?">
+          <img src="{{ url_for('static', filename='img/redtail-introduction-poster.jpg') }}" alt=""
+            width="1280" height="720" fetchpriority="high" decoding="async">
+          <span class="video-facade-overlay">
+            <span class="play-icon">{{ icon('play') }}</span>
+            <span>{{ gettext("Watch the introduction") }}</span>
+          </span>
+        </button>
         <div class="stage-status">
           <span class="status-light" aria-hidden="true"></span>
-          <span>{{ gettext("Connected to physical hardware") }}</span>
+          <span>{{ gettext("A short introduction to the REDTAIL learning model.") }}</span>
         </div>
       </div>
     </div>
@@ -57,20 +64,21 @@
       <p class="section-lead">{{ gettext("Students can rehearse a workflow in a simulation, then apply it to remotely accessible equipment. Instructors can pair both experiences in one coherent assignment.") }}</p>
       <p>{{ gettext("REDTAIL is developed by the <a href='https://rhlab.ece.uw.edu' target='_blank' rel='noopener noreferrer'>Remote Hub Lab research group</a> at the <a href='https://uw.edu' target='_blank' rel='noopener noreferrer'>University of Washington</a> with <a href='https://labsland.com' target='_blank' rel='noopener noreferrer'>LabsLand</a>.") }}</p>
     </div>
-    <div class="video-wrap">
-      <div class="video-frame">
-        <button class="video-facade" type="button" data-youtube-id="cfuF6VmhtMM"
-          data-youtube-title="What is REDTAIL?" aria-label="{{ gettext('Play the REDTAIL introduction') }}">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" alt="" width="810" height="456"
-            loading="lazy" decoding="async">
-          <span class="video-facade-overlay">
-            <span class="play-icon">{{ icon('play') }}</span>
-            <span>{{ gettext("Watch the introduction") }}</span>
-          </span>
-        </button>
-      </div>
-      <p class="video-caption">{{ gettext("A short introduction to the REDTAIL learning model.") }}</p>
-    </div>
+    <figure class="simulation-feature">
+      <a class="simulation-feature-link" href="{{ url_for('.simulation', simulation_slug='parking-lot') }}"
+        aria-label="{{ gettext('Explore the Parking Lot simulation') }}">
+        <span class="simulation-feature-kicker">{{ gettext("DIGITAL TWIN / PARKING LOT") }}</span>
+        <span class="simulation-feature-image">
+          <img src="{{ url_for('static', filename='img/redtail-parking-lot-simulation.jpg') }}"
+            alt="Parking Lot 3D simulation with spaces, indicator lights, and a moving vehicle"
+            width="1280" height="720" loading="lazy" decoding="async">
+        </span>
+        <span class="simulation-feature-action">
+          {{ gettext("Explore the Parking Lot simulation") }} <span aria-hidden="true">→</span>
+        </span>
+      </a>
+      <figcaption>{{ gettext("A digital twin responding to remotely accessible laboratory hardware.") }}</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -148,8 +156,9 @@
     <div class="video-wrap">
       <div class="video-frame video-frame-dark">
         <button class="video-facade" type="button" data-youtube-id="9_RL6gZpP1I"
-          data-youtube-title="REDTAIL demonstration" aria-label="{{ gettext('Play the REDTAIL demonstration') }}">
-          <img src="{{ url_for('static', filename='img/NES.png') }}" alt="" width="810" height="456"
+          data-youtube-title="REDTAIL demonstration">
+          <img src="{{ url_for('static', filename='img/redtail-parking-lot-demo-poster.jpg') }}" alt=""
+            width="1280" height="720"
             loading="lazy" decoding="async">
           <span class="video-facade-overlay">
             <span class="play-icon">{{ icon('play') }}</span>
