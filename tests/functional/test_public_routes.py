@@ -343,7 +343,10 @@ def test_legacy_document_urls_redirect_to_stable_slugged_urls(client, catalog):
     [
         "/author/99999",
         "/lessons/unknown-exercise",
+        "/simulations/missing/docs/1.md",
         "/simulations/test-simulation/docs/99999.md",
+        "/simulations/missing/devices/test-board/docs/1.md",
+        "/simulations/test-simulation/devices/missing/docs/1.md",
         "/simulations/test-simulation/devices/test-board/docs/99999.md",
     ],
 )
