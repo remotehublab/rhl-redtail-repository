@@ -150,7 +150,6 @@ test('homepage and footer expose the instructor contact path', async ({ page }) 
   for (const name of [
     'Explore laboratory exercises',
     'Browse simulations',
-    'Create an instructor account',
     'Explore the simulation library',
     'View the source on GitHub',
     'Browse current exercises',
@@ -158,6 +157,21 @@ test('homepage and footer expose the instructor contact path', async ({ page }) 
   ]) {
     await expect(page.getByRole('link', { name, exact: true }).first()).toBeVisible();
   }
+
+  await expect(page.getByRole('link', { name: 'Create an instructor account' })).toHaveCount(0);
+  await expect(page.locator('body')).not.toContainText('verified academic account');
+  await expect(page.locator('body')).not.toContainText('instructor-only solution materials');
+});
+
+test('registration directs university instructors to the REDTAIL team', async ({ page }) => {
+  await page.goto('/register');
+
+  await expect(page.locator('body')).toContainText('Instructor access is arranged separately');
+  await expect(
+    page.getByRole('link', { name: 'Email the REDTAIL team about instructor access.' }),
+  ).toHaveAttribute('href', instructorMailto);
+  await expect(page.locator('body')).not.toContainText('Use your academic email');
+  await expect(page.locator('body')).not.toContainText('laboratory solutions');
 });
 
 for (const [name, url] of publicPages) {

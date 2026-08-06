@@ -15,6 +15,7 @@ const pages = [
   ['device-catalog', '/devices'],
   ['device-detail', '/devices/test-board'],
   ['login', '/login'],
+  ['registration', '/register'],
 ] as const;
 
 for (const [name, url] of pages) {

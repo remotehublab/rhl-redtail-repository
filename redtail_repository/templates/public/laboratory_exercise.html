@@ -152,7 +152,14 @@
                   {% if verified_user %}
                     <a href="{{ safe_url }}" target="_blank">{{ document.title }}</a> ({{ gettext("Only available for verified instructors.") }})
                   {% else %}
-                    {{ document.title }} ({{ gettext("Only available for verified instructors.") }} <a href="{{ url_for('login.register', next=request.full_path) }}">{{ gettext("Register") }}</a> <a href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("or log in.") }}</a>)
+                    {{ document.title }}
+                    <span class="d-block small mt-1">
+                      {{ gettext("Instructor approval is required.") }}
+                      <a href="mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry">{{ gettext("Contact the REDTAIL team about access.") }}</a>
+                      {% if not current_user.is_authenticated %}
+                        <span class="d-block mt-1"><a href="{{ url_for('login.login', next=request.full_path) }}">{{ gettext("Already approved? Log in.") }}</a></span>
+                      {% endif %}
+                    </span>
                   {% endif %}
                 {% else %}
                   <a href="{{ safe_url }}" target="_blank">{{ document.title }}</a>

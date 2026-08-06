@@ -55,11 +55,15 @@ def test_laboratory_exercise_detail_and_visibility(client, catalog, login_as):
     assert anonymous.status_code == 200
     assert b"Exercise Guide" in anonymous.data
     assert b"Exercise Solution" in anonymous.data
-    assert b"Only available for verified instructors" in anonymous.data
+    assert b"Instructor approval is required" in anonymous.data
+    assert b"Contact the REDTAIL team about access" in anonymous.data
+    assert b"Already approved? Log in" in anonymous.data
 
     login_as("student-user")
     unverified = client.get("/laboratory-exercises/test-exercise")
-    assert b"Only available for verified instructors" in unverified.data
+    assert b"Instructor approval is required" in unverified.data
+    assert b"Contact the REDTAIL team about access" in unverified.data
+    assert b"Already approved? Log in" not in unverified.data
     client.get("/logout")
 
     login_as("verified-instructor")
@@ -271,7 +275,6 @@ def test_home_page_exposes_instructor_contact_paths(client, catalog):
     for label in (
         "Explore laboratory exercises",
         "Browse simulations",
-        "Create an instructor account",
         "Explore the simulation library",
         "View the source on GitHub",
         "Browse current exercises",
@@ -284,6 +287,21 @@ def test_home_page_exposes_instructor_contact_paths(client, catalog):
     assert 'href="#support"' in body
     assert "For instructors and collaborators" in body
     assert "Bring remote hardware into your course." in body
+    assert "Create an instructor account" not in body
+    assert "verified academic account" not in body
+    assert "instructor-only solution materials" not in body
+
+
+def test_account_pages_describe_instructor_access_accurately(client, catalog):
+    register_body = client.get("/register").data.decode()
+    login_body = client.get("/login").data.decode()
+
+    assert "Instructor access is arranged separately" in register_body
+    assert "Email the REDTAIL team about instructor access" in register_body
+    assert f'href="{INSTRUCTOR_MAILTO}"' in register_body
+    assert "Use your academic email" not in register_body
+    assert "laboratory solutions" not in register_body
+    assert "manage REDTAIL laboratory resources" not in login_body
 
 
 @pytest.mark.parametrize("path", ["/", "/simulations", "/devices", "/login"])

@@ -6,7 +6,7 @@
     <div>
       <p class="eyebrow">{{ gettext("Join the REDTAIL community") }}</p>
       <h1 id="register-story-title">{{ gettext("Teach with real hardware, from anywhere.") }}</h1>
-      <p>{{ gettext("Academic accounts can be verified for access to instructor-only materials and laboratory solutions.") }}</p>
+      <p>{{ gettext("University instructors are encouraged to contact the REDTAIL team about access and available teaching materials.") }}</p>
     </div>
     <p class="auth-note">{{ gettext("Open source · Research led · Classroom ready") }}</p>
   </section>
@@ -16,7 +16,7 @@
       {{ form.hidden_tag() }}
       <p class="eyebrow">{{ gettext("Create your account") }}</p>
       <h2 id="register-title">{{ gettext("Register") }}</h2>
-      <p>{{ gettext("Use your academic email if you plan to request instructor access.") }}</p>
+      <p>{{ gettext("Create a standard REDTAIL account with a username. Instructor access is arranged separately.") }}</p>
 
       <div class="mb-3">
         {{ form.login.label(class_="form-label") }}
@@ -49,6 +49,7 @@
 
       <button type="submit" class="btn btn-primary btn-lg">{{ form.submit.label.text }}</button>
       <p class="auth-switch">{{ gettext("Already have an account?") }} <a href="{{ url_for('login.login') }}">{{ gettext("Log in") }}</a></p>
+      <p class="auth-switch">{{ gettext("Teach at a university?") }} <a href="mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry">{{ gettext("Email the REDTAIL team about instructor access.") }}</a></p>
     </form>
   </section>
 </div>
