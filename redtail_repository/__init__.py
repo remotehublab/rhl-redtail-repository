@@ -85,10 +85,12 @@ def create_app(
                 response.headers["Cache-Control"] = (
                     "public, max-age=604800, stale-while-revalidate=86400"
                 )
-            elif endpoint in {"public.serve_public", "public.serve_uploads"}:
+            elif endpoint == "public.serve_public":
                 response.headers["Cache-Control"] = (
                     "public, max-age=3600, stale-while-revalidate=86400"
                 )
+            elif endpoint == "public.serve_uploads":
+                response.headers["Cache-Control"] = "private, no-store"
         return response
 
     def _list_languages() -> Dict[str, str]:

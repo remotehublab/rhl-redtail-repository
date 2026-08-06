@@ -515,6 +515,24 @@ def replace_document(doc_type, doc_id):
 
 @public_blueprint.route('/uploads/<path:filename>')
 def serve_uploads(filename):
+    normalized_url = f"/uploads/{filename.lstrip('/')}"
+    solution = (
+        db.session.query(LaboratoryExerciseDoc.id)
+        .filter(
+            LaboratoryExerciseDoc.is_solution.is_(True),
+            LaboratoryExerciseDoc.doc_url.in_(
+                (normalized_url, normalized_url.removeprefix('/'))
+            ),
+        )
+        .first()
+    )
+    can_access_solutions = current_user.is_authenticated and (
+        getattr(current_user, 'verified', False)
+        or getattr(current_user, 'role', None) == 'admin'
+    )
+    if solution is not None and not can_access_solutions:
+        abort(404)
+
     upload_folder = current_app.config['UPLOAD_FOLDER']
     return send_from_directory(upload_folder, filename)
 

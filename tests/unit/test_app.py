@@ -62,6 +62,8 @@ def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
         static_image = apply_policy(Response("image"))
     with app.test_request_context("/public/images/example.png"):
         public_image = apply_policy(Response("image"))
+    with app.test_request_context("/uploads/example.png"):
+        uploaded_image = apply_policy(Response("image"))
 
     assert generated.headers["Cache-Control"] == (
         "public, max-age=31536000, immutable"
@@ -72,6 +74,7 @@ def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
     assert public_image.headers["Cache-Control"] == (
         "public, max-age=3600, stale-while-revalidate=86400"
     )
+    assert uploaded_image.headers["Cache-Control"] == "private, no-store"
 
 
 def test_locale_defaults_to_english_outside_request(app):

@@ -143,6 +143,37 @@ def test_admin_can_add_document_and_cover_to_existing_exercise(
     assert len(list(Path(app.config["UPLOAD_FOLDER"]).iterdir())) == 2
 
 
+def test_uploaded_solutions_require_verified_access(
+    client, app, catalog, login_as
+):
+    upload_root = Path(app.config["UPLOAD_FOLDER"])
+    (upload_root / "public-guide.md").write_text("public", encoding="utf-8")
+    (upload_root / "instructor-solution.md").write_text("solution", encoding="utf-8")
+    catalog.exercise_doc.doc_url = "/uploads/public-guide.md"
+    catalog.solution_doc.doc_url = "/uploads/instructor-solution.md"
+    db.session.commit()
+
+    public = client.get("/uploads/public-guide.md")
+    anonymous_solution = client.get("/uploads/instructor-solution.md")
+
+    assert public.status_code == 200
+    assert public.get_data(as_text=True) == "public"
+    assert public.headers["Cache-Control"] == "private, no-store"
+    assert anonymous_solution.status_code == 404
+
+    login_as("student-user")
+    unverified_solution = client.get("/uploads/instructor-solution.md")
+    assert unverified_solution.status_code == 404
+    client.get("/logout")
+
+    login_as("verified-instructor")
+    verified_solution = client.get("/uploads/instructor-solution.md")
+    assert verified_solution.status_code == 200
+    assert verified_solution.get_data(as_text=True) == "solution"
+    assert verified_solution.headers["Cache-Control"] == "private, no-store"
+    assert verified_solution.headers["X-Robots-Tag"] == "noindex, nofollow"
+
+
 def test_admin_can_create_a_fully_related_exercise(client, app, catalog, login_as):
     login_as("admin-user")
     response = client.post(
