@@ -215,6 +215,35 @@ for (const [name, url] of [
   });
 }
 
+test('markdown tables remain accessible on narrow screens', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/simulations/test-simulation/devices/test-board/docs/1-board-guide.md');
+
+  const dimensions = await page.locator('.markdown-block').evaluate((block) => {
+    block.innerHTML = `
+      <table>
+        <thead><tr><th>Signal</th><th>Description</th><th>HAL name</th></tr></thead>
+        <tbody><tr><td>personSensor</td><td>A person is waiting at the door</td><td>GPIOB, GPIO_PIN_9</td></tr></tbody>
+      </table>
+    `;
+    const table = block.querySelector('table') as HTMLTableElement;
+    const tableBounds = table.getBoundingClientRect();
+    return {
+      documentClientWidth: document.documentElement.clientWidth,
+      documentScrollWidth: document.documentElement.scrollWidth,
+      overflowX: getComputedStyle(table).overflowX,
+      tableClientWidth: table.clientWidth,
+      tableScrollWidth: table.scrollWidth,
+      tableRight: tableBounds.right,
+    };
+  });
+
+  expect(dimensions.overflowX).toBe('auto');
+  expect(dimensions.tableScrollWidth).toBeGreaterThan(dimensions.tableClientWidth);
+  expect(dimensions.tableRight).toBeLessThanOrEqual(dimensions.documentClientWidth + 1);
+  expect(dimensions.documentScrollWidth).toBeLessThanOrEqual(dimensions.documentClientWidth + 1);
+});
+
 const instructorMailto = 'mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry';
 
 test('homepage and footer expose the instructor contact path', async ({ page }) => {

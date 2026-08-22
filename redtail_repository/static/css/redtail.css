@@ -2323,6 +2323,12 @@ hr {
     scroll-padding-top: 6rem;
   }
 
+  .markdown-block table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   .navbar-modern {
     min-height: 4.4rem;
   }
