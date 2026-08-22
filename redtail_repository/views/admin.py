@@ -17,6 +17,7 @@ from ..models import (
     LaboratoryExerciseDoc,
     LaboratoryExerciseImage,
     LaboratoryExerciseLevel,
+    MaterialAuditMixin,
     Simulation,
     SimulationCategory,
     SimulationDeviceDocument,
@@ -27,10 +28,38 @@ from ..models import (
 )
 
 
+def _record_material_change(model, is_created: bool):
+    if not isinstance(model, MaterialAuditMixin) or not current_user.is_authenticated:
+        return
+    if is_created:
+        model.mark_created_by(current_user)
+    else:
+        model.mark_updated_by(current_user)
+
+
 class AuthedModelMixIn:
     def is_accessible(self):
         # Allow access only if the user is authenticated and has the 'admin' role
         return current_user.is_authenticated and current_user.role == 'admin'
+
+    def on_model_change(self, form, model, is_created):
+        _record_material_change(model, is_created)
+        return super().on_model_change(form, model, is_created)
+
+
+class AuditedInlineFormAdmin(InlineFormAdmin):
+    form_excluded_columns = (
+        'created_at',
+        'updated_at',
+        'uploaded_by_user_id',
+        'updated_by_user_id',
+        'uploaded_by_user',
+        'updated_by_user',
+    )
+
+    def on_model_change(self, form, model, is_created):
+        _record_material_change(model, is_created)
+        return super().on_model_change(form, model, is_created)
 
 class AuthorModelView(AuthedModelMixIn, ModelView):
     column_list = ['login', 'name']
@@ -86,13 +115,16 @@ class LaboratoryExerciseVideoForm(InlineFormAdmin):
 class LaboratoryExerciseImageForm(InlineFormAdmin):
     pass
 
-class LaboratoryExerciseDocsForm(InlineFormAdmin):
+class LaboratoryExerciseDocsForm(AuditedInlineFormAdmin):
     pass
 
-class SimulationDocForm(InlineFormAdmin):
+class SimulationDocForm(AuditedInlineFormAdmin):
     pass
 
-class DeviceDocForm(InlineFormAdmin):
+class DeviceDocForm(AuditedInlineFormAdmin):
+    pass
+
+class SimulationDeviceDocumentForm(AuditedInlineFormAdmin):
     pass
 
 class SimulationImageForm(InlineFormAdmin):
@@ -147,7 +179,8 @@ class LaboratoryExerciseImagesModelView(AuthedModelMixIn, ModelView):
 class LaboratoryExerciseDocsModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'laboratory_exercise_id', 'laboratory_exercise',
-        'title', 'doc_url', 'description', 'is_solution', 'last_updated'
+        'title', 'doc_url', 'description', 'is_solution', 'last_updated',
+        'created_at', 'updated_at', 'uploaded_by_user', 'updated_by_user'
     ]
     form_columns = [
         'id', 'laboratory_exercise_id', 'laboratory_exercise',
@@ -198,7 +231,7 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
     inline_models = [
         SimulationDocForm(SimulationDoc),
         SimulationImageForm(SimulationImage),
-        SimulationDeviceDocument,
+        SimulationDeviceDocumentForm(SimulationDeviceDocument),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -207,7 +240,8 @@ class SimulationModelView(AuthedModelMixIn, ModelView):
 class SimulationDocModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'simulation_id', 'simulation',
-        'title', 'doc_url', 'description', 'last_updated'
+        'title', 'doc_url', 'description', 'last_updated',
+        'created_at', 'updated_at', 'uploaded_by_user', 'updated_by_user'
     ]
     form_columns = [
         'id', 'simulation_id', 'simulation',
@@ -242,7 +276,8 @@ class DeviceModelView(AuthedModelMixIn, ModelView):
 class DeviceDocModelView(AuthedModelMixIn, ModelView):
     column_list = [
         'id', 'device_id', 'device',
-        'doc_url', 'title', 'description', 'last_updated'
+        'doc_url', 'title', 'description', 'last_updated',
+        'created_at', 'updated_at', 'uploaded_by_user', 'updated_by_user'
     ]
     form_columns = [
         'id', 'device_id', 'device',
@@ -254,8 +289,8 @@ class DeviceDocModelView(AuthedModelMixIn, ModelView):
 
 class SimulationDeviceDocumentModelView(AuthedModelMixIn, ModelView):
     column_list = [
-        'simulation',
-        'device', 'name', 'doc_url'
+        'simulation', 'device', 'name', 'doc_url',
+        'created_at', 'updated_at', 'uploaded_by_user', 'updated_by_user'
     ]
     form_columns = [
         'simulation',

@@ -88,6 +88,19 @@ laboratory_exercise_level_association = Table(
     db.Column('level_id', db.Integer, db.ForeignKey('laboratory_exercise_level.id'), primary_key=True)
 )
 
+
+class MaterialAuditMixin:
+    """Shared attribution helpers for document-like teaching materials."""
+
+    def mark_created_by(self, user):
+        if self.uploaded_by_user_id is None:
+            self.uploaded_by_user_id = user.id
+        self.updated_by_user_id = user.id
+
+    def mark_updated_by(self, user):
+        self.updated_by_user_id = user.id
+
+
 class Author(db.Model):
     __tablename__ = 'author'
 
@@ -204,7 +217,7 @@ class LaboratoryExerciseImage(db.Model):
     laboratory_exercise: Mapped['LaboratoryExercise'] = relationship(
         "LaboratoryExercise", back_populates="laboratory_exercise_images")
 
-class LaboratoryExerciseDoc(db.Model):
+class LaboratoryExerciseDoc(MaterialAuditMixin, db.Model):
     __tablename__ = 'laboratory_exercise_doc'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -218,9 +231,27 @@ class LaboratoryExerciseDoc(db.Model):
         server_default=func.now(),
         onupdate=func.now()
     )
+    created_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+    uploaded_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
+    updated_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
 
     laboratory_exercise: Mapped['LaboratoryExercise'] = relationship(
         "LaboratoryExercise", back_populates="laboratory_exercise_documents"
+    )
+    uploaded_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[uploaded_by_user_id]
+    )
+    updated_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[updated_by_user_id]
     )
 
 class Device(db.Model):
@@ -259,7 +290,7 @@ class Device(db.Model):
     def __str__(self):
         return self.name
 
-class DeviceDoc(db.Model):
+class DeviceDoc(MaterialAuditMixin, db.Model):
     __tablename__ = 'device_doc'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -272,8 +303,26 @@ class DeviceDoc(db.Model):
         server_default=func.now(),
         onupdate=func.now()
     )
+    created_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+    uploaded_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
+    updated_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
 
     device: Mapped['Device'] = relationship("Device", back_populates="device_documents")
+    uploaded_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[uploaded_by_user_id]
+    )
+    updated_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[updated_by_user_id]
+    )
 
 class LaboratoryExerciseLevel(db.Model):
     __tablename__ = 'laboratory_exercise_level'
@@ -360,7 +409,7 @@ class SimulationImage(db.Model):
 
     simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_images")
 
-class SimulationDoc(db.Model):
+class SimulationDoc(MaterialAuditMixin, db.Model):
     __tablename__ = 'simulation_doc'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -373,14 +422,32 @@ class SimulationDoc(db.Model):
         server_default=func.now(),
         onupdate=func.now()
     )
+    created_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+    uploaded_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
+    updated_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
 
     simulation: Mapped['Simulation'] = relationship("Simulation", back_populates="simulation_documents")
+    uploaded_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[uploaded_by_user_id]
+    )
+    updated_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[updated_by_user_id]
+    )
 
     @property
     def slugified_title(self):
         return slugify(self.title)
 
-class SimulationDeviceDocument(db.Model):
+class SimulationDeviceDocument(MaterialAuditMixin, db.Model):
     __tablename__ = 'simulation_device_document'
 
     id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
@@ -388,6 +455,18 @@ class SimulationDeviceDocument(db.Model):
     device_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('device.id'), nullable=False)
     name: Mapped[str] = mapped_column(db.String(100), nullable=False)
     doc_url: Mapped[str] = mapped_column(db.String(2083), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        db.DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+    uploaded_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
+    updated_by_user_id: Mapped[Optional[int]] = mapped_column(
+        db.Integer, db.ForeignKey("user.id"), nullable=True
+    )
 
     simulation: Mapped[Simulation] = relationship(
         back_populates="device_documents"
@@ -395,6 +474,12 @@ class SimulationDeviceDocument(db.Model):
 
     device: Mapped[Device] = relationship(
         back_populates="simulation_documents"
+    )
+    uploaded_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[uploaded_by_user_id]
+    )
+    updated_by_user: Mapped[Optional['User']] = relationship(
+        "User", foreign_keys=[updated_by_user_id]
     )
 
     @property

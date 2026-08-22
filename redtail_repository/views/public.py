@@ -117,7 +117,9 @@ def legacy_exercise(lesson_slug):
 
 
 def _sitemap_lastmod(record):
-    last_updated = getattr(record, "last_updated", None)
+    last_updated = getattr(record, "updated_at", None) or getattr(
+        record, "last_updated", None
+    )
     return last_updated.date().isoformat() if last_updated else None
 
 
@@ -366,6 +368,7 @@ def file_submission():
                     description=description,
                     doc_url=doc_url,
                 )
+                new_doc.mark_created_by(current_user)
                 db.session.add(new_doc)
             else:
                 if exercise_mode == 'new':
@@ -424,12 +427,14 @@ def file_submission():
                     existing_doc.description = description
                     existing_doc.doc_url = doc_url
                     existing_doc.is_solution = is_solution
+                    existing_doc.mark_updated_by(current_user)
                 else:
                     new_doc = LaboratoryExerciseDoc(
                         laboratory_exercise_id=exercise.id,
                         title=title, description=description,
                         doc_url=doc_url, is_solution=is_solution
                     )
+                    new_doc.mark_created_by(current_user)
                     db.session.add(new_doc)
 
             db.session.commit()
@@ -471,6 +476,7 @@ def replace_document(doc_type, doc_id):
     new_title = request.form.get('new_title')
     old_upload_to_remove = None
     new_upload = None
+    document_changed = False
 
     if new_file and new_file.filename != '':
         if doc.doc_url and doc.doc_url.startswith('/uploads/'):
@@ -486,9 +492,14 @@ def replace_document(doc_type, doc_id):
         new_file.save(new_upload)
 
         doc.doc_url = f"/uploads/{unique_filename}"
+        document_changed = True
 
-    if new_title:
+    if new_title and new_title != doc.title:
         doc.title = new_title
+        document_changed = True
+
+    if document_changed:
+        doc.mark_updated_by(current_user)
 
     try:
         db.session.commit()

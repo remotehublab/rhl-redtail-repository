@@ -104,3 +104,30 @@ def test_document_properties_slugify_unicode(app):
     )
     assert doc.slugified_title == "cafe-guide"
     assert device_doc.slugified_name == "board-1"
+
+
+def test_material_audit_fields_cover_every_document_type(app, catalog):
+    documents = (
+        catalog.exercise_doc,
+        catalog.simulation_doc,
+        catalog.device_doc,
+        catalog.simulation_device_doc,
+    )
+
+    for document in documents:
+        assert document.created_at is not None
+        assert document.updated_at is not None
+        assert document.uploaded_by_user_id is None
+        assert document.updated_by_user_id is None
+
+        document.mark_created_by(catalog.instructor)
+        document.mark_updated_by(catalog.admin)
+
+    db.session.commit()
+
+    for document in documents:
+        db.session.refresh(document)
+        assert document.uploaded_by_user_id == catalog.instructor.id
+        assert document.uploaded_by_user is catalog.instructor
+        assert document.updated_by_user_id == catalog.admin.id
+        assert document.updated_by_user is catalog.admin

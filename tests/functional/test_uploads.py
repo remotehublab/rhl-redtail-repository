@@ -1,4 +1,5 @@
 import io
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -111,6 +112,10 @@ def test_admin_can_upload_a_simulation_document(client, app, catalog, login_as):
     document = SimulationDoc.query.filter_by(title="New Simulation Guide").one()
     assert document.simulation_id == catalog.simulation.id
     assert document.description == "A new document"
+    assert document.created_at is not None
+    assert document.updated_at is not None
+    assert document.uploaded_by_user_id == catalog.admin.id
+    assert document.updated_by_user_id == catalog.admin.id
     saved = Path(app.config["UPLOAD_FOLDER"]) / document.doc_url.removeprefix(
         "/uploads/"
     )
@@ -140,6 +145,10 @@ def test_admin_can_add_document_and_cover_to_existing_exercise(
     document = LaboratoryExerciseDoc.query.filter_by(title="Additional Solution").one()
     assert document.is_solution is True
     assert document.laboratory_exercise_id == catalog.exercise.id
+    assert document.created_at is not None
+    assert document.updated_at is not None
+    assert document.uploaded_by_user_id == catalog.admin.id
+    assert document.updated_by_user_id == catalog.admin.id
     db.session.refresh(catalog.exercise)
     assert catalog.exercise.cover_image_url.startswith("/uploads/cover_")
     assert len(list(Path(app.config["UPLOAD_FOLDER"]).iterdir())) == 2
@@ -296,6 +305,8 @@ def test_submission_replaces_only_a_document_owned_by_the_exercise(
     old_file = upload_root / "old.md"
     old_file.write_text("old", encoding="utf-8")
     catalog.exercise_doc.doc_url = "/uploads/old.md"
+    catalog.exercise_doc.mark_created_by(catalog.instructor)
+    catalog.exercise_doc.updated_at = datetime(2000, 1, 1)
     other_exercise = LaboratoryExercise(
         name="Other Exercise",
         slug="other-exercise",
@@ -345,6 +356,9 @@ def test_submission_replaces_only_a_document_owned_by_the_exercise(
     db.session.refresh(catalog.exercise_doc)
     assert catalog.exercise_doc.title == "Replaced Exercise Guide"
     assert catalog.exercise_doc.is_solution is True
+    assert catalog.exercise_doc.uploaded_by_user_id == catalog.instructor.id
+    assert catalog.exercise_doc.updated_by_user_id == catalog.admin.id
+    assert catalog.exercise_doc.updated_at > datetime(2000, 1, 1)
     assert not old_file.exists()
     assert len(list(upload_root.iterdir())) == 1
 
@@ -421,6 +435,8 @@ def test_replace_document_updates_file_and_title_after_commit(
     old_file = upload_root / f"old-{doc_type}.md"
     old_file.write_text("old", encoding="utf-8")
     document.doc_url = f"/uploads/{old_file.name}"
+    document.mark_created_by(catalog.instructor)
+    document.updated_at = datetime(2000, 1, 1)
     db.session.commit()
 
     login_as("admin-user")
@@ -437,6 +453,9 @@ def test_replace_document_updates_file_and_title_after_commit(
     db.session.refresh(document)
     assert document.title == "Replacement Title"
     assert document.doc_url.startswith("/uploads/")
+    assert document.uploaded_by_user_id == catalog.instructor.id
+    assert document.updated_by_user_id == catalog.admin.id
+    assert document.updated_at > datetime(2000, 1, 1)
     assert not old_file.exists()
     new_file = upload_root / document.doc_url.removeprefix("/uploads/")
     assert new_file.read_bytes() == b"replacement"

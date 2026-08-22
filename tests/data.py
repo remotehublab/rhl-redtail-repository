@@ -153,6 +153,7 @@ def seed_catalog():
         simulation_category,
         simulation,
         simulation_doc,
+        simulation_device_doc,
         simulation_image,
         exercise_category,
         level,
@@ -165,6 +166,10 @@ def seed_catalog():
     for record in dated_records:
         if hasattr(record, "last_updated"):
             record.last_updated = fixed_time
+        if hasattr(record, "created_at"):
+            record.created_at = fixed_time
+        if hasattr(record, "updated_at"):
+            record.updated_at = fixed_time
 
     db.session.add_all(
         [
