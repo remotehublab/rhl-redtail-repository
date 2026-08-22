@@ -110,6 +110,31 @@ test('mobile navigation opens and every key page avoids horizontal overflow', as
   ).toBeVisible();
 });
 
+test('learning goals card contains its content on narrow screens', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/laboratory-exercises/test-exercise');
+
+  const dimensions = await page.locator('.learning-goals-sidebar .card').evaluate((card) => {
+    const body = card.querySelector('.card-body') as HTMLElement;
+    const goals = body.firstElementChild as HTMLElement;
+    goals.textContent =
+      'Model the controller, map every signal, enforce endpoint interlocks, ' +
+      'test safe reversal, and document the observed behavior.';
+
+    const cardBounds = card.getBoundingClientRect();
+    const bodyBounds = body.getBoundingClientRect();
+    return {
+      cardBottom: cardBounds.bottom,
+      bodyBottom: bodyBounds.bottom,
+      cardScrollHeight: card.scrollHeight,
+      cardClientHeight: card.clientHeight,
+    };
+  });
+
+  expect(dimensions.bodyBottom).toBeLessThanOrEqual(dimensions.cardBottom + 1);
+  expect(dimensions.cardScrollHeight).toBeLessThanOrEqual(dimensions.cardClientHeight + 1);
+});
+
 test('home video facade loads the privacy-enhanced embed on demand', async ({ page }) => {
   await page.goto('/');
   const playButton = page.getByRole('button', { name: 'Watch the introduction' });

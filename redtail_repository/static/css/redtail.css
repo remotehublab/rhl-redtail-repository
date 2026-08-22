@@ -2301,6 +2301,10 @@ hr {
     position: static;
   }
 
+  .learning-goals-sidebar .card {
+    height: auto !important;
+  }
+
   .detail-content {
     order: 1;
   }
