@@ -1780,6 +1780,12 @@ hr {
   box-shadow: none !important;
 }
 
+.learning-goals-sidebar .card-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  padding: 1rem 1rem 1.2rem;
+}
+
 .page-public-laboratory_exercise .detail-content .card > .card-header,
 .page-public-simulation .detail-content .card > .card-header,
 .page-public-device .device-card > .card-header,

@@ -110,7 +110,7 @@ test('mobile navigation opens and every key page avoids horizontal overflow', as
   ).toBeVisible();
 });
 
-test('learning goals card contains its content on narrow screens', async ({ page }) => {
+test('learning goals card is padded and contains its content on narrow screens', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/laboratory-exercises/test-exercise');
 
@@ -123,14 +123,19 @@ test('learning goals card contains its content on narrow screens', async ({ page
 
     const cardBounds = card.getBoundingClientRect();
     const bodyBounds = body.getBoundingClientRect();
+    const bodyStyle = getComputedStyle(body);
     return {
       cardBottom: cardBounds.bottom,
       bodyBottom: bodyBounds.bottom,
       cardScrollHeight: card.scrollHeight,
       cardClientHeight: card.clientHeight,
+      paddingLeft: Number.parseFloat(bodyStyle.paddingLeft),
+      paddingRight: Number.parseFloat(bodyStyle.paddingRight),
     };
   });
 
+  expect(dimensions.paddingLeft).toBeGreaterThanOrEqual(16);
+  expect(dimensions.paddingRight).toBeGreaterThanOrEqual(16);
   expect(dimensions.bodyBottom).toBeLessThanOrEqual(dimensions.cardBottom + 1);
   expect(dimensions.cardScrollHeight).toBeLessThanOrEqual(dimensions.cardClientHeight + 1);
 });
