@@ -192,7 +192,12 @@ for (const [name, url] of [
     const response = await page.goto(url);
     expect(response?.status()).toBe(200);
 
-    const dimensions = await page.locator('img.documentation-cover').evaluate((image) => {
+    const cover = page.locator('img.documentation-cover');
+    await expect
+      .poll(() => cover.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0))
+      .toBe(true);
+
+    const dimensions = await cover.evaluate((image) => {
       const element = image as HTMLImageElement;
       const bounds = element.getBoundingClientRect();
       return {
@@ -223,7 +228,7 @@ test('markdown tables remain accessible on narrow screens', async ({ page }) => 
     block.innerHTML = `
       <table>
         <thead><tr><th>Signal</th><th>Description</th><th>HAL name</th></tr></thead>
-        <tbody><tr><td>personSensor</td><td>A person is waiting at the door</td><td>GPIOB, GPIO_PIN_9</td></tr></tbody>
+        <tbody><tr><td>personSensor</td><td>A person is waiting at the door</td><td>GPIO_PIN_WITH_AN_INTENTIONALLY_LONG_UNBROKEN_NAME</td></tr></tbody>
       </table>
     `;
     const table = block.querySelector('table') as HTMLTableElement;
