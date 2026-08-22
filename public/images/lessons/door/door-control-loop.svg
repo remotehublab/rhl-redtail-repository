@@ -2,67 +2,71 @@
   <title id="title">Automatic door closed-loop controller</title>
   <desc id="desc">The student controller sends mutually exclusive open and close commands to the simulated door. The door returns open-endpoint, closed-endpoint, and person-detected feedback to the controller.</desc>
   <defs>
-    <marker id="arrow-gold" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L11,5.5 L0,11 z" fill="#85754d"/>
+    <marker id="arrow-gold" markerWidth="16" markerHeight="16" viewBox="0 0 16 16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,1 L15,8 L0,15 z" fill="#85754d"/>
     </marker>
-    <marker id="arrow-purple" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L11,5.5 L0,11 z" fill="#4b2e83"/>
+    <marker id="arrow-purple" markerWidth="16" markerHeight="16" viewBox="0 0 16 16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,1 L15,8 L0,15 z" fill="#3a2266"/>
     </marker>
     <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#2b2140" flood-opacity="0.1"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#2a1b4d" flood-opacity="0.1"/>
     </filter>
+    <clipPath id="controller-clip">
+      <rect x="70" y="110" width="370" height="240" rx="18"/>
+    </clipPath>
   </defs>
 
-  <rect width="1200" height="430" rx="20" fill="#fbfafd"/>
-  <text x="600" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#2b2140">Closed-loop automatic door control</text>
-  <text x="600" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#5d5968">Commands move the door; sensor feedback informs the next safe decision.</text>
+  <rect width="1200" height="430" rx="20" fill="#fdfbf6"/>
+  <text x="600" y="42" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="25" font-weight="700" fill="#2a1b4d">Closed-loop automatic door control</text>
+  <text x="600" y="70" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15" fill="#5e5a69">Commands move the door; sensor feedback informs the next safe decision.</text>
 
   <g filter="url(#soft-shadow)">
     <rect x="70" y="110" width="370" height="240" rx="18" fill="#4b2e83"/>
-    <rect x="760" y="110" width="370" height="240" rx="18" fill="#ffffff" stroke="#d7d1e1" stroke-width="2"/>
+    <rect x="760" y="110" width="370" height="240" rx="18" fill="#ffffff" stroke="#ded7c9" stroke-width="2"/>
   </g>
 
-  <rect x="70" y="110" width="370" height="8" rx="4" fill="#b7a57a"/>
-  <text x="105" y="151" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4" fill="#d9cfb4">STUDENT CONTROLLER</text>
-  <text x="105" y="192" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#ffffff">Read  →  Decide  →  Interlock</text>
-  <text x="105" y="226" font-family="Arial, sans-serif" font-size="16" fill="#eeeaf5">Evaluate occupancy and both end positions.</text>
-  <text x="105" y="252" font-family="Arial, sans-serif" font-size="16" fill="#eeeaf5">Select a safe direction—or stop.</text>
+  <rect x="70" y="110" width="370" height="8" fill="#b7a57a" clip-path="url(#controller-clip)"/>
+  <text x="105" y="151" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.2" fill="#d9cda8">STUDENT CONTROLLER</text>
+  <text x="105" y="192" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="23" font-weight="700" fill="#ffffff">Read → Decide → Interlock</text>
+  <text x="105" y="226" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15.5" fill="#f1edf7">Evaluate occupancy and both end positions.</text>
+  <text x="105" y="252" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15.5" fill="#f1edf7">Select a safe direction—or stop.</text>
 
   <rect x="105" y="284" width="125" height="37" rx="18.5" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.28"/>
-  <text x="167" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">OPEN</text>
+  <text x="167" y="308" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">OPEN</text>
   <circle cx="250" cy="302.5" r="14" fill="#b7a57a"/>
-  <text x="250" y="307" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#2b2140">OR</text>
+  <text x="250" y="307" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#2a1b4d">OR</text>
   <rect x="270" y="284" width="125" height="37" rx="18.5" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.28"/>
-  <text x="332" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">CLOSE</text>
-  <text x="250" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="700" letter-spacing="0.7" fill="#d9cfb4">AT MOST ONE COMMAND ACTIVE</text>
+  <text x="332" y="308" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">CLOSE</text>
+  <text x="250" y="338" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#d9cda8">AT MOST ONE COMMAND ACTIVE</text>
 
   <g transform="translate(800 146)">
-    <rect x="0" y="0" width="92" height="150" rx="8" fill="#f1eef7" stroke="#4b2e83" stroke-width="3"/>
-    <rect x="12" y="13" width="54" height="124" rx="3" fill="#ffffff" stroke="#85754d" stroke-width="2"/>
-    <rect x="55" y="13" width="25" height="124" rx="2" fill="#ddd5e9"/>
-    <circle cx="48" cy="76" r="4" fill="#4b2e83"/>
+    <rect x="0" y="0" width="92" height="150" rx="8" fill="#f1edf7" stroke="#4b2e83" stroke-width="3"/>
+    <rect x="12" y="13" width="68" height="124" rx="3" fill="#ffffff" stroke="#85754d" stroke-width="2"/>
+    <rect x="47" y="18" width="28" height="114" rx="2" fill="#e5deee"/>
+    <line x1="47" y1="18" x2="47" y2="132" stroke="#4b2e83" stroke-width="2"/>
+    <circle cx="56" cy="75" r="3.5" fill="#4b2e83"/>
     <path d="M8 150 H86" stroke="#4b2e83" stroke-width="4" stroke-linecap="round"/>
   </g>
-  <text x="918" y="151" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.4" fill="#6c5e3b">SIMULATED PLANT</text>
-  <text x="918" y="188" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#2b2140">Door mechanism</text>
-  <text x="918" y="221" font-family="Arial, sans-serif" font-size="16" fill="#5d5968">Moves until an endpoint</text>
-  <text x="918" y="246" font-family="Arial, sans-serif" font-size="16" fill="#5d5968">Reports position and presence</text>
-  <rect x="918" y="272" width="175" height="33" rx="16.5" fill="#f7f3e8"/>
-  <text x="1005" y="293" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#6c5e3b">DOOR + SENSORS</text>
+  <text x="914" y="151" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.2" fill="#6f6140">SIMULATED PLANT</text>
+  <text x="914" y="188" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="23" font-weight="700" fill="#2a1b4d">Door mechanism</text>
+  <text x="914" y="221" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15" fill="#5e5a69">Moves to an endpoint</text>
+  <text x="914" y="246" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15" fill="#5e5a69">Reports position and occupancy</text>
+  <rect x="914" y="272" width="178" height="33" rx="16.5" fill="#faf7f0"/>
+  <text x="1003" y="293" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#6f6140">DOOR + SENSORS</text>
 
-  <path d="M440 160 H760" fill="none" stroke="#85754d" stroke-width="4" marker-end="url(#arrow-gold)"/>
+  <path d="M440 160 H752" fill="none" stroke="#85754d" stroke-width="4" marker-end="url(#arrow-gold)"/>
   <circle cx="490" cy="160" r="14" fill="#85754d"/>
-  <text x="490" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">1</text>
-  <text x="600" y="139" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="0.8" fill="#6c5e3b">ACTUATOR COMMANDS</text>
-  <text x="600" y="181" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#5d5968">open  or  close</text>
+  <text x="490" y="165" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">1</text>
+  <text x="600" y="139" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="0.6" fill="#6f6140">ACTUATOR COMMANDS</text>
+  <text x="600" y="181" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" fill="#5e5a69">open or close</text>
 
-  <path d="M760 300 H440" fill="none" stroke="#4b2e83" stroke-width="4" marker-end="url(#arrow-purple)"/>
+  <path d="M760 300 H448" fill="none" stroke="#4b2e83" stroke-width="4" marker-end="url(#arrow-purple)"/>
   <circle cx="710" cy="300" r="14" fill="#4b2e83"/>
-  <text x="710" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">2</text>
-  <text x="600" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="0.8" fill="#4b2e83">SENSOR FEEDBACK</text>
-  <rect x="454" y="309" width="292" height="25" rx="12.5" fill="#fbfafd"/>
-  <text x="600" y="326" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" fill="#5d5968">fully open  •  fully closed  •  person detected</text>
+  <text x="710" y="305" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">2</text>
+  <text x="600" y="278" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="0.6" fill="#4b2e83">SENSOR FEEDBACK</text>
+  <rect x="454" y="307" width="292" height="29" rx="14.5" fill="#fdfbf6"/>
+  <text x="600" y="326" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13.5" fill="#5e5a69">fully open • fully closed • person detected</text>
 
-  <line x1="70" y1="388" x2="1130" y2="388" stroke="#e4e0e9" stroke-width="1"/>
-  <text x="600" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="0.7" fill="#4b2e83">FEEDBACK REPEATS CONTINUOUSLY WHILE THE LAB RUNS</text>
+  <line x1="70" y1="388" x2="1130" y2="388" stroke="#ded7c9" stroke-width="1"/>
+  <text x="600" y="414" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="0.5" fill="#4b2e83">SAMPLE FEEDBACK • UPDATE COMMAND • REPEAT</text>
 </svg>

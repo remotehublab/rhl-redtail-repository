@@ -19,7 +19,7 @@ laboratory exercise. The assignment and its characteristic test scenarios are
 preserved here, while the completed implementation is provided separately to
 verified instructors.
 
-![Automatic door control loop](../../../../images/lessons/door/door-control-loop.svg)
+![Closed-loop automatic door control: the controller chooses open, close, or stop; the simulation reports fully-open, fully-closed, and person-detected inputs before the next update.](../../../../images/lessons/door/door-control-loop.svg)
 
 ## Learning objectives
 
