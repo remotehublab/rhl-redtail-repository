@@ -14,10 +14,12 @@ simulation provides a person detector and two end-position sensors. Your VHDL
 design commands the door to open or close without driving against an end stop
 or issuing contradictory commands.
 
-This activity is based on the original WebLab-Deusto glass-door remote
-laboratory exercise. The assignment and its characteristic test scenarios are
-preserved here, while the completed implementation is provided separately to
-verified instructors.
+The Door 3D simulation and original remote-laboratory exercise were created by
+[WebLab-Deusto at the University of Deusto in Spain](https://weblab.deusto.es).
+The assignment and its characteristic test scenarios are preserved here, while
+the completed implementation is provided separately to verified instructors.
+
+![3D view of the University of Deusto Door simulation showing a school entrance with a closed automatic glass door, brick columns, and the outdoor approach.](../../../../images/lessons/door/door-3d-simulation.jpg)
 
 ![Closed-loop automatic door control: the controller chooses open, close, or stop; the simulation reports fully-open, fully-closed, and person-detected inputs before the next update.](../../../../images/lessons/door/door-control-loop.svg)
 
