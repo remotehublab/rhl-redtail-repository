@@ -45,6 +45,7 @@
 </head>
 
 {% set endpoint = request.endpoint or '' %}
+{% set is_auth_page = endpoint in ['login.login', 'login.register'] %}
 <body class="d-flex flex-column min-vh-100 page-{{ endpoint|replace('.', '-') }}">
   <a class="skip-link" href="#main-content">{{ gettext("Skip to main content") }}</a>
 
@@ -101,11 +102,12 @@
               <a class="btn btn-nav-outline btn-sm px-3"
                 href="{{ url_for('login.logout', url=request.full_path) }}">{{ gettext("Logout") }}</a>
             {% else %}
-              <a class="btn btn-ghost" href="{{ url_for('login.login', url=request.full_path) }}">
+              <a class="btn btn-ghost"
+                href="{{ url_for('login.login') if is_auth_page else url_for('login.login', url=request.full_path) }}">
                 {{ gettext("Log in") }}
               </a>
               <a class="btn btn-brand-primary px-4"
-                href="{{ url_for('login.register', url=request.full_path) }}">
+                href="{{ url_for('login.register') }}">
                 {{ gettext("Register") }}
               </a>
             {% endif %}

@@ -65,6 +65,50 @@ test('login protects admin submission and rejects external redirects', async ({ 
   await page.getByLabel('Password').fill('test-password');
   await page.getByRole('button', { name: 'Log in' }).click();
   await expect(page).toHaveURL('http://127.0.0.1:5010/');
+
+  await page.context().clearCookies();
+  await page.goto('/login?url=https://example.test');
+  await page.getByLabel('Username').fill('admin-user');
+  await page.getByLabel('Password').fill('test-password');
+  await page.getByRole('button', { name: 'Log in' }).click();
+  await expect(page).toHaveURL('http://127.0.0.1:5010/');
+});
+
+test('auth header links stay clean and preserve legitimate return paths', async ({ page }) => {
+  for (const path of [
+    '/login',
+    '/login?url=/register?url%3D/login?',
+    '/register',
+    '/register?url=/login?url%3D/register?',
+  ]) {
+    await page.goto(path);
+    const accountNavigation = page.locator('.nav-account');
+    await expect(
+      accountNavigation.getByRole('link', { name: 'Log in', exact: true }),
+    ).toHaveAttribute('href', '/login');
+    await expect(
+      accountNavigation.getByRole('link', { name: 'Register', exact: true }),
+    ).toHaveAttribute('href', '/register');
+  }
+
+  await page.goto('/devices?framework=native');
+  const accountNavigation = page.locator('.nav-account');
+  const loginLink = accountNavigation.getByRole('link', { name: 'Log in', exact: true });
+  const loginHref = await loginLink.getAttribute('href');
+  expect(loginHref).not.toBeNull();
+  const loginUrl = new URL(loginHref!, page.url());
+  expect(loginUrl.pathname).toBe('/login');
+  expect(loginUrl.searchParams.get('url')).toBe('/devices?framework=native');
+  await expect(
+    accountNavigation.getByRole('link', { name: 'Register', exact: true }),
+  ).toHaveAttribute('href', '/register');
+
+  await loginLink.click();
+  await page.getByLabel('Username').fill('admin-user');
+  await page.getByLabel('Password').fill('test-password');
+  await page.getByRole('button', { name: 'Log in' }).click();
+  await expect(page).toHaveURL(/\/devices\?framework=native$/);
+  await expect(page.getByText('Test Board', { exact: true })).toBeVisible();
 });
 
 test('admin can upload a simulation document in the browser', async ({ page }, testInfo) => {

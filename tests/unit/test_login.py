@@ -1,8 +1,19 @@
+import re
+from html import unescape
+from urllib.parse import parse_qs, urlsplit
+
 import pytest
 
 from redtail_repository import db
 from redtail_repository.models import User
 from redtail_repository.views.login import is_safe_local_redirect
+
+
+def response_hrefs(response):
+    return [
+        unescape(href)
+        for href in re.findall(r'href="([^"]+)"', response.get_data(as_text=True))
+    ]
 
 
 @pytest.mark.parametrize("target", ["/", "/simulations", "/path?query=yes"])
@@ -15,6 +26,39 @@ def test_safe_local_redirects(target):
 )
 def test_unsafe_redirects_are_rejected(target):
     assert not is_safe_local_redirect(target)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/login",
+        "/login?url=/laboratory-exercises?",
+        "/register",
+        "/register?url=/login?url%3D/laboratory-exercises%3F",
+    ],
+)
+def test_auth_pages_do_not_nest_header_return_urls(client, path):
+    response = client.get(path)
+
+    assert response.status_code == 200
+    hrefs = response_hrefs(response)
+    assert "/login" in hrefs
+    assert "/register" in hrefs
+    assert not any(href.startswith("/login?url=") for href in hrefs)
+    assert not any(href.startswith("/register?url=") for href in hrefs)
+
+
+def test_header_login_preserves_legitimate_internal_return_path(client, catalog):
+    response = client.get("/devices?framework=native")
+
+    assert response.status_code == 200
+    hrefs = response_hrefs(response)
+    login_href = next(href for href in hrefs if href.startswith("/login?url="))
+    assert parse_qs(urlsplit(login_href).query) == {
+        "url": ["/devices?framework=native"]
+    }
+    assert "/register" in hrefs
+    assert not any(href.startswith("/register?") for href in hrefs)
 
 
 def test_registration_validates_and_logs_user_in(client, app):
@@ -91,6 +135,15 @@ def test_login_logout_and_redirect_handling(client, catalog):
     assert legacy.status_code == 302
     assert legacy.location == "/devices"
 
+    client.get("/logout")
+    query_return = client.post(
+        "/login",
+        query_string={"url": "/devices?framework=native"},
+        data={"username": "admin-user", "password": "test-password"},
+    )
+    assert query_return.status_code == 302
+    assert query_return.location == "/devices?framework=native"
+
 
 def test_login_never_redirects_to_external_host(client, catalog):
     response = client.post(
@@ -99,6 +152,15 @@ def test_login_never_redirects_to_external_host(client, catalog):
     )
     assert response.status_code == 302
     assert response.location == "/"
+
+    client.get("/logout")
+    legacy_response = client.post(
+        "/login",
+        query_string={"url": "https://evil.test"},
+        data={"username": "admin-user", "password": "test-password"},
+    )
+    assert legacy_response.status_code == 302
+    assert legacy_response.location == "/"
 
     response = client.get("/logout?url=https://evil.test")
     assert response.location == "/"
