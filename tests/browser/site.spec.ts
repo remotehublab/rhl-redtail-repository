@@ -154,34 +154,42 @@ test('mobile navigation opens and every key page avoids horizontal overflow', as
   ).toBeVisible();
 });
 
-test('learning goals card is padded and contains its content on narrow screens', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/laboratory-exercises/test-exercise');
+test('learning goals card is padded and contains long content', async ({ page }) => {
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/laboratory-exercises/test-exercise');
 
-  const dimensions = await page.locator('.learning-goals-sidebar .card').evaluate((card) => {
-    const body = card.querySelector('.card-body') as HTMLElement;
-    const goals = body.firstElementChild as HTMLElement;
-    goals.textContent =
-      'Model the controller, map every signal, enforce endpoint interlocks, ' +
-      'test safe reversal, and document the observed behavior.';
+    const dimensions = await page.locator('.learning-goals-sidebar .card').evaluate((card) => {
+      const body = card.querySelector('.card-body') as HTMLElement;
+      const goals = body.firstElementChild as HTMLElement;
+      goals.textContent =
+        'Translate rain-driven behavior into deterministic controller logic; ' +
+        'map every signal to the remote hardware interface; distinguish ' +
+        'controller-owned movement from simulation-owned reversal; stop safely ' +
+        'on contradictory endpoint feedback; and test pause, resume, automatic ' +
+        'reversal, optional-button isolation, fault, and recovery.';
 
-    const cardBounds = card.getBoundingClientRect();
-    const bodyBounds = body.getBoundingClientRect();
-    const bodyStyle = getComputedStyle(body);
-    return {
-      cardBottom: cardBounds.bottom,
-      bodyBottom: bodyBounds.bottom,
-      cardScrollHeight: card.scrollHeight,
-      cardClientHeight: card.clientHeight,
-      paddingLeft: Number.parseFloat(bodyStyle.paddingLeft),
-      paddingRight: Number.parseFloat(bodyStyle.paddingRight),
-    };
-  });
+      const cardBounds = card.getBoundingClientRect();
+      const bodyBounds = body.getBoundingClientRect();
+      const bodyStyle = getComputedStyle(body);
+      return {
+        cardBottom: cardBounds.bottom,
+        bodyBottom: bodyBounds.bottom,
+        cardScrollHeight: card.scrollHeight,
+        cardClientHeight: card.clientHeight,
+        paddingLeft: Number.parseFloat(bodyStyle.paddingLeft),
+        paddingRight: Number.parseFloat(bodyStyle.paddingRight),
+      };
+    });
 
-  expect(dimensions.paddingLeft).toBeGreaterThanOrEqual(16);
-  expect(dimensions.paddingRight).toBeGreaterThanOrEqual(16);
-  expect(dimensions.bodyBottom).toBeLessThanOrEqual(dimensions.cardBottom + 1);
-  expect(dimensions.cardScrollHeight).toBeLessThanOrEqual(dimensions.cardClientHeight + 1);
+    expect(dimensions.paddingLeft).toBeGreaterThanOrEqual(16);
+    expect(dimensions.paddingRight).toBeGreaterThanOrEqual(16);
+    expect(dimensions.bodyBottom).toBeLessThanOrEqual(dimensions.cardBottom + 1);
+    expect(dimensions.cardScrollHeight).toBeLessThanOrEqual(dimensions.cardClientHeight + 1);
+  }
 });
 
 test('home video facade loads the privacy-enhanced embed on demand', async ({ page }) => {
