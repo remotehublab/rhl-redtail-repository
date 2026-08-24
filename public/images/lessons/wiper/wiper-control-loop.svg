@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="450" viewBox="0 0 1200 450" role="img" aria-labelledby="title desc">
+  <title id="title">One-bit windshield-wiper control loop</title>
+  <desc id="desc">The student controller sends one move command to the University of Deusto Wiper simulation. The simulation owns blade direction and endpoint reversal, and returns rain, left-limit, right-limit, and optional M and P button inputs.</desc>
+  <defs>
+    <marker id="gold-arrow" markerWidth="16" markerHeight="16" viewBox="0 0 16 16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,1 L15,8 L0,15 z" fill="#85754d"/></marker>
+    <marker id="purple-arrow" markerWidth="16" markerHeight="16" viewBox="0 0 16 16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,1 L15,8 L0,15 z" fill="#4b2e83"/></marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#2a1b4d" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1200" height="450" rx="20" fill="#fdfbf6"/>
+  <text x="600" y="43" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="25" font-weight="700" fill="#2a1b4d">One-bit Wiper control</text>
+  <text x="600" y="72" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15" fill="#5e5a69">The controller decides whether to move; the simulation owns direction and reversal.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="112" width="370" height="242" rx="18" fill="#4b2e83"/>
+    <rect x="760" y="112" width="370" height="242" rx="18" fill="#ffffff" stroke="#ded7c9" stroke-width="2"/>
+  </g>
+  <rect x="70" y="112" width="370" height="8" rx="4" fill="#b7a57a"/>
+  <text x="105" y="153" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.2" fill="#d9cda8">STUDENT CONTROLLER</text>
+  <text x="105" y="193" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Sense rain. Stop on fault.</text>
+  <text x="105" y="228" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15.5" fill="#f1edf7">Rain requests continuous wiping.</text>
+  <text x="105" y="255" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15.5" fill="#f1edf7">Dual endpoint feedback is impossible.</text>
+  <rect x="105" y="286" width="290" height="42" rx="21" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.28"/>
+  <text x="250" y="313" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">MOVE = 0 OR 1</text>
+
+  <g transform="translate(790 206) scale(0.64)">
+    <path d="M8 115 C32 45 70 45 92 115" fill="none" stroke="#4b2e83" stroke-width="12" stroke-linecap="round"/>
+    <path d="M92 115 C116 45 154 45 176 115" fill="none" stroke="#85754d" stroke-width="12" stroke-linecap="round"/>
+    <line x1="8" y1="122" x2="176" y2="122" stroke="#ded7c9" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="8" cy="122" r="8" fill="#4b2e83"/>
+    <circle cx="176" cy="122" r="8" fill="#85754d"/>
+  </g>
+  <text x="945" y="153" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.2" fill="#6f6140">DEUSTO SIMULATION</text>
+  <text x="945" y="190" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="23" font-weight="700" fill="#2a1b4d">Wiper mechanism</text>
+  <text x="930" y="225" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14.5" fill="#5e5a69">Moves while enabled</text>
+  <text x="930" y="250" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14.5" fill="#5e5a69">Reverses at each limit</text>
+  <rect x="914" y="292" width="172" height="33" rx="16.5" fill="#faf7f0"/>
+  <text x="1000" y="313" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#6f6140">BLADE + SENSORS</text>
+
+  <path d="M440 165 H752" fill="none" stroke="#85754d" stroke-width="4" marker-end="url(#gold-arrow)"/>
+  <text x="600" y="143" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#6f6140">MOVE COMMAND</text>
+  <text x="600" y="186" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" fill="#5e5a69">move</text>
+
+  <path d="M760 306 H448" fill="none" stroke="#4b2e83" stroke-width="4" marker-end="url(#purple-arrow)"/>
+  <text x="600" y="282" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#4b2e83">SENSOR FEEDBACK</text>
+  <rect x="460" y="316" width="280" height="28" rx="14" fill="#fdfbf6"/>
+  <text x="600" y="335" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="13" fill="#5e5a69">rain • right limit • left limit • M • P</text>
+
+  <line x1="70" y1="397" x2="1130" y2="397" stroke="#ded7c9" stroke-width="1"/>
+  <text x="600" y="425" text-anchor="middle" font-family="'Avenir Next', Avenir, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="0.5" fill="#4b2e83">SAMPLE INPUTS • APPLY MOVE • REPEAT</text>
+</svg>
