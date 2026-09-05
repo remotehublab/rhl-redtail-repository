@@ -22,6 +22,12 @@ const documentationPages = [
 
 const browserCheckedPages = [...publicPages, ...documentationPages] as const;
 
+const errorPages = [
+  ['access restricted', '/_test/errors/403', 403, 'Access restricted'],
+  ['page not found', '/missing-page', 404, 'Page not found'],
+  ['server error', '/_test/errors/500', 500, 'Something went wrong'],
+] as const;
+
 test.beforeEach(async ({ page }) => {
   await page.route(/youtube\.com|youtube-nocookie\.com|youtu\.be/, (route) =>
     route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html>' }),
@@ -41,6 +47,46 @@ for (const [name, url] of browserCheckedPages) {
     await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible();
     await expect(page.locator('footer')).toBeVisible();
     expect(errors).toEqual([]);
+  });
+}
+
+for (const [name, url, statusCode, heading] of errorPages) {
+  test(`${name} page is branded and recoverable`, async ({ page }) => {
+    const failedAssets: string[] = [];
+    const pageErrors: string[] = [];
+    page.on('response', (response) => {
+      if (response.status() >= 400 && response.request().resourceType() !== 'document') {
+        failedAssets.push(`${response.status()} ${response.url()}`);
+      }
+    });
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+
+    const response = await page.goto(url);
+    expect(response?.status()).toBe(statusCode);
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(page.locator('.error-code')).toHaveText(String(statusCode));
+    await expect(page.getByRole('link', { name: 'Go to home' })).toHaveAttribute('href', '/');
+    await expect(page.getByRole('link', { name: 'Browse exercises' })).toHaveAttribute(
+      'href',
+      '/laboratory-exercises',
+    );
+    await expect(page.getByRole('link', { name: 'Explore simulations' })).toHaveAttribute(
+      'href',
+      '/simulations',
+    );
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible();
+    await expect(page.locator('footer')).toBeVisible();
+    expect(failedAssets).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test(`${name} page has no WCAG A/AA accessibility violations`, async ({ page }) => {
+    const response = await page.goto(url);
+    expect(response?.status()).toBe(statusCode);
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(results.violations).toEqual([]);
   });
 }
 

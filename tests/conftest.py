@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from redtail_repository import create_app, db
+from tests.error_routes import register_test_error_routes
 
 
 @pytest.fixture
@@ -22,8 +23,10 @@ def app(tmp_path: Path):
             "UPLOAD_FOLDER": str(upload_folder),
             "KNOWN_DOMAINS": ("docs.example.test",),
             "PUBLIC_BASE_URL": "https://redtail.example.test",
+            "PROPAGATE_EXCEPTIONS": False,
         },
     )
+    register_test_error_routes(application)
 
     with application.app_context():
         db.create_all()

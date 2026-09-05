@@ -66,6 +66,9 @@ def create_app(
     app.register_blueprint(public_blueprint, url_prefix='/')
     app.register_blueprint(login_blueprint, url_prefix='/')
 
+    from .errors import register_error_handlers
+    register_error_handlers(app)
+
     from .seo import robots_directive
 
     @app.after_request
@@ -79,7 +82,12 @@ def create_app(
         if directive:
             response.headers.setdefault("X-Robots-Tag", directive)
 
-        if response.status_code < 400:
+        if response.status_code >= 400:
+            response.headers["Cache-Control"] = (
+                "no-store, no-cache, must-revalidate"
+            )
+            response.headers["Pragma"] = "no-cache"
+        else:
             endpoint = request.endpoint or ""
             filename = (request.view_args or {}).get("filename", "")
             if endpoint == "static" and filename.startswith("gen/"):

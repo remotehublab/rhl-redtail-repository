@@ -7,6 +7,7 @@ from pathlib import Path
 
 from redtail_repository import create_app, db
 from tests.data import seed_catalog
+from tests.error_routes import register_test_error_routes
 
 
 def build_browser_app():
@@ -27,8 +28,10 @@ def build_browser_app():
             "UPLOAD_FOLDER": str(upload_folder),
             "SQLALCHEMY_DATABASE_URI": f"sqlite:///{runtime_root / 'browser.sqlite'}",
             "KNOWN_DOMAINS": ("docs.example.test",),
+            "PROPAGATE_EXCEPTIONS": False,
         },
     )
+    register_test_error_routes(app)
     with app.app_context():
         db.create_all()
         seed_catalog()

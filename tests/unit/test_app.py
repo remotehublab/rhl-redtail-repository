@@ -64,6 +64,8 @@ def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
         public_image = apply_policy(Response("image"))
     with app.test_request_context("/uploads/example.png"):
         uploaded_image = apply_policy(Response("image"))
+    with app.test_request_context("/missing"):
+        error = apply_policy(Response("missing", status=404))
 
     assert generated.headers["Cache-Control"] == (
         "public, max-age=31536000, immutable"
@@ -75,6 +77,11 @@ def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
         "public, max-age=3600, stale-while-revalidate=86400"
     )
     assert uploaded_image.headers["Cache-Control"] == "private, no-store"
+    assert error.headers["Cache-Control"] == (
+        "no-store, no-cache, must-revalidate"
+    )
+    assert error.headers["Pragma"] == "no-cache"
+    assert error.headers["X-Robots-Tag"] == "noindex, noarchive"
     for response in (generated, static_image, public_image, uploaded_image):
         assert response.headers["X-Content-Type-Options"] == "nosniff"
         assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
@@ -89,6 +96,23 @@ def test_production_cookie_policy_is_secure():
     assert app.config["REMEMBER_COOKIE_HTTPONLY"] is True
     assert app.config["REMEMBER_COOKIE_SECURE"] is True
     assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Lax"
+
+
+def test_production_public_file_fallback_uses_branded_not_found_page():
+    app = create_app(
+        "production",
+        {
+            "SQLALCHEMY_DATABASE_URI": "sqlite://",
+            "SECRET_KEY": "test-secret-key",
+            "SERVE_PUBLIC_FILES": False,
+        },
+    )
+
+    response = app.test_client().get("/public/missing-guide.md")
+
+    assert response.status_code == 404
+    assert b'<h1 id="error-title">Page not found</h1>' in response.data
+    assert b"Public file not found." in response.data
 
 
 def test_locale_defaults_to_english_outside_request(app):

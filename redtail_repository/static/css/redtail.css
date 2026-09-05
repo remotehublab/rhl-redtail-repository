@@ -554,6 +554,78 @@ hr {
 }
 
 /* --------------------------------------------------------------------------
+   Error pages
+   -------------------------------------------------------------------------- */
+
+.error-page-shell {
+  display: grid;
+  min-height: clamp(32rem, 62vh, 46rem);
+  padding-bottom: clamp(4rem, 9vh, 7rem);
+  padding-top: clamp(4rem, 9vh, 7rem);
+  place-items: center;
+}
+
+.error-layout {
+  align-items: center;
+  display: grid;
+  gap: clamp(2.5rem, 8vw, 7rem);
+  grid-template-columns: minmax(15rem, 0.75fr) minmax(19rem, 1fr);
+  max-width: 64rem;
+  width: 100%;
+}
+
+.error-code {
+  color: #8975a4;
+  font-family: var(--rt-font-serif);
+  font-size: clamp(9rem, 21vw, 17rem);
+  font-weight: 700;
+  letter-spacing: -0.085em;
+  line-height: 0.72;
+  margin: 0;
+  text-align: center;
+  user-select: none;
+}
+
+.error-copy {
+  border-left: 1px solid var(--rt-gold);
+  padding: 1rem 0 1rem clamp(1.75rem, 4vw, 3.5rem);
+}
+
+.error-copy h1 {
+  font-size: clamp(2.65rem, 5vw, 4.75rem);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  margin: 0;
+  max-width: 10ch;
+}
+
+.error-message {
+  color: var(--rt-graphite);
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  margin: 1.5rem 0 0;
+  max-width: 35rem;
+}
+
+.error-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.25rem;
+  margin-top: 2rem;
+}
+
+.error-actions .btn {
+  min-height: 2.75rem;
+  padding: 0.55rem 1rem;
+}
+
+.error-text-link {
+  color: var(--rt-purple);
+  font-weight: 700;
+  padding: 0.55rem 0;
+}
+
+/* --------------------------------------------------------------------------
    Home — hero
    -------------------------------------------------------------------------- */
 
@@ -2707,6 +2779,46 @@ hr {
 
   .page-shell {
     padding-top: 1.75rem;
+  }
+
+  .error-page-shell {
+    min-height: 31rem;
+    padding-bottom: 4rem;
+    padding-top: 3.5rem;
+  }
+
+  .error-layout {
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .error-code {
+    font-size: clamp(7.5rem, 39vw, 10rem);
+    text-align: left;
+  }
+
+  .error-copy {
+    border-left: 0;
+    border-top: 1px solid var(--rt-gold);
+    padding: 2rem 0 0;
+  }
+
+  .error-copy h1 {
+    font-size: clamp(2.5rem, 12vw, 3.6rem);
+  }
+
+  .error-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .error-actions .btn {
+    text-align: center;
+    width: 100%;
+  }
+
+  .error-text-link {
+    align-self: flex-start;
   }
 
   .catalog-mobile-heading {

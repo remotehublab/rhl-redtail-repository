@@ -33,6 +33,9 @@ const pages = [
   ['registration', '/register'],
   ['authors', '/authors'],
   ['author-detail', '/authors/1'],
+  ['error-403', '/_test/errors/403'],
+  ['error-404', '/missing-page'],
+  ['error-500', '/_test/errors/500'],
 ] as const;
 
 for (const [name, url] of pages) {

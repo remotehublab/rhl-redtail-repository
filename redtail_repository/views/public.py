@@ -75,6 +75,25 @@ LEGACY_DEVICE_SLUGS = {
 }
 
 
+def _document_response(response):
+    if not (
+        isinstance(response, tuple)
+        and len(response) == 2
+        and isinstance(response[1], int)
+    ):
+        return response
+
+    status_code = response[1]
+    messages = {
+        403: gettext("This document cannot be accessed."),
+        404: gettext("The requested document could not be found."),
+        500: gettext("We could not load this document. Please try again later."),
+    }
+    if status_code in messages:
+        abort(status_code, description=messages[status_code])
+    return response
+
+
 @public_blueprint.route('/')
 def index():
     return render_template(
@@ -229,14 +248,6 @@ def sitemap_xml():
         headers={"Cache-Control": "public, max-age=3600"},
     )
 
-# This should be at app level, and if the template makes calls like url_for('.lessons') it will fail. Let's talk about this in the next meeting
-# @public_blueprint.app_errorhandler(404)
-# def page_not_found(error):
-#     response = make_response(render_template("public/error.html", message=gettext("The page doesn't exist.")), 404)
-#     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
-#     return response
-
-
 @public_blueprint.route('/authors/<author_id>')
 def view_author(author_id):
     author = (
@@ -249,7 +260,7 @@ def view_author(author_id):
         .first()
     )
     if not author:
-        return render_template("public/error.html", message=gettext("Author not found")), 404
+        abort(404, description=gettext("Author not found."))
 
     laboratory_exercises = sorted(
         (exercise for exercise in author.laboratory_exercises if exercise.active),
@@ -687,7 +698,7 @@ def laboratory_exercise(laboratory_exercise_slug):
                     ),
                     code=301,
                 )
-        return render_template("public/error.html", message=gettext("Laboratory Exercise not found")), 404
+        abort(404, description=gettext("Laboratory exercise not found."))
 
     devices_by_id = {device.id: device for device in Device.query.all()}
     all_frameworks = DeviceFramework.query.filter(
@@ -858,7 +869,7 @@ def simulation(simulation_slug):
     ).first()
 
     if not simulation:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation not found."))
 
     # Organize frameworks by device for consistency with parent route
     devices_by_id = {}
@@ -948,14 +959,14 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
     ).first()
 
     if not simulation:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation not found."))
 
     doc = db.session.query(SimulationDoc).filter_by(id=doc_id, simulation_id=simulation.id).first()
     if doc is None:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation document not found."))
 
     if not doc.doc_url.lower().endswith('.md'):
-        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+        abort(404, description=gettext("Markdown document not found."))
 
     # Organize frameworks by device for consistency with parent route
     devices_by_id = {}
@@ -982,7 +993,7 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
         for device_id in devices_to_frameworks
     ]
 
-    response = _get_html(doc.doc_url, document_layout=True)
+    response = _document_response(_get_html(doc.doc_url, document_layout=True))
     if not isinstance(response, str):
         return response
 
@@ -1077,36 +1088,36 @@ def simulation_doc_word(simulation_slug, doc_id: int, title):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
 
     if not simulation:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation not found."))
 
     doc = db.session.query(SimulationDoc).filter_by(id=doc_id, simulation_id=simulation.id).first()
     if doc is None:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation document not found."))
 
     if not doc.doc_url.lower().endswith('.md'):
-        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+        abort(404, description=gettext("Markdown document not found."))
 
     title = f"{simulation.name}-{doc.title}.docx"
 
-    return _get_word(doc.doc_url, title)
+    return _document_response(_get_word(doc.doc_url, title))
 
 @public_blueprint.route('/simulations/<simulation_slug>/devices/<device_slug>/docs/<int:doc_id>-<name>.md')
 def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int, name):
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
 
     if not simulation:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation not found."))
 
     device = db.session.query(Device).filter_by(slug=device_slug).first()
     if not device:
-        return render_template("public/error.html", message=gettext("Device not found")), 404
+        abort(404, description=gettext("Device not found."))
 
     doc = db.session.query(SimulationDeviceDocument).filter_by(id=doc_id, simulation_id=simulation.id, device_id=device.id).first()
     if doc is None:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation device document not found."))
 
     if not doc.doc_url.lower().endswith('.md'):
-        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+        abort(404, description=gettext("Markdown document not found."))
 
     # Organize frameworks by device for consistency with parent route
     devices_by_id = {}
@@ -1133,7 +1144,7 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
         for device_id in devices_to_frameworks
     ]
 
-    response = _get_html(doc.doc_url, document_layout=True)
+    response = _document_response(_get_html(doc.doc_url, document_layout=True))
     if not isinstance(response, str):
         return response
 
@@ -1246,23 +1257,30 @@ def simulation_device_doc_word(simulation_slug: str, device_slug: str, doc_id: i
     simulation = db.session.query(Simulation).filter_by(slug=simulation_slug).first()
 
     if not simulation:
-        return render_template("public/error.html", message=gettext("Simulation not found")), 404
+        abort(404, description=gettext("Simulation not found."))
 
     device = db.session.query(Device).filter_by(slug=device_slug).first()
     if not device:
-        return render_template("public/error.html", message=gettext("Device not found")), 404
+        abort(404, description=gettext("Device not found."))
 
     doc = db.session.query(SimulationDeviceDocument).filter_by(id=doc_id, simulation_id=simulation.id, device_id=device.id).first()
     if doc is None:
-        return render_template("public/error.html", message=gettext("Simulation Device Document not found for %(device_name)s and %(simulation_name)s", simulation_name=simulation.name, device_name=device.name)), 404
+        abort(
+            404,
+            description=gettext(
+                "Simulation device document not found for %(device_name)s and %(simulation_name)s.",
+                simulation_name=simulation.name,
+                device_name=device.name,
+            ),
+        )
 
 
     if not doc.doc_url.lower().endswith('.md'):
-        return render_template("public/error.html", message=gettext("Document is not Markdown")), 404
+        abort(404, description=gettext("Markdown document not found."))
 
     title = f"{simulation.name}-{device.name}-{doc.name}.docx"
 
-    return _get_word(doc.doc_url, title)
+    return _document_response(_get_word(doc.doc_url, title))
 
 
 
@@ -1339,7 +1357,7 @@ def device(device_slug):
                     url_for('public.device', device_slug=current_device.slug),
                     code=301,
                 )
-        return render_template("public/error.html", message=gettext("Device not found")), 404
+        abort(404, description=gettext("Device not found."))
 
     return render_template(
         "public/device.html",
@@ -1375,7 +1393,7 @@ def md_viewer(path):
     if is_solution and not _current_user_can_access_solutions():
         abort(404)
 
-    response = _get_html(path)
+    response = _document_response(_get_html(path))
     if not isinstance(response, str):
         return response
     metadata = page_metadata(
@@ -1403,7 +1421,7 @@ def word_converter(path):
     if is_solution and not _current_user_can_access_solutions():
         abort(404)
 
-    response = _get_word(path)
+    response = _document_response(_get_word(path))
     if is_solution and isinstance(response, Response):
         response.headers["Cache-Control"] = "private, no-store"
         response.headers["X-Robots-Tag"] = "noindex, nofollow"
@@ -1736,4 +1754,4 @@ def serve_public(filename: str):
     if current_app.debug or current_app.config['SERVE_PUBLIC_FILES']:
         return send_from_directory(current_app.config['PUBLIC_FOLDER'], filename)
 
-    return "/public only works in development", 404
+    abort(404, description=gettext("Public file not found."))
