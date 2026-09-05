@@ -152,6 +152,27 @@ def test_get_html_converts_markdown_and_preserves_errors(app, monkeypatch):
     assert public._get_html("bad.txt") == ("bad", 400)
 
 
+def test_get_html_document_layout_offsets_headings_and_wraps_tables(
+    app, monkeypatch
+):
+    monkeypatch.setattr(
+        public,
+        "_get_md",
+        lambda _path: "# Heading\n\n## Detail\n\n| Signal | Pin |\n| --- | --- |\n| a | 1 |",
+    )
+
+    html = public._get_html("public/docs/guide.md", document_layout=True)
+
+    assert '<h2>Heading</h2>' in html
+    assert '<h3>Detail</h3>' in html
+    assert '<h1>' not in html
+    assert 'class="table-scroll"' in html
+    assert 'tabindex="0"' in html
+    assert 'role="region"' in html
+    assert 'aria-label="Scrollable data table"' in html
+    assert '<table>' in html
+
+
 def test_get_word_converts_local_markdown_and_cleans_output(app, tmp_path, monkeypatch):
     markdown = Path(app.config["PROJECT_ROOT"]) / "guide.md"
     markdown.write_text("# Guide", encoding="utf-8")

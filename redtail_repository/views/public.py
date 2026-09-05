@@ -7,6 +7,7 @@ import traceback
 from functools import wraps
 from urllib.parse import urljoin, urlparse, urlunparse
 from uuid import uuid4
+from xml.etree.ElementTree import Element
 
 import pypandoc
 import requests
@@ -28,6 +29,8 @@ from flask import (
 from flask_babel import gettext
 from flask_login import current_user
 from markdown import markdown
+from markdown.extensions import Extension
+from markdown.treeprocessors import Treeprocessor
 from slugify import slugify
 from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
@@ -942,7 +945,7 @@ def simulation_doc_md(simulation_slug, doc_id: int, title: str):
         for device_id in devices_to_frameworks
     ]
 
-    response = _get_html(doc.doc_url)
+    response = _get_html(doc.doc_url, document_layout=True)
     if not isinstance(response, str):
         return response
 
@@ -1093,7 +1096,7 @@ def simulation_device_doc_md(simulation_slug: str, device_slug: str, doc_id: int
         for device_id in devices_to_frameworks
     ]
 
-    response = _get_html(doc.doc_url)
+    response = _get_html(doc.doc_url, document_layout=True)
     if not isinstance(response, str):
         return response
 
@@ -1626,12 +1629,62 @@ def get_image_base_url(path):
         directory = os.path.dirname(path).replace('\\', '/').strip('/')
         return f'/{directory}/' if directory else '/'
 
-def _get_html(path: str):
+class _DocumentStructureTreeprocessor(Treeprocessor):
+    """Keep embedded Markdown subordinate to the page title and tables usable."""
+
+    def __init__(self, md, table_label: str):
+        super().__init__(md)
+        self.table_label = table_label
+
+    def run(self, root):
+        for element in root.iter():
+            heading = re.fullmatch(r"h([1-5])", element.tag)
+            if heading:
+                element.tag = f"h{int(heading.group(1)) + 1}"
+
+        # Snapshot the original tree so a newly inserted wrapper is not visited and
+        # wrapped again during this same pass.
+        for parent in list(root.iter()):
+            for index, child in enumerate(list(parent)):
+                if child.tag != "table":
+                    continue
+                wrapper = Element(
+                    "div",
+                    {
+                        "class": "table-scroll",
+                        "tabindex": "0",
+                        "role": "region",
+                        "aria-label": self.table_label,
+                    },
+                )
+                parent[index] = wrapper
+                wrapper.append(child)
+
+
+class _DocumentStructureExtension(Extension):
+    def __init__(self, table_label: str):
+        self.table_label = table_label
+        super().__init__()
+
+    def extendMarkdown(self, md):
+        md.treeprocessors.register(
+            _DocumentStructureTreeprocessor(md, self.table_label),
+            "redtail_document_structure",
+            5,
+        )
+
+
+def _get_html(path: str, *, document_layout: bool = False):
     response = _get_md(path)
     if isinstance(response, str):
         image_base_url = get_image_base_url(path)
         safe_md = secure_image_paths(response, image_base_url)
-        return markdown(safe_md, extensions=['extra'])
+        extensions = ['extra']
+        if document_layout:
+            extensions.append(
+                _DocumentStructureExtension(gettext("Scrollable data table"))
+            )
+        return markdown(safe_md, extensions=extensions)
     return response
 
 @public_blueprint.route('/public/<path:filename>')

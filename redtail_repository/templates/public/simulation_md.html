@@ -1,9 +1,53 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<div class="row">
-  <!-- Sidebar Section -->
-  <div class="col-md-2 mt-4">
+<div class="row g-5 detail-layout documentation-layout">
+  <article class="col-lg-9 col-xl-10 detail-content order-1 order-lg-2">
+    <header class="documentation-header">
+      <div class="documentation-heading">
+        <p class="eyebrow mb-2">{{ gettext("Simulation documentation") }}</p>
+        <h1 id="document-title">{{ doc.title }}</h1>
+        <p class="documentation-context">
+          {{ gettext("For the") }}
+          <a href="{{ url_for('.simulation', simulation_slug=simulation.slug) }}">{{ simulation.name }}</a>
+          {{ gettext("simulation") }}
+        </p>
+        {% if simulation.authors %}
+        <p class="text-muted mb-0">
+          {{ gettext("By") }}:
+          {% for author in simulation.authors %}
+          {% if author.link %}
+          <a href="{{ author.link }}" target="_blank" rel="noopener noreferrer">{{ author.name }}</a>
+          {% else %}
+          {{ author.name }}
+          {% endif %}
+          {% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+        {% endif %}
+        {% if doc.description %}<p class="documentation-summary">{{ doc.description }}</p>{% endif %}
+        <div class="documentation-actions" aria-label="{{ gettext('Document downloads') }}">
+          <a class="btn btn-sm btn-primary" href="{{ url_for('.simulation_doc_word', simulation_slug=simulation.slug, doc_id=doc.id, title=doc.slugified_title) }}">{{ gettext("Download Word version") }}</a>
+          {% if doc.doc_url.startswith(('http://', 'https://')) %}
+            {% set doc_url = doc.doc_url %}
+          {% else %}
+            {% set doc_url = url_for('.serve_public', filename=doc.doc_url.replace('public/', '')) %}
+          {% endif %}
+          <a class="btn btn-sm btn-outline-secondary" href="{{ doc_url }}">{{ gettext("Download Markdown version") }}</a>
+        </div>
+      </div>
+      <a class="documentation-cover-link" href="{{ url_for('.simulation', simulation_slug=simulation.slug) }}" aria-label="{{ gettext('View %(name)s simulation', name=simulation.name) }}">
+        <img src="{{ simulation.cover_image_url }}" class="documentation-cover"
+          alt="{{ gettext('Preview of the %(name)s simulation', name=simulation.name) }}" width="200" height="200" loading="lazy" decoding="async">
+      </a>
+    </header>
+
+    <div class="markdown-block" aria-labelledby="document-title">
+      {{ html_content|safe }}
+    </div>
+  </article>
+
+  <aside class="col-lg-3 col-xl-2 detail-sidebar order-2 order-lg-1" aria-label="{{ gettext('Related simulation information') }}">
     <!-- Categories Section -->
     <div class="card mb-3">
       <div class="card-header">{{ gettext("Categories:") }}</div>
@@ -36,54 +80,6 @@
         </ul>
       </div>
     </div>
-  </div>
-
-  <!-- Main Content Section -->
-  <div class="col-md-8">
-    <br>
-    <div class="row">
-      <div class="col-md-4">
-        <img src="{{ simulation.cover_image_url }}" class="documentation-cover rounded float-end"
-          alt="{{ simulation.name }}" width="200" height="200" loading="lazy" decoding="async">
-      </div>
-      <div class="col-md-8">
-        <h1 class="">
-            {{ gettext("Simulation: <a href='%(link)s'>%(simulations_name)s</a>", simulations_name=simulation.name, link=url_for('.simulation', simulation_slug=simulation.slug)) }}
-        </h1>
-
-        <!-- Authors as Subheading -->
-        {% if simulation.authors %}
-        <h5 class="text-muted mb-4">
-          {{ gettext("By") }}:
-          {% for author in simulation.authors %}
-          {% if author.link %}
-          <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
-          {% else %}
-          {{ author.name }}
-          {% endif %}
-          {% if not loop.last %}, {% endif %}
-          {% endfor %}
-        </h5>
-        {% endif %}
-      </div>      
-    </div>
-
-    <br><br>
-
-    <h2>{{ doc.title }}</h2>
-    <p>{{ doc.description }}</p>
-    <a class="btn btn-sm btn-primary" href="{{ url_for(".simulation_doc_word", simulation_slug=simulation.slug, doc_id=doc.id, title=doc.slugified_title) }}">{{ gettext("Download Word version") }}</a>
-    {% if doc.doc_url.startswith(('http://', 'https://')) %}
-        {% set doc_url = doc.doc_url %}
-    {% else %}
-        {% set doc_url = url_for('.serve_public', filename=doc.doc_url.replace('public/', '')) %}
-    {% endif %}
-    <a class="btn btn-sm btn-success" href="{{ doc_url }}">{{ gettext("Download Markdown version") }}</a>
-    <hr>
-
-    <div class="markdown-block">
-    {{ html_content|safe }}
-    </div>
-  </div>
+  </aside>
 </div>
 {% endblock %}

@@ -38,9 +38,18 @@ def seed_catalog():
     docs_root = public_root / "docs"
     docs_root.mkdir(parents=True, exist_ok=True)
     (docs_root / "simulation.md").write_text(
-        "# Simulation guide\n\n![Local](/static/img/NES.png)", encoding="utf-8"
+        "# Simulation guide\n\nUse the `run` control to begin.\n\n"
+        "![Local](/static/img/NES.png)",
+        encoding="utf-8",
     )
-    (docs_root / "device.md").write_text("# Device guide", encoding="utf-8")
+    (docs_root / "device.md").write_text(
+        "# Device guide\n\nConnect the `personSensor` input before testing.\n\n"
+        "| Signal | Description | HAL name |\n"
+        "| --- | --- | --- |\n"
+        "| personSensor | A person is waiting at the door | "
+        "GPIO_PIN_WITH_AN_INTENTIONALLY_LONG_UNBROKEN_NAME |",
+        encoding="utf-8",
+    )
     (docs_root / "exercise.md").write_text("# Exercise guide", encoding="utf-8")
 
     author = Author(

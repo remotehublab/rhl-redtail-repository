@@ -573,6 +573,11 @@ def test_simulation_detail_and_markdown_routes(client, catalog):
     )
     assert device_markdown.status_code == 200
     assert b"Device guide" in device_markdown.data
+    assert device_markdown.data.count(b"<h1") == 1
+    assert b'class="table-scroll"' in device_markdown.data
+    assert b'role="region"' in device_markdown.data
+    assert b'tabindex="0"' in device_markdown.data
+    assert b'<h2>Device guide</h2>' in device_markdown.data
 
 
 def test_simulation_detail_hides_inactive_exercises_and_missing_documents(
@@ -711,7 +716,8 @@ def test_markdown_routes_preserve_reader_error_responses(
     client, catalog, monkeypatch
 ):
     monkeypatch.setattr(
-        "redtail_repository.views.public._get_html", lambda _path: ("blocked", 403)
+        "redtail_repository.views.public._get_html",
+        lambda _path, **_kwargs: ("blocked", 403),
     )
     assert client.get(
         f"/simulations/test-simulation/docs/{catalog.simulation_doc.id}-guide.md"

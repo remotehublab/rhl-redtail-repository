@@ -10,6 +10,8 @@ const publicPages = [
   ['exercise detail', '/laboratory-exercises/test-exercise'],
   ['simulation detail', '/simulations/test-simulation'],
   ['device detail', '/devices/test-board'],
+  ['simulation documentation', '/simulations/test-simulation/docs/1-simulation-guide.md'],
+  ['device documentation', '/simulations/test-simulation/devices/test-board/docs/1-board-guide.md'],
   ['login', '/login'],
   ['registration', '/register'],
 ] as const;
@@ -306,29 +308,40 @@ test('markdown tables remain accessible on narrow screens', async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/simulations/test-simulation/devices/test-board/docs/1-board-guide.md');
 
-  const dimensions = await page.locator('.markdown-block').evaluate((block) => {
-    block.innerHTML = `
-      <table>
-        <thead><tr><th>Signal</th><th>Description</th><th>HAL name</th></tr></thead>
-        <tbody><tr><td>personSensor</td><td>A person is waiting at the door</td><td>GPIO_PIN_WITH_AN_INTENTIONALLY_LONG_UNBROKEN_NAME</td></tr></tbody>
-      </table>
-    `;
-    const table = block.querySelector('table') as HTMLTableElement;
-    const tableBounds = table.getBoundingClientRect();
+  const dimensions = await page.locator('.table-scroll').evaluate((region) => {
+    const table = region.querySelector('table') as HTMLTableElement;
+    const regionBounds = region.getBoundingClientRect();
     return {
       documentClientWidth: document.documentElement.clientWidth,
       documentScrollWidth: document.documentElement.scrollWidth,
-      overflowX: getComputedStyle(table).overflowX,
-      tableClientWidth: table.clientWidth,
-      tableScrollWidth: table.scrollWidth,
-      tableRight: tableBounds.right,
+      overflowX: getComputedStyle(region).overflowX,
+      regionClientWidth: region.clientWidth,
+      regionScrollWidth: region.scrollWidth,
+      regionRight: regionBounds.right,
+      tabIndex: (region as HTMLElement).tabIndex,
+      role: region.getAttribute('role'),
     };
   });
 
   expect(dimensions.overflowX).toBe('auto');
-  expect(dimensions.tableScrollWidth).toBeGreaterThan(dimensions.tableClientWidth);
-  expect(dimensions.tableRight).toBeLessThanOrEqual(dimensions.documentClientWidth + 1);
+  expect(dimensions.regionScrollWidth).toBeGreaterThan(dimensions.regionClientWidth);
+  expect(dimensions.regionRight).toBeLessThanOrEqual(dimensions.documentClientWidth + 1);
   expect(dimensions.documentScrollWidth).toBeLessThanOrEqual(dimensions.documentClientWidth + 1);
+  expect(dimensions.tabIndex).toBe(0);
+  expect(dimensions.role).toBe('region');
+});
+
+test('documentation leads with its title on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/simulations/test-simulation/devices/test-board/docs/1-board-guide.md');
+
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1, name: 'Board Guide' })).toBeVisible();
+  const positions = await page.locator('h1, .detail-sidebar').evaluateAll((elements) =>
+    elements.map((element) => element.getBoundingClientRect().top),
+  );
+  expect(positions[0]).toBeLessThan(positions[1]);
+  await expect(page.locator('.documentation-cover-link')).toBeHidden();
 });
 
 const instructorMailto = 'mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry';

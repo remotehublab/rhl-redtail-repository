@@ -2172,6 +2172,87 @@ hr {
   max-width: 70ch;
 }
 
+.documentation-layout {
+  padding-top: 1.5rem;
+}
+
+.documentation-header {
+  align-items: start;
+  border-bottom: 1px solid var(--rt-line-strong);
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 10rem);
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+}
+
+.documentation-header h1 {
+  font-size: clamp(2.1rem, 4vw, 3.35rem);
+  margin-bottom: 0.75rem;
+}
+
+.documentation-context {
+  color: var(--rt-graphite);
+  font-family: var(--rt-font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+
+.documentation-summary {
+  color: var(--rt-graphite);
+  font-family: var(--rt-font-serif);
+  font-size: 1.05rem;
+  margin: 1rem 0 0;
+  max-width: 48rem;
+}
+
+.documentation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+}
+
+.documentation-cover-link {
+  background: var(--rt-ivory);
+  border: 1px solid var(--rt-purple-line);
+  border-radius: var(--rt-radius-sm);
+  display: block;
+  padding: 0.45rem;
+}
+
+.documentation-cover-link:focus-visible {
+  outline: 3px solid var(--rt-gold);
+  outline-offset: 3px;
+}
+
+.documentation-cover {
+  display: block;
+  max-width: 100%;
+}
+
+.markdown-block :not(pre) > code {
+  color: var(--rt-purple-deep);
+  font-family: var(--rt-font-mono);
+}
+
+.table-scroll {
+  margin: 1.5rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.table-scroll:focus-visible {
+  outline: 3px solid var(--rt-gold);
+  outline-offset: 3px;
+}
+
+.table-scroll table {
+  margin: 0;
+}
+
 .markdown-block table {
   border-collapse: collapse;
   width: 100%;
@@ -2333,10 +2414,13 @@ hr {
     scroll-padding-top: 6rem;
   }
 
-  .markdown-block table {
-    display: block;
-    max-width: 100%;
-    overflow-x: auto;
+  .documentation-header {
+    grid-template-columns: 1fr;
+    margin-bottom: 2rem;
+  }
+
+  .documentation-cover-link {
+    display: none;
   }
 
   .navbar-modern {
