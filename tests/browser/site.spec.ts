@@ -52,6 +52,9 @@ test('catalog navigation and filtering work', async ({ page }) => {
 });
 
 test('login protects admin submission and rejects external redirects', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'File Submission' })).toHaveCount(0);
+
   await page.goto('/file_submission');
   await expect(page).toHaveURL(/\/login\?next=/);
 
@@ -60,6 +63,7 @@ test('login protects admin submission and rejects external redirects', async ({ 
   await page.getByRole('button', { name: 'Log in' }).click();
   await expect(page).toHaveURL(/\/file_submission$/);
   await expect(page.getByText('Upload Document & Update Exercise')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'File Submission' })).toBeVisible();
 
   await page.context().clearCookies();
   await page.goto('/login?next=//example.test');

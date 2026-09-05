@@ -48,6 +48,22 @@ def test_public_collection_pages_render(client, catalog, path):
     assert b"REDTAIL" in response.data
 
 
+def test_file_submission_navigation_is_visible_only_to_admin(
+    client, catalog, login_as
+):
+    anonymous = client.get("/")
+    assert b'href="/file_submission"' not in anonymous.data
+
+    login_as("student-user")
+    student = client.get("/")
+    assert b'href="/file_submission"' not in student.data
+
+    client.get("/logout")
+    login_as("admin-user")
+    admin = client.get("/")
+    assert b'href="/file_submission"' in admin.data
+
+
 @pytest.mark.parametrize(
     ("path", "title", "description", "canonical"),
     [
