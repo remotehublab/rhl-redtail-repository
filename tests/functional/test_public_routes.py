@@ -59,9 +59,37 @@ def test_file_submission_navigation_is_visible_only_to_admin(
     assert b'href="/file_submission"' not in student.data
 
     client.get("/logout")
+    login_as("verified-instructor")
+    instructor = client.get("/")
+    assert b'href="/file_submission"' not in instructor.data
+
+    client.get("/logout")
     login_as("admin-user")
     admin = client.get("/")
     assert b'href="/file_submission"' in admin.data
+    assert b">Manage content<" in admin.data
+
+
+def test_file_submission_denials_render_accessible_explanations(
+    client, catalog, login_as
+):
+    anonymous = client.get("/file_submission", follow_redirects=True)
+    assert anonymous.status_code == 200
+    assert anonymous.data.count(b"Please log in to access this page.") == 1
+    assert b'role="alert"' in anonymous.data
+
+    for username in ("student-user", "verified-instructor"):
+        login_as(username)
+        denied = client.get("/file_submission", follow_redirects=True)
+        assert denied.status_code == 200
+        assert denied.data.count(b"You must be an admin to view this page.") == 1
+        assert b'role="alert"' in denied.data
+        client.get("/logout")
+
+    login_as("admin-user")
+    allowed = client.get("/file_submission")
+    assert allowed.status_code == 200
+    assert b"Upload Document & Update Exercise" in allowed.data
 
 
 @pytest.mark.parametrize(

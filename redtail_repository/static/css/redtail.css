@@ -2179,6 +2179,14 @@ hr {
   border-left-color: var(--rt-alert);
 }
 
+.site-alerts {
+  padding-top: 1rem;
+}
+
+.site-alerts .alert:last-child {
+  margin-bottom: 0;
+}
+
 /* --------------------------------------------------------------------------
    Authentication
    -------------------------------------------------------------------------- */

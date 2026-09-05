@@ -63,13 +63,14 @@ test('login protects admin submission and rejects external redirects', async ({ 
 
   await page.goto('/file_submission');
   await expect(page).toHaveURL(/\/login\?next=/);
+  await expect(page.getByRole('alert')).toHaveText('Please log in to access this page.');
 
   await page.getByLabel('Username').fill('admin-user');
   await page.getByLabel('Password').fill('test-password');
   await page.getByRole('button', { name: 'Log in' }).click();
   await expect(page).toHaveURL(/\/file_submission$/);
   await expect(page.getByText('Upload Document & Update Exercise')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'File Submission' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Manage content' })).toBeVisible();
 
   await page.context().clearCookies();
   await page.goto('/login?next=//example.test');
@@ -84,6 +85,22 @@ test('login protects admin submission and rejects external redirects', async ({ 
   await page.getByLabel('Password').fill('test-password');
   await page.getByRole('button', { name: 'Log in' }).click();
   await expect(page).toHaveURL('http://127.0.0.1:5010/');
+});
+
+test('ordinary users and instructors receive visible submission denial', async ({ page }) => {
+  for (const username of ['student-user', 'verified-instructor']) {
+    await page.goto('/login');
+    await page.getByLabel('Username').fill(username);
+    await page.getByLabel('Password').fill('test-password');
+    await page.getByRole('button', { name: 'Log in' }).click();
+    await page.goto('/file_submission');
+    await expect(page).toHaveURL('http://127.0.0.1:5010/');
+    await expect(page.getByRole('alert')).toHaveText(
+      'You must be an admin to view this page.',
+    );
+    await expect(page.getByRole('link', { name: 'Manage content' })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Logout' }).click();
+  }
 });
 
 test('auth header links stay clean and preserve legitimate return paths', async ({ page }) => {

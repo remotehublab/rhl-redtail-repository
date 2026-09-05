@@ -1,21 +1,6 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="row mt-3">
-      <div class="col-12">
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
-{% endwith %}
-
 <div class="row g-5 detail-layout">
   <aside class="col-lg-3 col-xl-2 detail-sidebar">
     <div class="card mb-3">

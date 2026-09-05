@@ -59,6 +59,13 @@ test('@visual invalid login state', async ({ page }) => {
   await expect(page).toHaveScreenshot('login-error.png', { fullPage: true });
 });
 
+test('@visual anonymous submission denial', async ({ page }) => {
+  await page.goto('/file_submission');
+  await expect(page).toHaveURL(/\/login\?next=/);
+  await expect(page.getByRole('alert')).toHaveText('Please log in to access this page.');
+  await expect(page).toHaveScreenshot('login-access-denied.png', { fullPage: true });
+});
+
 test('@visual admin submission form', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Username').fill('admin-user');
