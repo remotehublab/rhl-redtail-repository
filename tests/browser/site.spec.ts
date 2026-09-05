@@ -7,6 +7,7 @@ const publicPages = [
   ['simulations', '/simulations'],
   ['devices', '/devices'],
   ['authors', '/authors'],
+  ['author detail', '/authors/1'],
   ['exercise detail', '/laboratory-exercises/test-exercise'],
   ['simulation detail', '/simulations/test-simulation'],
   ['device detail', '/devices/test-board'],

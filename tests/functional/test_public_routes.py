@@ -505,10 +505,16 @@ def test_social_card_is_a_1200_by_630_png(client):
 def test_author_pages_render_empty_populated_and_missing(client, catalog):
     listing = client.get("/authors")
     assert b"Example Author" in listing.data
+    assert b"View contributions" in listing.data
+    assert b"<dt>Simulations</dt><dd>1</dd>" in listing.data
+    assert b"<dt>Exercises</dt><dd>1</dd>" in listing.data
 
     detail = client.get(f"/authors/{catalog.author.id}")
     assert detail.status_code == 200
     assert b"Example Author" in detail.data
+    assert b'href="/simulations/test-simulation"' in detail.data
+    assert b'href="/laboratory-exercises/test-exercise"' in detail.data
+    assert b"Inactive Exercise" not in detail.data
 
     missing = client.get("/authors/99999")
     assert missing.status_code == 404

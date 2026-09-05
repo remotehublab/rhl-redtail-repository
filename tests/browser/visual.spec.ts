@@ -31,6 +31,8 @@ const pages = [
   ['device-detail', '/devices/test-board'],
   ['login', '/login'],
   ['registration', '/register'],
+  ['authors', '/authors'],
+  ['author-detail', '/authors/1'],
 ] as const;
 
 for (const [name, url] of pages) {

@@ -1,10 +1,54 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<main class="container py-4">
-  <h1>{{ author.name }}</h1>
-  {% if author.link %}
-  <p><a href="{{ author.link }}" rel="noopener noreferrer">{{ gettext("Author profile") }}</a></p>
-  {% endif %}
+<main class="container-xl author-profile-page">
+  <a class="back-link" href="{{ url_for('public.authors') }}"><span aria-hidden="true">←</span> {{ gettext("All authors") }}</a>
+  <header class="author-page-header author-profile-header">
+    <p class="eyebrow mb-2">{{ gettext("REDTAIL contributor") }}</p>
+    <h1>{{ author.name }}</h1>
+    {% if author.link %}
+    <a class="author-external-link" href="{{ author.link }}" target="_blank" rel="noopener noreferrer">{{ gettext("Visit external profile") }} <span aria-hidden="true">↗</span></a>
+    {% endif %}
+  </header>
+
+  <div class="author-contribution-grid">
+    <section aria-labelledby="author-simulations">
+      <div class="author-section-heading">
+        <h2 id="author-simulations">{{ gettext("Simulations") }}</h2>
+        <span>{{ simulations|length }}</span>
+      </div>
+      {% if simulations %}
+      <ul class="contribution-list">
+        {% for simulation in simulations %}
+        <li>
+          <a href="{{ url_for('public.simulation', simulation_slug=simulation.slug) }}">{{ simulation.name }}</a>
+          {% if simulation.description %}<p>{{ simulation.description }}</p>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty-state">{{ gettext("No simulations are currently listed for this contributor.") }}</p>
+      {% endif %}
+    </section>
+
+    <section aria-labelledby="author-exercises">
+      <div class="author-section-heading">
+        <h2 id="author-exercises">{{ gettext("Laboratory exercises") }}</h2>
+        <span>{{ laboratory_exercises|length }}</span>
+      </div>
+      {% if laboratory_exercises %}
+      <ul class="contribution-list">
+        {% for exercise in laboratory_exercises %}
+        <li>
+          <a href="{{ url_for('public.laboratory_exercise', laboratory_exercise_slug=exercise.slug) }}">{{ exercise.name }}</a>
+          {% if exercise.short_description %}<p>{{ exercise.short_description }}</p>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty-state">{{ gettext("No laboratory exercises are currently listed for this contributor.") }}</p>
+      {% endif %}
+    </section>
+  </div>
 </main>
 {% endblock %}

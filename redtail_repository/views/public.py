@@ -239,13 +239,32 @@ def sitemap_xml():
 
 @public_blueprint.route('/authors/<author_id>')
 def view_author(author_id):
-    author = db.session.query(Author).filter_by(id=author_id).first()
+    author = (
+        db.session.query(Author)
+        .options(
+            joinedload(Author.laboratory_exercises),
+            joinedload(Author.simulations),
+        )
+        .filter_by(id=author_id)
+        .first()
+    )
     if not author:
         return render_template("public/error.html", message=gettext("Author not found")), 404
+
+    laboratory_exercises = sorted(
+        (exercise for exercise in author.laboratory_exercises if exercise.active),
+        key=lambda exercise: exercise.name.casefold(),
+    )
+    simulations = sorted(
+        author.simulations,
+        key=lambda simulation: simulation.name.casefold(),
+    )
 
     return render_template(
         "public/author.html",
         author=author,
+        laboratory_exercises=laboratory_exercises,
+        simulations=simulations,
         **page_metadata(
             title=f"{author.name} | REDTAIL Author",
             description=(
@@ -274,10 +293,28 @@ def view_author(author_id):
 
 @public_blueprint.route('/authors')
 def authors():
-    all_authors = db.session.query(Author).all()
+    all_authors = (
+        db.session.query(Author)
+        .options(
+            joinedload(Author.laboratory_exercises),
+            joinedload(Author.simulations),
+        )
+        .order_by(Author.name.asc())
+        .all()
+    )
+    author_summaries = [
+        {
+            "author": author,
+            "exercise_count": sum(
+                exercise.active for exercise in author.laboratory_exercises
+            ),
+            "simulation_count": len(author.simulations),
+        }
+        for author in all_authors
+    ]
     return render_template(
         'public/authors.html',
-        authors=all_authors,
+        authors=author_summaries,
         **page_metadata(
             title="Authors and Contributors | REDTAIL",
             description=(

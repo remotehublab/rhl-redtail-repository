@@ -1,16 +1,33 @@
 {% extends "public/_base.html" %}
 
 {% block container %}
-<main class="container py-4">
-  <h1>{{ gettext("Authors") }}</h1>
+<main class="container-xl author-directory">
+  <header class="author-page-header">
+    <p class="eyebrow mb-2">{{ gettext("REDTAIL community") }}</p>
+    <h1>{{ gettext("Authors and contributors") }}</h1>
+    <p>{{ gettext("Meet the educators, researchers, and teams contributing simulations and classroom materials to REDTAIL.") }}</p>
+  </header>
+
   {% if authors %}
-  <ul>
-    {% for author in authors %}
-    <li><a href="{{ url_for('public.view_author', author_id=author.id) }}">{{ author.name }}</a></li>
+  <div class="author-index">
+    {% for item in authors %}
+    <article class="author-index-row">
+      <div>
+        <h2><a href="{{ url_for('public.view_author', author_id=item.author.id) }}">{{ item.author.name }}</a></h2>
+        {% if item.author.link %}
+        <a class="author-external-link" href="{{ item.author.link }}" target="_blank" rel="noopener noreferrer">{{ gettext("External profile") }} <span aria-hidden="true">↗</span></a>
+        {% endif %}
+      </div>
+      <dl class="author-counts">
+        <div><dt>{{ gettext("Simulations") }}</dt><dd>{{ item.simulation_count }}</dd></div>
+        <div><dt>{{ gettext("Exercises") }}</dt><dd>{{ item.exercise_count }}</dd></div>
+      </dl>
+      <a class="author-view-link" href="{{ url_for('public.view_author', author_id=item.author.id) }}">{{ gettext("View contributions") }} <span aria-hidden="true">→</span></a>
+    </article>
     {% endfor %}
-  </ul>
+  </div>
   {% else %}
-  <p>{{ gettext("No authors are available.") }}</p>
+  <p class="empty-state">{{ gettext("No authors are available.") }}</p>
   {% endif %}
 </main>
 {% endblock %}
