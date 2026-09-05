@@ -158,7 +158,11 @@ def test_get_html_document_layout_offsets_headings_and_wraps_tables(
     monkeypatch.setattr(
         public,
         "_get_md",
-        lambda _path: "# Heading\n\n## Detail\n\n| Signal | Pin |\n| --- | --- |\n| a | 1 |",
+        lambda _path: (
+            "# Heading\n\n## Detail\n\n"
+            "[External](https://example.test){:target=\"_blank\"}\n\n"
+            "| Signal | Pin |\n| --- | --- |\n| a | 1 |"
+        ),
     )
 
     html = public._get_html("public/docs/guide.md", document_layout=True)
@@ -171,6 +175,10 @@ def test_get_html_document_layout_offsets_headings_and_wraps_tables(
     assert 'role="region"' in html
     assert 'aria-label="Scrollable data table"' in html
     assert '<table>' in html
+    assert (
+        '<a href="https://example.test" rel="noopener noreferrer" target="_blank">'
+        in html
+    )
 
 
 def test_get_word_converts_local_markdown_and_cleans_output(app, tmp_path, monkeypatch):

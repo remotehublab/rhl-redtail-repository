@@ -1679,6 +1679,13 @@ class _DocumentStructureTreeprocessor(Treeprocessor):
             if heading:
                 element.tag = f"h{int(heading.group(1)) + 1}"
 
+            if element.tag == "a" and element.get("target") == "_blank":
+                rel_tokens = (element.get("rel") or "").split()
+                for token in ("noopener", "noreferrer"):
+                    if token not in rel_tokens:
+                        rel_tokens.append(token)
+                element.set("rel", " ".join(rel_tokens))
+
         # Snapshot the original tree so a newly inserted wrapper is not visited and
         # wrapped again during this same pass.
         for parent in list(root.iter()):
