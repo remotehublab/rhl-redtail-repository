@@ -18,6 +18,10 @@
       <h2 id="login-title">{{ gettext("Log in") }}</h2>
       <p>{{ gettext("Use the credentials associated with your REDTAIL account.") }}</p>
 
+      {% if login_error %}
+      <div class="alert alert-danger" role="alert">{{ login_error }}</div>
+      {% endif %}
+
       <div class="mb-3">
         {{ form.username.label(class_="form-label") }}
         {{ form.username(class_="form-control", autofocus='autofocus', autocomplete='username') }}

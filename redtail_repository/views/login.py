@@ -39,6 +39,7 @@ login_blueprint = Blueprint('login', __name__)
 @login_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    login_error = None
 
     if form.validate_on_submit():
         user: Optional[User] = db.session.query(User).filter_by(login=form.username.data).first()
@@ -54,12 +55,12 @@ def login():
 
             return redirect(url_for('public.index'))
 
-        form.username.errors.append(lazy_gettext('Invalid username or password'))
-        form.password.errors.append(lazy_gettext('Invalid username or password'))
+        login_error = lazy_gettext('Invalid username or password')
 
     return render_template(
         'login/login.html',
         form=form,
+        login_error=login_error,
         **page_metadata(
             title="Log in | REDTAIL",
             description="Log in to access the REDTAIL features available to your account.",

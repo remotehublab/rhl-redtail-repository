@@ -115,6 +115,7 @@ def test_login_logout_and_redirect_handling(client, catalog):
     bad = client.post("/login", data={"username": "admin-user", "password": "bad"})
     assert bad.status_code == 200
     assert b"Invalid username or password" in bad.data
+    assert bad.data.count(b"Invalid username or password") == 1
 
     good = client.post(
         "/login?next=/simulations",

@@ -54,7 +54,8 @@ test('@visual invalid login state', async ({ page }) => {
   await page.getByLabel('Username').fill('not-a-user');
   await page.getByLabel('Password').fill('bad-password');
   await page.getByRole('button', { name: 'Log in' }).click();
-  await expect(page.getByText('Invalid username or password').first()).toBeVisible();
+  await expect(page.getByText('Invalid username or password')).toHaveCount(1);
+  await expect(page.getByRole('alert')).toHaveText('Invalid username or password');
   await expect(page).toHaveScreenshot('login-error.png', { fullPage: true });
 });
 
