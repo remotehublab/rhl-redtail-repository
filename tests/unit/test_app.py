@@ -98,15 +98,8 @@ def test_production_cookie_policy_is_secure():
     assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Lax"
 
 
-def test_production_public_file_fallback_uses_branded_not_found_page():
-    app = create_app(
-        "production",
-        {
-            "SQLALCHEMY_DATABASE_URI": "sqlite://",
-            "SECRET_KEY": "test-secret-key",
-            "SERVE_PUBLIC_FILES": False,
-        },
-    )
+def test_disabled_public_file_fallback_uses_branded_not_found_page(app):
+    app.config["SERVE_PUBLIC_FILES"] = False
 
     response = app.test_client().get("/public/missing-guide.md")
 
