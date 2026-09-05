@@ -11,11 +11,16 @@ const publicPages = [
   ['exercise detail', '/laboratory-exercises/test-exercise'],
   ['simulation detail', '/simulations/test-simulation'],
   ['device detail', '/devices/test-board'],
-  ['simulation documentation', '/simulations/test-simulation/docs/1-simulation-guide.md'],
-  ['device documentation', '/simulations/test-simulation/devices/test-board/docs/1-board-guide.md'],
   ['login', '/login'],
   ['registration', '/register'],
 ] as const;
+
+const documentationPages = [
+  ['simulation documentation', '/simulations/test-simulation/docs/1-simulation-guide.md'],
+  ['device documentation', '/simulations/test-simulation/devices/test-board/docs/1-board-guide.md'],
+] as const;
+
+const browserCheckedPages = [...publicPages, ...documentationPages] as const;
 
 test.beforeEach(async ({ page }) => {
   await page.route(/youtube\.com|youtube-nocookie\.com|youtu\.be/, (route) =>
@@ -23,7 +28,7 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-for (const [name, url] of publicPages) {
+for (const [name, url] of browserCheckedPages) {
   test(`${name} page loads without browser errors`, async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (message) => {
@@ -413,7 +418,7 @@ test('registration directs university instructors to the REDTAIL team', async ({
   await expect(page.locator('body')).not.toContainText('laboratory solutions');
 });
 
-for (const [name, url] of publicPages) {
+for (const [name, url] of browserCheckedPages) {
   test(`${name} has no WCAG A/AA accessibility violations`, async ({ page }) => {
     await page.goto(url);
     const results = await new AxeBuilder({ page })
