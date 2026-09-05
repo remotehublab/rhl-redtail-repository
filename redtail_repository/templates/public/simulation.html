@@ -164,7 +164,7 @@
               {% set safe_url = '/' + safe_url %}
               {% endif %}
 
-              <li><a href="{{ safe_url }}" target="_blank">{{ document.title }}</a></li>
+              <li><a href="{{ safe_url }}" target="_blank" rel="noopener noreferrer">{{ document.title }}</a></li>
               {% endif %}
               {% endfor %}
 
@@ -184,7 +184,7 @@
                   {% set safe_url = '/' + safe_url %}
                   {% endif %}
 
-                  <li><a href="{{ safe_url }}" target="_blank">{{ document.name }}</a></li>
+                  <li><a href="{{ safe_url }}" target="_blank" rel="noopener noreferrer">{{ document.name }}</a></li>
                   {% endif %}
                   {% endfor %}
                 </ul>

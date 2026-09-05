@@ -91,7 +91,7 @@
         {{ gettext("By") }}:
         {% for author in authors %}
         {% if author.link %}
-        <a href="{{ author.link }}" target="_blank">{{ author.name }}</a>
+        <a href="{{ author.link }}" target="_blank" rel="noopener noreferrer">{{ author.name }}</a>
         {% else %}
         {{ author.name }}
         {% endif %}
@@ -151,7 +151,7 @@
               <li class="mb-2">
                 {% if document.is_solution %}
                   {% if verified_user %}
-                    <a href="{{ safe_url }}" target="_blank">{{ document.title }}</a> ({{ gettext("Only available for verified instructors.") }})
+                    <a href="{{ safe_url }}" target="_blank" rel="noopener noreferrer">{{ document.title }}</a> ({{ gettext("Only available for verified instructors.") }})
                   {% else %}
                     {{ document.title }}
                     <span class="d-block small mt-1">
@@ -163,7 +163,7 @@
                     </span>
                   {% endif %}
                 {% else %}
-                  <a href="{{ safe_url }}" target="_blank">{{ document.title }}</a>
+                  <a href="{{ safe_url }}" target="_blank" rel="noopener noreferrer">{{ document.title }}</a>
                 {% endif %}
 
                 {% if current_user.is_authenticated and current_user.role == 'admin' %}

@@ -602,6 +602,26 @@ def test_simulation_detail_and_markdown_routes(client, catalog):
     assert b'<h2>Device guide</h2>' in device_markdown.data
 
 
+def test_links_opened_in_new_tabs_are_isolated(client, catalog):
+    catalog.simulation_doc.doc_url = "https://docs.example.test/simulation.pdf"
+    db.session.commit()
+
+    for path in (
+        "/laboratory-exercises/test-exercise",
+        "/simulations/test-simulation",
+    ):
+        response = client.get(path)
+        assert response.status_code == 200
+        new_tab_links = re.findall(
+            rb'<a\b[^>]*target="_blank"[^>]*>',
+            response.data,
+        )
+        assert new_tab_links
+        assert all(
+            b'rel="noopener noreferrer"' in link for link in new_tab_links
+        )
+
+
 def test_simulation_detail_hides_inactive_exercises_and_missing_documents(
     client, catalog
 ):
