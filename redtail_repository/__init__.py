@@ -70,6 +70,11 @@ def create_app(
 
     @app.after_request
     def apply_response_policies(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault(
+            "Referrer-Policy", "strict-origin-when-cross-origin"
+        )
+
         directive = robots_directive(response.status_code)
         if directive:
             response.headers.setdefault("X-Robots-Tag", directive)
@@ -140,13 +145,15 @@ def get_locale():
         supported_languages = SUPPORTED_TRANSLATIONS
 
     locale = None
+    requested_locale = None
 
     # This is used also from tasks (which are not in a context environment)
     if has_request_context():
         # If user accesses ?locale=es force it to Spanish, for example
-        locale = request.args.get('locale', None)
-        if locale not in supported_languages:
-            locale = None
+        requested_locale = request.args.get('locale', None)
+        if requested_locale in supported_languages:
+            locale = requested_locale
+            session['locale'] = locale
 
     # Otherwise, check what the web browser is using (the web browser might state multiple
     # languages)
@@ -161,8 +168,5 @@ def get_locale():
     # Otherwise... use the default one (English)
     if locale is None:
         locale = 'en'
-
-    if has_request_context():
-        session['locale'] = locale
 
     return locale

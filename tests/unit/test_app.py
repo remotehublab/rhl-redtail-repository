@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from flask import Response
+from flask import Response, session
 from flask_assets import Environment
 
 import redtail_repository
@@ -75,6 +75,20 @@ def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
         "public, max-age=3600, stale-while-revalidate=86400"
     )
     assert uploaded_image.headers["Cache-Control"] == "private, no-store"
+    for response in (generated, static_image, public_image, uploaded_image):
+        assert response.headers["X-Content-Type-Options"] == "nosniff"
+        assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+
+
+def test_production_cookie_policy_is_secure():
+    app = create_app("production", {"SQLALCHEMY_DATABASE_URI": "sqlite://"})
+
+    assert app.config["SESSION_COOKIE_HTTPONLY"] is True
+    assert app.config["SESSION_COOKIE_SECURE"] is True
+    assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
+    assert app.config["REMEMBER_COOKIE_HTTPONLY"] is True
+    assert app.config["REMEMBER_COOKIE_SECURE"] is True
+    assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Lax"
 
 
 def test_locale_defaults_to_english_outside_request(app):
@@ -93,15 +107,31 @@ def test_locale_query_session_and_accept_language(app, monkeypatch):
 
     with app.test_request_context("/?locale=es"):
         assert get_locale() == "es"
+        assert session["locale"] == "es"
 
     with app.test_request_context("/", headers={"Accept-Language": "pt-BR,es;q=0.8"}):
         assert get_locale() == "pt_BR"
+        assert "locale" not in session
 
     with app.test_request_context("/?locale=xx"):
-        from flask import session
-
         session["locale"] = "es"
         assert get_locale() == "es"
+
+
+def test_anonymous_default_locale_does_not_create_a_session_cookie(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Set-Cookie" not in response.headers
+
+
+def test_explicit_locale_is_persisted_with_samesite_cookie(client):
+    response = client.get("/?locale=en")
+
+    assert response.status_code == 200
+    cookie = response.headers["Set-Cookie"]
+    assert "HttpOnly" in cookie
+    assert "SameSite=Lax" in cookie
 
 
 def test_language_listing_is_cached_and_tolerates_display_name_failure(app, monkeypatch):

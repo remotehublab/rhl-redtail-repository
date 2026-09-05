@@ -7,6 +7,10 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'mysql+pymysql://redtail:redtail@localhost/redtail'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG_TB_INTERCEPT_REDIRECTS = False
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
     PROJECT_ROOT = PROJECT_ROOT
     UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'redtail_repository', 'uploads')
     PUBLIC_FOLDER = os.path.join(PROJECT_ROOT, 'public')
@@ -31,7 +35,8 @@ class StagingConfig(Config):
     pass
 
 class ProductionConfig(Config):
-    pass
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
 
 class TestingConfig(Config):
     TESTING = True
