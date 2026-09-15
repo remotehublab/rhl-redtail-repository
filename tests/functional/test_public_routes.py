@@ -816,9 +816,9 @@ def test_home_page_exposes_instructor_contact_paths(client, catalog):
     for label in (
         "Explore laboratory exercises",
         "Browse simulations",
-        "Explore the simulation library",
+        "See how a REDTAIL-supported lab works",
         "View the source on GitHub",
-        "Browse current exercises",
+        "Browse compatible devices",
         "Email the REDTAIL team",
         "Work with us",
         "Register",

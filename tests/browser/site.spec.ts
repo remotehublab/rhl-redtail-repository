@@ -419,6 +419,38 @@ test('documentation leads with its title on mobile', async ({ page }) => {
 
 const instructorMailto = 'mailto:rhlab@uw.edu?subject=REDTAIL%20instructor%20inquiry';
 
+test('homepage section navigation docks below the header and clears anchor headings', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const rail = page.getByRole('navigation', { name: 'On this page' });
+  await rail.getByRole('link', { name: 'What is included' }).click();
+  await expect(page).toHaveURL(/#hardware$/);
+  await expect(rail.locator('[aria-current="location"]')).toHaveAttribute('href', '#hardware');
+  await expect.poll(async () => page.evaluate(() => {
+    const header = document.querySelector('.site-header')!.getBoundingClientRect();
+    const nav = document.querySelector('.section-nav')!.getBoundingClientRect();
+    return Math.abs(nav.top - header.bottom);
+  })).toBeLessThan(2);
+  const navBox = await rail.boundingBox();
+  const headingBox = await page.locator('#hardware h2').boundingBox();
+  expect(headingBox!.y).toBeGreaterThan(navBox!.y + navBox!.height);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(rail).toHaveCSS('position', 'static');
+  await page.getByRole('button', { name: 'Toggle navigation' }).click();
+  await expect(page.locator('#primaryNavigation')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('new-tab links retain their names and announce their destination behavior', async ({ page }) => {
+  await page.goto('/');
+  const link = page.locator('#overview').getByRole('link', { name: 'University of Washington', exact: true });
+  await expect(link).toHaveAccessibleDescription('Opens in a new tab');
+  await expect(page.locator('#students a')).toHaveAttribute('href', '#youtube');
+  await expect(page.locator('#instructors')).toContainText('rhlab@uw.edu');
+});
+
 test('homepage and footer expose the instructor contact path', async ({ page }) => {
   await page.goto('/');
 
@@ -457,9 +489,9 @@ test('homepage and footer expose the instructor contact path', async ({ page }) 
   for (const name of [
     'Explore laboratory exercises',
     'Browse simulations',
-    'Explore the simulation library',
+    'See how a REDTAIL-supported lab works',
     'View the source on GitHub',
-    'Browse current exercises',
+    'Browse compatible devices',
     'Register',
   ]) {
     await expect(page.getByRole('link', { name, exact: true }).first()).toBeVisible();

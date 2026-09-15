@@ -16,6 +16,7 @@
       {{ form.hidden_tag() }}
       <p class="eyebrow">{{ gettext("Welcome back") }}</p>
       <h2 id="login-title">{{ gettext("Log in") }}</h2>
+      <p class="account-purpose"><strong>{{ gettext("What is an account for?") }}</strong><br>{{ gettext("Student laboratory access is provided through your course. Log in if you have approved access to instructor solutions or manage repository content.") }}</p>
       <p>{{ gettext("Use the credentials associated with your REDTAIL account.") }}</p>
 
       {% if login_error %}
