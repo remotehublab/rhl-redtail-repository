@@ -1,3 +1,4 @@
+from pathlib import Path
 from types import SimpleNamespace
 
 from flask import Response, session
@@ -85,6 +86,23 @@ def test_response_cache_policy_distinguishes_fingerprinted_assets(app):
     for response in (generated, static_image, public_image, uploaded_image):
         assert response.headers["X-Content-Type-Options"] == "nosniff"
         assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+
+    for response in (generated, static_image, public_image, uploaded_image, error):
+        assert response.headers["Content-Security-Policy"] == "frame-ancestors 'self'"
+        assert response.headers["X-Frame-Options"] == "SAMEORIGIN"
+        # HSTS belongs at the TLS terminator, not on local HTTP responses.
+        assert "Strict-Transport-Security" not in response.headers
+
+
+def test_apache_tls_policy_covers_direct_files_without_duplicate_headers():
+    policy = (Path(__file__).resolve().parents[2] / "ops/apache/redtail-response-policies.conf").read_text()
+    assert 'Header always set Strict-Transport-Security "max-age=86400"' in policy
+    directives = "\n".join(line for line in policy.splitlines() if not line.startswith("#"))
+    assert "includeSubDomains" not in directives
+    assert "preload" not in directives
+    for name, value in (("Content-Security-Policy", "frame-ancestors 'self'"), ("X-Frame-Options", "SAMEORIGIN")):
+        assert f"Header onsuccess unset {name}" in directives
+        assert f'Header always set {name} "{value}"' in directives
 
 
 def test_production_cookie_policy_is_secure():

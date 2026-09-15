@@ -73,6 +73,8 @@ def create_app(
 
     @app.after_request
     def apply_response_policies(response):
+        response.headers.setdefault("Content-Security-Policy", "frame-ancestors 'self'")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault(
             "Referrer-Policy", "strict-origin-when-cross-origin"
