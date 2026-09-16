@@ -39,12 +39,10 @@ DOCS = ROOT / "public/docs/simulations/airport-wind-station"
 )
 def test_airport_mapping_preserves_the_five_physical_slots(filename, pins):
     text = (DOCS / "devices" / filename).read_text()
-    rows = [
-        line for line in text.splitlines() if line.startswith(tuple(f"| {i} |" for i in range(5)))
-    ]
+    rows = [line for line in text.splitlines() if line.startswith("- **Fixed slot ")]
     assert len(rows) == 10
     for index, (row, pin) in enumerate(zip(rows, pins, strict=True)):
-        assert row.startswith(f"| {index % 5} |")
+        assert row.startswith(f"- **Fixed slot {index % 5} —")
         assert f"`{pin}`" in row
     assert "not the controller reset" in rows[0]
     assert "Drive low" in rows[6]

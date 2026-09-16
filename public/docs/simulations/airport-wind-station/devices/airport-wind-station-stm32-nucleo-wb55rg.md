@@ -8,23 +8,19 @@ pin `GPIO_PIN_6`.
 
 ## Simulation to STM32
 
-| Fixed slot | Signal | STM32 input | Mbed name | Meaning |
-|---|---|---|---|---|
-| 0 | Reserved | `PC13` | `PC_13` | Ignore; not the controller reset |
-| 1 | `inputCode[0]` | `PA6` | `PA_6` | Least-significant wind-code bit |
-| 2 | `inputCode[1]` | `PB9` | `PB_9` | Most-significant wind-code bit |
-| 3 | Reserved | `PB8` | `PB_8` | Ignore |
-| 4 | `aligned` | `PC12` | `PC_12` | High when the turbine is aligned with the wind |
+- **Fixed slot 0 — Reserved:** `PC13` (Mbed `PC_13`). Ignore; not the controller reset.
+- **Fixed slot 1 — `inputCode[0]`:** `PA6` (Mbed `PA_6`). Least-significant wind-code bit.
+- **Fixed slot 2 — `inputCode[1]`:** `PB9` (Mbed `PB_9`). Most-significant wind-code bit.
+- **Fixed slot 3 — Reserved:** `PB8` (Mbed `PB_8`). Ignore.
+- **Fixed slot 4 — `aligned`:** `PC12` (Mbed `PC_12`). High when the turbine is aligned with the wind.
 
 ## STM32 to simulation
 
-| Fixed slot | Signal | STM32 output | Mbed name | Meaning |
-|---|---|---|---|---|
-| 0 | `align` | `PC4` | `PC_4` | Request yaw toward the wind |
-| 1 | Reserved | `PD0` | `PD_0` | Drive low |
-| 2 | `generatorEnable` | `PD1` | `PD_1` | Request generation |
-| 3 | `active` | `PB0` | `PB_0` | Turbine active |
-| 4 | `runwayWindAlert` | `PB1` | `PB_1` | High-wind alert |
+- **Fixed slot 0 — `align`:** `PC4` (Mbed `PC_4`). Request yaw toward the wind.
+- **Fixed slot 1 — Reserved:** `PD0` (Mbed `PD_0`). Drive low.
+- **Fixed slot 2 — `generatorEnable`:** `PD1` (Mbed `PD_1`). Request generation.
+- **Fixed slot 3 — `active`:** `PB0` (Mbed `PB_0`). Turbine active.
+- **Fixed slot 4 — `runwayWindAlert`:** `PB1` (Mbed `PB_1`). High-wind alert.
 
 Preserve all five slots in each direction, including the unused ones. Configure
 the sensor pins as inputs and command pins as outputs. Initialize outputs low

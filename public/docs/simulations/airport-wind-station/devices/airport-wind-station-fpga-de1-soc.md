@@ -8,23 +8,19 @@ high. GPIO 28 is written as `V_GPIO[28]` in Verilog/SystemVerilog or
 
 ## Simulation to FPGA
 
-| Fixed slot | Signal | FPGA input | Meaning |
-|---|---|---|---|
-| 0 | Reserved | `V_GPIO[28]` | Ignore; not the controller reset |
-| 1 | `inputCode[0]` | `V_GPIO[29]` | Least-significant wind-code bit |
-| 2 | `inputCode[1]` | `V_GPIO[30]` | Most-significant wind-code bit |
-| 3 | Reserved | `V_GPIO[23]` | Ignore |
-| 4 | `aligned` | `V_GPIO[24]` | High when the turbine is aligned with the wind |
+- **Fixed slot 0 — Reserved:** `V_GPIO[28]`. Ignore; not the controller reset.
+- **Fixed slot 1 — `inputCode[0]`:** `V_GPIO[29]`. Least-significant wind-code bit.
+- **Fixed slot 2 — `inputCode[1]`:** `V_GPIO[30]`. Most-significant wind-code bit.
+- **Fixed slot 3 — Reserved:** `V_GPIO[23]`. Ignore.
+- **Fixed slot 4 — `aligned`:** `V_GPIO[24]`. High when the turbine is aligned with the wind.
 
 ## FPGA to simulation
 
-| Fixed slot | Signal | FPGA output | Meaning |
-|---|---|---|---|
-| 0 | `align` | `V_GPIO[26]` | Request yaw toward the wind |
-| 1 | Reserved | `V_GPIO[27]` | Drive low |
-| 2 | `generatorEnable` | `V_GPIO[32]` | Request generation |
-| 3 | `active` | `V_GPIO[34]` | Turbine active |
-| 4 | `runwayWindAlert` | `V_GPIO[31]` | High-wind alert |
+- **Fixed slot 0 — `align`:** `V_GPIO[26]`. Request yaw toward the wind.
+- **Fixed slot 1 — Reserved:** `V_GPIO[27]`. Drive low.
+- **Fixed slot 2 — `generatorEnable`:** `V_GPIO[32]`. Request generation.
+- **Fixed slot 3 — `active`:** `V_GPIO[34]`. Turbine active.
+- **Fixed slot 4 — `runwayWindAlert`:** `V_GPIO[31]`. High-wind alert.
 
 Preserve all five slots in each direction, including the unused ones. Never
 drive the simulation-to-FPGA inputs from your controller.
