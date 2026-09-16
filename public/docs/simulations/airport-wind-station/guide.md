@@ -3,10 +3,10 @@
 Build a controller that turns a wind turbine toward the wind, enables generation
 when it is aligned, and brings it to a safe stop when wind conditions change.
 Airport Wind Station is a REDTAIL activity developed with the Remote Hub Lab
-(RHLAB) at the University of Washington and integrated with LabsLand. Original
-3D assets and visualization foundation: **Zhiyun (ZZ) Zhang**.
+(RHLAB) at the University of Washington and integrated with LabsLand.
+3D modeling and simulation development: **Zhiyun (ZZ) Zhang**.
 
-![Airport Wind Station weather mast, windsock and turbine. Original 3D assets and visualization foundation by Zhiyun (ZZ) Zhang.](../../../images/simulations/airport-wind-station.jpg)
+![Airport Wind Station weather mast, windsock and turbine. 3D modeling and simulation development by Zhiyun (ZZ) Zhang.](../../../images/simulations/airport-wind-station.jpg)
 
 ## Access and setup
 
@@ -143,15 +143,17 @@ as a reset input or shift the other signals to fill the unused slot.
 
 ## Credits
 
-- **Zhiyun (ZZ) Zhang, University of Washington:** original 3D airport and
-  wind-turbine assets and visualization foundation.
-- **Luis Rodríguez Gil, LabsLand:** activity integration, browser transport and
-  state model, user interface, tests and multi-platform support.
 - **[Remote Hub Lab (RHLAB), University of Washington](https://rhlab.ece.uw.edu/):**
   the research and teaching group developing REDTAIL.
+- **Zhiyun (ZZ) Zhang, University of Washington:** 3D modeling and simulation
+  development.
+- **Luis Rodríguez Gil, LabsLand:** concept development, firmware development
+  and system integration.
+- **Brian Chap, University of Washington:** contributions to the activity
+  specification.
+- **Professor Rania Hussein, University of Washington:** project leadership
+  and direction, and principal investigator for REDTAIL.
 - **[LabsLand](https://labsland.com/):** remote-laboratory platform integration.
-- **Professor Rania Hussein:** RHLAB principal investigator and lab leader,
-  and principal investigator for REDTAIL.
 
 Development was supported in part by the National Science Foundation through
 REDTAIL under [Award No. 2336745](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2336745).

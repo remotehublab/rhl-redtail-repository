@@ -53,7 +53,9 @@ turbine geometry. Test both operations separately.
 ## Credits
 
 Airport Wind Station is a REDTAIL activity developed with RHLAB at the
-University of Washington and integrated with LabsLand. Original 3D assets and
-visualization foundation: **Zhiyun (ZZ) Zhang**. Activity integration and
-multi-platform support: **Luis Rodríguez Gil**. REDTAIL principal investigator:
-**Professor Rania Hussein**. See the usage guide for full acknowledgments.
+University of Washington and integrated with LabsLand. 3D modeling and simulation
+development: **Zhiyun (ZZ) Zhang**. Concept development, firmware development and
+system integration: **Luis Rodríguez Gil**. Contributions to the activity
+specification: **Brian Chap**. Project leadership and direction, and REDTAIL
+principal investigator: **Professor Rania Hussein**. See the usage guide for full
+acknowledgments.

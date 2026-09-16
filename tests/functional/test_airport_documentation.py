@@ -79,6 +79,25 @@ def test_airport_resources_work_in_offline_word_exports():
             assert link.startswith(("https://", "mailto:")), "Offline links need full URLs"
 
 
+@pytest.mark.parametrize("path", sorted(DOCS.rglob("*.md")))
+def test_airport_credits_include_all_contributors_and_roles(path):
+    credits = path.read_text().split("## Credits", 1)[1]
+    normalized = " ".join(credits.split()).lower()
+    for expected in (
+        "rhlab",
+        "zhiyun (zz) zhang",
+        "luis rodríguez gil",
+        "brian chap",
+        "professor rania hussein",
+        "3d modeling and simulation development",
+        "concept development, firmware development and system integration",
+        "contributions to the activity specification",
+        "project leadership and direction",
+    ):
+        assert expected in normalized
+    assert normalized.index("rhlab") < normalized.index("zhiyun")
+
+
 def test_airport_documentation_renders_anonymously(client, app):
     copytree(DOCS, Path(app.config["PUBLIC_FOLDER"]) / "docs/simulations/airport-wind-station")
     sim = Simulation(
