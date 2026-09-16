@@ -3,11 +3,10 @@
 Build a controller that turns a wind turbine toward the wind, enables generation
 when it is aligned, and brings it to a safe stop when wind conditions change.
 Airport Wind Station is a REDTAIL activity developed with the Remote Hub Lab
-(RHLAB) at the University of Washington and integrated with LabsLand.
+(RHLAB) at the University of Washington and integrated with LabsLand. Original
+3D assets and visualization foundation: **Zhiyun (ZZ) Zhang**.
 
 ![Airport Wind Station weather mast, windsock and turbine. Original 3D assets and visualization foundation by Zhiyun (ZZ) Zhang.](../../../images/simulations/airport-wind-station.jpg)
-*The weather mast and turbine in the Airport Wind Station simulation. Original
-3D assets and visualization foundation: Zhiyun (ZZ) Zhang, University of Washington.*
 
 ## Access and setup
 
