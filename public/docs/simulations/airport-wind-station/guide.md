@@ -5,8 +5,7 @@ when it is aligned, and brings it to a safe stop when wind conditions change.
 Airport Wind Station is a REDTAIL activity developed with the Remote Hub Lab
 (RHLAB) at the University of Washington and integrated with LabsLand.
 
-![Airport Wind Station weather mast, windsock and turbine. Original 3D assets and visualization foundation by Zhiyun (ZZ) Zhang.](/public/images/simulations/airport-wind-station.jpg)
-
+![Airport Wind Station weather mast, windsock and turbine. Original 3D assets and visualization foundation by Zhiyun (ZZ) Zhang.](../../../images/simulations/airport-wind-station.jpg)
 *The weather mast and turbine in the Airport Wind Station simulation. Original
 3D assets and visualization foundation: Zhiyun (ZZ) Zhang, University of Washington.*
 
@@ -20,7 +19,7 @@ accounts or reservations. Instructors interested in using the activity can
 1. Open your course's LabsLand laboratory and select **Airport Wind Station**
    with the hardware and language assigned by your instructor.
 2. Open the supplied project or starter. Check the appropriate device mapping
-   on the [Airport Wind Station page](/simulations/airport-wind-station).
+   on the [Airport Wind Station page](https://redtail.rhlab.ece.uw.edu/simulations/airport-wind-station).
 3. Implement and simulate your controller, then build and program the target.
 4. Open the 3D simulation and confirm that its connection indicator shows
    **Connected** before testing. A disconnected scene is not a live test result.

@@ -36,7 +36,7 @@ output. In HAL, enable the GPIO port clocks before initialization.
 Combine the inputs as `(PB9 << 1) | PA6`: `01` calm, `10` steady, `11` high
 wind, `00` reserved/non-generating safe stop. Generation requires steady wind
 and confirmed alignment. The usage guide on the
-[simulation page](/simulations/airport-wind-station) defines the complete
+[simulation page](https://redtail.rhlab.ece.uw.edu/simulations/airport-wind-station) defines the complete
 operating requirements.
 
 Advance the state machine once per second with a non-blocking timer, while

@@ -1,5 +1,6 @@
 """Exercise the real Airport Markdown through the existing public document routes."""
 
+import re
 from pathlib import Path
 from shutil import copytree
 
@@ -70,6 +71,16 @@ def test_airport_usage_guide_explains_access_resets_and_credits():
     assert (ROOT / "public/images/simulations/airport-wind-station.jpg").stat().st_size > 50_000
 
 
+def test_airport_resources_work_in_offline_word_exports():
+    for path in DOCS.rglob("*.md"):
+        text = path.read_text()
+        for image in re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text):
+            assert not image.startswith("/"), "Pandoc needs a file-relative image"
+            assert (path.parent / image).resolve().is_file()
+        for link in re.findall(r"(?<!!)\[[^\]]*\]\(([^)]+)\)", text):
+            assert link.startswith(("https://", "mailto:")), "Offline links need full URLs"
+
+
 def test_airport_documentation_renders_anonymously(client, app):
     copytree(DOCS, Path(app.config["PUBLIC_FOLDER"]) / "docs/simulations/airport-wind-station")
     sim = Simulation(
@@ -101,7 +112,10 @@ def test_airport_documentation_renders_anonymously(client, app):
     assert response.status_code == 200
     assert "Zhiyun (ZZ) Zhang" in response.text
     assert "<table" in response.text
-    assert "/public/images/simulations/airport-wind-station.jpg" in response.text
+    assert (
+        "/public/docs/simulations/airport-wind-station/../../../images/simulations/airport-wind-station.jpg"
+        in response.text
+    )
     for mapping in mappings:
         url = f"/simulations/{sim.slug}/devices/{mapping.device.slug}/docs/{mapping.id}-{mapping.slugified_name}.md"
         response = client.get(url)

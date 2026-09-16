@@ -34,7 +34,7 @@ drive the simulation-to-FPGA inputs from your controller.
 Read the wind code as `{V_GPIO[30], V_GPIO[29]}`: `01` calm, `10` steady,
 `11` high wind, `00` reserved/non-generating safe stop. Generation requires
 steady wind and confirmed alignment. The full operating rules are in the
-usage guide on the [simulation page](/simulations/airport-wind-station).
+usage guide on the [simulation page](https://redtail.rhlab.ece.uw.edu/simulations/airport-wind-station).
 
 Use `CLOCK_50` and the supplied one-second clock-enable tick, with two-stage
 synchronizers on the plant inputs. The high-wind alert follows the synchronized
