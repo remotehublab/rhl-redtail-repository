@@ -61,12 +61,14 @@ Use a one-second state-machine tick for the standard activity. The DE1 wrapper
 runs from the 50 MHz board clock and uses a clock-enable tick; STM32 uses a
 non-blocking timer while continuing to sample inputs.
 
-| State | `active` | `align` | `generatorEnable` |
-|---|---|---|---|
-| STOPPED | `0` | `0` | `0` |
-| ALIGNING | `1` | `1` | `0` |
-| GENERATING | `1` | `0` | `1` |
-| STOPPING | `1` | `0` | `0` |
+The required outputs for each state are:
+
+- **STOPPED:** `active=0`, `align=0`, `generatorEnable=0`.
+- **ALIGNING:** `active=1`, `align=1`, `generatorEnable=0`.
+- **GENERATING:** `active=1`, `align=0`, `generatorEnable=1`.
+- **STOPPING:** `active=1`, `align=0`, `generatorEnable=0`.
+
+Apply these transition rules:
 
 - Start in STOPPED. With steady wind, move to ALIGNING if unaligned, or directly
   to GENERATING if already aligned.
